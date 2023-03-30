@@ -1,0 +1,84 @@
+#!/usr/bin/env escript
+
+-dynamic(minha_var).
+%_______________________________________________________________
+%
+%
+%_______________________________________________________________
+main(Args) ->
+    %Args = init:get_arguments(),
+
+     if
+        length(Args) < 4 ->
+            io:format("Wrong number of parameters: ~p~n", [Args]),
+            halt();
+        true ->
+            Command = lists:nth(1, Args),
+
+            case Command of
+                "-r" ->
+                    read_ini(Args),
+                    halt();
+
+                "-w" ->
+                    write_ini(Args),
+                    halt();
+
+                _ ->
+                    show_help(),
+                    halt()
+            end
+    end.
+
+
+
+%_______________________________________________________________
+%
+%
+%_______________________________________________________________
+read_ini(Args) ->
+    IniFile = lists:nth(2, Args),
+    Sector = lists:nth(3, Args),
+    Field = lists:nth(4, Args),
+
+    {Status, Result} = my_lib:ini_file(IniFile, Sector, Field),
+
+    case Status of 
+        ok -> 
+            io:format("~p ~n", [Result]),
+            halt();
+        error ->
+            io:format("Error: ~p ~n", [Result]),
+           halt()
+    end.
+
+%_______________________________________________________________
+%
+%
+%_______________________________________________________________
+write_ini(Args) ->
+    IniFile = lists:nth(2, Args),
+    Sector = lists:nth(3, Args),
+    Field = lists:nth(4, Args),
+    NewFieldValue = lists:nth(5, Args),
+
+    {Status, Result} = my_lib:ini_file(IniFile, Sector, Field, NewFieldValue, wr),
+
+    case Status of 
+        ok -> 
+            io:format("~p ~n", [Result]),
+            halt();
+        error ->
+            io:format("Error: ~p ~n", [Result]),
+            halt()
+    end.
+
+%_______________________________________________________________
+%
+%
+%_______________________________________________________________
+show_help() ->
+    io:format("This is just a stupid message of help ~n").
+
+
+
