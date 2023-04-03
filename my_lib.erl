@@ -39,6 +39,10 @@
 -export([ini_file/5]).
 -export([list_delete/2]).
 -export([remove_char/2]).
+-export([read_field_from_cfg/3]).
+
+-define(INI_FILE, "arq.ini").
+
 
 
 %-record(person,
@@ -478,7 +482,7 @@ extract_field(Field) ->
     if
         (Index1 > 0 ) ->
             FieldSize = string:length(Field)-Index1,
-            FieldValue = string:slice(Field, Index1+2, abs(FieldSize-2)),
+            FieldValue = string:slice(Field, Index1+2, abs(FieldSize-3)),
             FieldValue;
         true ->
            error
@@ -648,3 +652,166 @@ ini_file_replace_field(IniFile, List, Index, Field, CurrentFieldValue, NewFieldV
                 {ok, CurrentFieldValue}
         end.
 
+
+%--------------------------------------------------------------
+%
+%
+%--------------------------------------------------------------
+-spec read_field_from_cfg(string, string, string) -> {result, string}.
+read_field_from_cfg(Board, Device, Field) ->
+    {Result, NumDevicesStr} = read_ini(?INI_FILE, Board, "num_devices"),
+
+    case Result of
+        ok ->
+            {NumDevices, _} = string:to_integer(NumDevicesStr),
+            read_field_from_cfg_search_for_device(Board, Device, Field, 1, NumDevices);
+
+        _ ->
+            {error, NumDevicesStr}
+    end.
+
+read_field_from_cfg_search_for_device(Board, Device, Field, Index, MaxDevices) ->
+    DeviceFieldStr = unicode:characters_to_list(["device", integer_to_list(Index)]),
+    EnabledFieldStr = unicode:characters_to_list(["enabled", integer_to_list(Index)]),
+    FieldStr = unicode:characters_to_list([Field, integer_to_list(Index)]),
+    {Result1, DevicesStr} = read_ini(?INI_FILE, Board, DeviceFieldStr),
+    {Result2, EnabledStr} = read_ini(?INI_FILE, Board, EnabledFieldStr),
+
+    if
+        (Index =< MaxDevices) ->
+            if
+                (Result1 == ok) and (Result2 == ok) and (DevicesStr == Device) and (EnabledStr == "1") ->
+                    read_ini(?INI_FILE, Board, FieldStr);
+
+                true ->
+                    read_field_from_cfg_search_for_device(Board, Device, Field, Index + 1, MaxDevices)
+            end;
+
+        true ->
+            {error, "field not found"}
+    end.
+
+
+
+
+%   read_field_from_cfg_search
+%    
+%    # Arguments:
+%    #   none
+%    # Returns:
+%    #   0 on success
+%    #   1 on fail
+%    read_field_from_cfg_anyway() {
+%    local board="$1"
+%    local device="$2"
+%    local field="$3"
+%    local num_devices=0
+%    local device_cfg=${NULL}
+%    local value=${NULL}
+%    local enabled=0
+%    
+%        num_devices=$(read_cfg_file ${board} num_devices)
+%    
+%        # scan for all devices inside of the board
+%        for (( d = 1; d <= $num_devices; d++ )); do
+%            device_cfg=$(read_cfg_file ${board} device${d})
+%            enabled=$(read_cfg_file ${board} enabled${d})
+%    
+%             if [[ ${device_cfg} == ${device} ]]; then
+%                value=$(read_cfg_file ${board} ${field}${d})
+%                break
+%             fi
+%        done
+%    
+%        echo $value
+%    }
+%    
+%    # Arguments:
+%    #   none
+%    # Returns:
+%    #   0 on success
+%    #   1 on fail
+%    get_device_index_from_cfg() {
+%    local board="$1"
+%    local device="$2"
+%    local field="$3"
+%    local value="$4"
+%    local num_devices=0
+%    local device_cfg=${NULL}
+%    local value_cfg=${NULL}
+%    local index=${NULL}
+%    
+%        num_devices=$(read_cfg_file ${board} num_devices)
+%    
+%        # scan for all devices inside of the board
+%        for (( d = 1; d <= $num_devices; d++ )); do
+%            device_cfg=$(read_cfg_file ${board} device${d})
+%            value_cfg=$(read_cfg_file ${board} ${field}${d})
+%    
+%            if [[ ${device_cfg} == ${device} ]] && [[ ${value_cfg} == ${value} ]]; then
+%               index=$d
+%               break
+%            fi
+%        done
+%    
+%        echo $index
+%    }
+%    
+%    # Arguments:
+%    #   none
+%    # Returns:
+%    #   0 on success
+%    #   1 on fail
+%    get_file_image_name() {
+%    local board="$1"
+%    local device="$2"
+%    local file=${NULL}
+%    local md5sum=${NULL}
+%    local md5file=${NULL}
+%    
+%        if [[ ${input_file} != ${NULL} ]]; then
+%            if [[ -e ${input_file} ]]; then
+%                file=${input_file}
+%                res=$SUCCESS
+%            else
+%                file=${NULL}
+%                res=$FILE_NOT_FOUND_ERROR
+%            fi
+%    
+%            echo $file
+%            return $res
+%        fi
+%    
+%        file=$(read_field_from_cfg ${board} ${device} file)
+%    
+%        if [[ ${file} == ${NULL} ]]; then
+%            echo ${NULL}
+%            return $INVALID_FILE_NAME_ERROR
+%        fi
+%    
+%        md5file=$(read_field_from_cfg ${board} ${device} md5)
+%    
+%        if [[ ${md5file} == ${NULL} ]]; then
+%            echo ${NULL}
+%            return $INVALID_MD5_ERROR
+%        fi
+%    
+%        # check for file integrity
+%        if [[ -e ${hw_image_partition}${file} ]]; then
+%            md5sum=$(${MD5SUM} ${hw_image_partition}${file} | awk '{print $1}')
+%    
+%            if [[ ${md5file} != ${md5sum} ]]; then
+%                file=${NULL}
+%                res=$MD5_CHECK_ERROR
+%            else
+%                res=$SUCCESS
+%            fi
+%        else
+%            file=${NULL}
+%            res=$FILE_NOT_FOUND_ERROR
+%        fi
+%    
+%        echo ${hw_image_partition}$file
+%        return $res
+%    }
+%    
