@@ -9,6 +9,10 @@
 % 
 % 1> my_module:bubble_sort([5, 2, 9, 1, 7, 3, 8, 6, 10, 4]).
 % [1,2,3,4,5,6,7,8,9,10]
+%
+%
+%   git push -u origin main
+%
 -module(my_lib).
 -export([bubble_sort/1]).
 -export([update_var/2]).
@@ -40,9 +44,172 @@
 -export([list_delete/2]).
 -export([remove_char/2]).
 -export([read_field_from_cfg/3]).
+-export([read_field_from_cfg_anyway/3]).
+-export([get_device_index_from_cfg/4]).
+-export([get_file_image_name/3]).
+-export([md5_check/2]).
+-export([binary_to_hex/1]).
+-export([dependencies_list_etsc1/0]).
+-export([dependencies_list_etsc2/0]).
+-export([dependencies_list_etsc6/0]).
+-export([check_for_dependencies/1]).
+-export([check_file_exists/1]).
+
+
 
 -define(INI_FILE, "arq.ini").
+-define(IMAGES_PATH, "/opt/ets/hw/images/").
+-define(SPK_PARTITION, "/mnt/update").
+-define(KERNEL_CMDLINE, "/proc/cmdline").
+-define(KERNEL_BZIMAGE, "/boot/bzImage").
+-define(KEXEC_TIMEOUT, "2").
+-define(DEVICES_VERSIONS_FILE, "/data/board/hw_devices_versions.csv").
 
+
+-define(GPIOGET, "/usr/bin/gpioget").
+-define(GPIOSET, "/usr/bin/gpioset").
+-define(GPIOFIND, "/usr/bin/gpiofind").
+-define(FPGAIO, "/usr/bin/fpgaio").
+-define(I2CGET, "/usr/sbin/i2cget").
+-define(I2CSET, "/usr/sbin/i2cset").
+-define(I2CTRANSFER, "/usr/sbin/i2ctransfer").
+-define(I2CDETECT, "/usr/sbin/i2cdetect").
+-define(FAN, "/usr/bin/fan").
+-define(DD, "/bin/dd").
+-define(BTOOL, "/usr/bin/btool").
+-define(MD5SUM, "/usr/bin/md5sum").
+-define(MX25U256, "/dev/mx25u256").
+-define(MACHXO2, "/usr/bin/machxo2").
+-define(BLHOST, "/usr/bin/blhost").
+-define(KEXEC, "/usr/sbin/kexec").
+-define(ISSI_FLASH, "/usr/bin/issi_flash").
+-define(SPI_CPLD_DRIVER, "/dev/spidev50.2").
+-define(DATA_BOARD_PATH, "/data/board/").
+-define(FLASHROM, "/usr/sbin/flashrom").
+-define(EHALCLI, "/usr/bin/ehalcli").
+
+-define(ETSC1, "etsc1").
+-define(ETSC2, "etsc2").
+-define(ETSC6, "etsc6").
+-define(TEST, "test").
+
+-define(NOHUP, "/usr/bin/nohup").
+-define(NOTIFY_SEND, "/usr/bin/notify-send").
+-define(NPROC, "/usr/bin/nproc").
+-define(NROFF, "/usr/bin/nroff").
+-define(NSENTER, "/usr/bin/nsenter").
+-define(NSLOOKUP, "/usr/bin/nslookup").
+-define(NSS_ADDBUILTIN, "/usr/bin/nss-addbuiltin").
+-define(NSS_DBTEST, "/usr/bin/nss-dbtest").
+-define(NSS_PP, "/usr/bin/nss-pp").
+-define(NSTAT, "/usr/bin/nstat").
+-define(NSUPDATE, "/usr/bin/nsupdate").
+-define(NTFS_3G, "/usr/bin/ntfs-3g").
+-define(NTFS_3G_PROBE, "/usr/bin/ntfs-3g.probe").
+-define(NTFSCAT, "/usr/bin/ntfscat").
+-define(NTFSCLUSTER, "/usr/bin/ntfscluster").
+-define(NTFSCMP, "/usr/bin/ntfscmp").
+-define(NTFSDECRYPT, "/usr/bin/ntfsdecrypt").
+-define(NTFSFALLOCATE, "/usr/bin/ntfsfallocate").
+-define(NTFSFIX, "/usr/bin/ntfsfix").
+-define(NTFSINFO, "/usr/bin/ntfsinfo").
+-define(NTFSLS, "/usr/bin/ntfsls").
+-define(NTFSMOVE, "/usr/bin/ntfsmove").
+-define(NTFSRECOVER, "/usr/bin/ntfsrecover").
+-define(NTFSSECAUDIT, "/usr/bin/ntfssecaudit").
+-define(NTFSTRUNCATE, "/usr/bin/ntfstruncate").
+-define(NTFSUSERMAP, "/usr/bin/ntfsusermap").
+-define(NTFSWIPE, "/usr/bin/ntfswipe").
+-define(NUMFMT, "/usr/bin/numfmt").
+-define(NVIDIA_DETECTOR, "/usr/bin/nvidia-detector").
+-define(NVLC, "/usr/bin/nvlc").
+
+dependencies_list_test() -> [?NOHUP,
+                        ?NOTIFY_SEND,
+                        ?NPROC,
+                        ?NROFF,
+                        ?NSENTER,
+                        ?NSLOOKUP,
+                        ?NSS_ADDBUILTIN,
+                        ?NSS_DBTEST,
+                        ?NSS_PP,
+                        ?NSTAT,
+                        ?NSUPDATE,
+                        ?NTFS_3G,
+                        ?NTFS_3G_PROBE,
+                        ?NTFSCAT,
+                        ?NTFSCLUSTER,
+                        ?NTFSCMP,
+                        ?NTFSDECRYPT,
+                        ?NTFSFALLOCATE,
+                        ?NTFSFIX,
+                        ?NTFSINFO,
+                        ?NTFSLS,
+                        ?NTFSMOVE,
+                        ?NTFSRECOVER,
+                        ?NTFSSECAUDIT,
+                        ?NTFSTRUNCATE,
+                        ?NTFSUSERMAP,
+                        ?NTFSWIPE,
+                        ?NUMFMT,
+                        ?NVIDIA_DETECTOR,
+                        ?NVLC].
+
+
+dependencies_list_etsc1() -> [?FPGAIO,
+                               ?I2CGET,
+                               ?I2CSET,
+                               ?I2CTRANSFER,
+                               ?I2CDETECT,
+                               ?FAN,
+                               ?DD,
+                               ?MD5SUM,
+                               ?MACHXO2,
+                               ?GPIOGET,
+                               ?GPIOSET,
+                               ?GPIOFIND,
+                               ?BLHOST,
+                               ?BTOOL,
+                               ?KEXEC,
+                               ?EHALCLI].
+
+dependencies_list_etsc2() -> [?FPGAIO,
+                               ?I2CGET,
+                               ?I2CSET,
+                               ?I2CTRANSFER,
+                               ?I2CDETECT,
+                               ?FAN,
+                               ?DD,
+                               ?MD5SUM,
+                               ?MACHXO2,
+                               ?GPIOGET,
+                               ?GPIOSET,
+                               ?GPIOFIND,
+                               ?BLHOST,
+                               ?BTOOL,
+                               ?KEXEC,
+                               ?ISSI_FLASH,
+                               ?FLASHROM,
+                               ?EHALCLI].
+
+dependencies_list_etsc6() -> [?FPGAIO,
+                               ?I2CGET,
+                               ?I2CSET,
+                               ?I2CTRANSFER,
+                               ?I2CDETECT,
+                               ?FAN,
+                               ?DD,
+                               ?MD5SUM,
+                               ?MACHXO2,
+                               ?GPIOGET,
+                               ?GPIOSET,
+                               ?GPIOFIND,
+                               ?BLHOST,
+                               ?BTOOL,
+                               ?KEXEC,
+                               ?ISSI_FLASH,
+                               ?FLASHROM,
+                               ?EHALCLI].
 
 
 %-record(person,
@@ -529,6 +696,54 @@ remove_char(String, Char) ->
 %
 %
 %--------------------------------------------------------------
+binary_to_hex(Binary) ->
+    lists:flatten([io_lib:format("~2.16.0B", [Byte]) || <<Byte>> <= Binary]).
+
+
+%--------------------------------------------------------------
+%
+%
+%--------------------------------------------------------------
+check_file_exists(File) ->
+        case filelib:is_file(File) of
+            true ->
+                {ok, File};
+    
+            false ->
+                {error, "file not found"}
+        end.
+
+%--------------------------------------------------------------
+%
+%
+%--------------------------------------------------------------
+-spec md5_check(string, string) -> {result, string}.
+md5_check(FileName, ExpectedMD5Sum) ->
+    
+    {Result, Binary} = file:read_file(FileName),
+
+    case (Result == ok) of
+        true ->
+            Md5SumBinary = crypto:hash(md5, Binary),
+            Md5SumHex = binary_to_hex(Md5SumBinary),
+
+            if
+                (Md5SumHex == ExpectedMD5Sum) ->
+                    {ok, Md5SumHex};
+
+                true ->
+                    {error, Md5SumHex}
+            end;
+
+        false ->
+            {error, "file not found"}
+    end.
+
+
+%--------------------------------------------------------------
+%
+%
+%--------------------------------------------------------------
 -spec ini_file(string, string, string) -> {status, string}.
 ini_file(IniFile, Sector, Field) ->
     ini_file(IniFile, Sector, Field, "", rd).
@@ -692,126 +907,177 @@ read_field_from_cfg_search_for_device(Board, Device, Field, Index, MaxDevices) -
     end.
 
 
+%--------------------------------------------------------------
+%
+%
+%--------------------------------------------------------------
+-spec read_field_from_cfg_anyway(string, string, string) -> {result, string}.
+read_field_from_cfg_anyway(Board, Device, Field) ->
+    {Result, NumDevicesStr} = read_ini(?INI_FILE, Board, "num_devices"),
+
+    case Result of
+        ok ->
+            {NumDevices, _} = string:to_integer(NumDevicesStr),
+            read_field_from_cfg_anyway_search_for_device(Board, Device, Field, 1, NumDevices);
+
+        _ ->
+            {error, NumDevicesStr}
+    end.
+
+read_field_from_cfg_anyway_search_for_device(Board, Device, Field, Index, MaxDevices) ->
+    DeviceFieldStr = unicode:characters_to_list(["device", integer_to_list(Index)]),
+    FieldStr = unicode:characters_to_list([Field, integer_to_list(Index)]),
+    {Result1, DevicesStr} = read_ini(?INI_FILE, Board, DeviceFieldStr),
+
+    if
+        (Index =< MaxDevices) ->
+            if
+                (Result1 == ok) and (DevicesStr == Device) ->
+                    read_ini(?INI_FILE, Board, FieldStr);
+
+                true ->
+                    read_field_from_cfg_anyway_search_for_device(Board, Device, Field, Index + 1, MaxDevices)
+            end;
+
+        true ->
+            {error, "field not found"}
+    end.
 
 
-%   read_field_from_cfg_search
-%    
-%    # Arguments:
-%    #   none
-%    # Returns:
-%    #   0 on success
-%    #   1 on fail
-%    read_field_from_cfg_anyway() {
-%    local board="$1"
-%    local device="$2"
-%    local field="$3"
-%    local num_devices=0
-%    local device_cfg=${NULL}
-%    local value=${NULL}
-%    local enabled=0
-%    
-%        num_devices=$(read_cfg_file ${board} num_devices)
-%    
-%        # scan for all devices inside of the board
-%        for (( d = 1; d <= $num_devices; d++ )); do
-%            device_cfg=$(read_cfg_file ${board} device${d})
-%            enabled=$(read_cfg_file ${board} enabled${d})
-%    
-%             if [[ ${device_cfg} == ${device} ]]; then
-%                value=$(read_cfg_file ${board} ${field}${d})
-%                break
-%             fi
-%        done
-%    
-%        echo $value
-%    }
-%    
-%    # Arguments:
-%    #   none
-%    # Returns:
-%    #   0 on success
-%    #   1 on fail
-%    get_device_index_from_cfg() {
-%    local board="$1"
-%    local device="$2"
-%    local field="$3"
-%    local value="$4"
-%    local num_devices=0
-%    local device_cfg=${NULL}
-%    local value_cfg=${NULL}
-%    local index=${NULL}
-%    
-%        num_devices=$(read_cfg_file ${board} num_devices)
-%    
-%        # scan for all devices inside of the board
-%        for (( d = 1; d <= $num_devices; d++ )); do
-%            device_cfg=$(read_cfg_file ${board} device${d})
-%            value_cfg=$(read_cfg_file ${board} ${field}${d})
-%    
-%            if [[ ${device_cfg} == ${device} ]] && [[ ${value_cfg} == ${value} ]]; then
-%               index=$d
-%               break
-%            fi
-%        done
-%    
-%        echo $index
-%    }
-%    
-%    # Arguments:
-%    #   none
-%    # Returns:
-%    #   0 on success
-%    #   1 on fail
-%    get_file_image_name() {
-%    local board="$1"
-%    local device="$2"
-%    local file=${NULL}
-%    local md5sum=${NULL}
-%    local md5file=${NULL}
-%    
-%        if [[ ${input_file} != ${NULL} ]]; then
-%            if [[ -e ${input_file} ]]; then
-%                file=${input_file}
-%                res=$SUCCESS
-%            else
-%                file=${NULL}
-%                res=$FILE_NOT_FOUND_ERROR
-%            fi
-%    
-%            echo $file
-%            return $res
+%--------------------------------------------------------------
+%
+%
+%--------------------------------------------------------------
+-spec get_device_index_from_cfg(string, string, string, string) -> {result, number}.
+get_device_index_from_cfg(Board, Device, Field, Value) ->
+    {Result, NumDevicesStr} = read_ini(?INI_FILE, Board, "num_devices"),
+
+    case Result of
+        ok ->
+            {NumDevices, _} = string:to_integer(NumDevicesStr),
+            get_device_index_from_cfg_search_for_device(Board, Device, Field, Value, 1, NumDevices);
+
+        _ ->
+            {error, -1}
+    end.
+
+get_device_index_from_cfg_search_for_device(Board, Device, Field, Value, Index, MaxDevices) ->
+    DeviceFieldStr = unicode:characters_to_list(["device", integer_to_list(Index)]),
+    FieldStr = unicode:characters_to_list([Field, integer_to_list(Index)]),
+    {Result1, DevicesValueStr} = read_ini(?INI_FILE, Board, DeviceFieldStr),
+    {Result2, FieldValueStr} = read_ini(?INI_FILE, Board, FieldStr),
+
+    if
+        (Index =< MaxDevices) ->
+            if
+                (Result1 == ok) and (Result2 == ok) and (DevicesValueStr == Device) and (FieldValueStr == Value) ->
+                    {ok, Index};
+
+                true ->
+                    get_device_index_from_cfg_search_for_device(Board, Device, Field, Value, Index + 1, MaxDevices)
+            end;
+
+        true ->
+            {error, -1}
+    end.
+
+
+%--------------------------------------------------------------
+%
+%
+%--------------------------------------------------------------
+-spec get_file_image_name(string, string, string) -> {result, string}.
+get_file_image_name(Board, Device, InputFile) ->
+
+    case (InputFile == "") of
+        true ->
+            {Result1, File} = read_field_from_cfg(Board, Device, "file"),
+            {Result2, Md5} = read_field_from_cfg(Board, Device, "md5"),
+
+            if
+                (Result1 == ok) and (Result2 == ok) ->
+                    {Result3, Msg} = md5_check(File, Md5),
+
+                    case Result3 of
+                        ok ->
+                            {ok, File};
+
+                        _ ->
+                            {error, Msg}
+                    end;
+
+                true ->
+                    {error, "can not read ini cfg file"}
+
+            end;
+
+        false ->
+            check_file_exists(InputFile)
+    end.
+
+
+%# Arguments:
+%#   none
+%# Returns:
+%#   String with the "path + file name" that not found
+%#
+%check_for_dependencies() {
+%declare -n dependencies_list="dependencies_list_${platform_type}"
+%
+%    for i in ${dependencies_list[@]}; do
+%
+%        if [[ ! -e $i ]]; then
+%            echo "$i"
+%            return $(code_error $MODULE_MAIN $LINENO $DEPENDENCY_ERROR)
 %        fi
-%    
-%        file=$(read_field_from_cfg ${board} ${device} file)
-%    
-%        if [[ ${file} == ${NULL} ]]; then
-%            echo ${NULL}
-%            return $INVALID_FILE_NAME_ERROR
-%        fi
-%    
-%        md5file=$(read_field_from_cfg ${board} ${device} md5)
-%    
-%        if [[ ${md5file} == ${NULL} ]]; then
-%            echo ${NULL}
-%            return $INVALID_MD5_ERROR
-%        fi
-%    
-%        # check for file integrity
-%        if [[ -e ${hw_image_partition}${file} ]]; then
-%            md5sum=$(${MD5SUM} ${hw_image_partition}${file} | awk '{print $1}')
-%    
-%            if [[ ${md5file} != ${md5sum} ]]; then
-%                file=${NULL}
-%                res=$MD5_CHECK_ERROR
-%            else
-%                res=$SUCCESS
-%            fi
-%        else
-%            file=${NULL}
-%            res=$FILE_NOT_FOUND_ERROR
-%        fi
-%    
-%        echo ${hw_image_partition}$file
-%        return $res
-%    }
-%    
+%
+%    done
+%
+%    echo ${NULL}
+%    return $SUCCESS
+%}
+
+%--------------------------------------------------------------
+%
+%
+%--------------------------------------------------------------
+check_for_dependencies(Platform) ->
+
+    case Platform of
+
+        ?ETSC1 ->
+            check_for_dependencies(dependencies_list_etsc1(), 1);
+
+        ?ETSC2 ->
+            check_for_dependencies(dependencies_list_etsc2(), 1);
+
+        ?ETSC6 ->
+            check_for_dependencies(dependencies_list_etsc6(), 1);
+    
+        ?TEST ->
+            check_for_dependencies(dependencies_list_test(), 1);
+        
+         _ ->
+            error
+
+    end.
+
+check_for_dependencies(List, Index) ->
+
+    if
+        (Index =< length(List)) and (Index > 0) ->
+
+            Current = lists:nth(Index, List),
+            {Result, _} = check_file_exists(Current),
+
+            case Result of
+                ok ->
+                    check_for_dependencies(List, Index + 1);
+
+                error ->
+                    error
+            end;
+
+        true ->
+            ok
+    end.
