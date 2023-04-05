@@ -54,6 +54,8 @@
 -export([enable_disable_device/4]).
 -export([show_help/0]).
 -export([show_devices/2]).
+-export([show_tree_devices/2]).
+
 
 
 
@@ -1232,3 +1234,73 @@ show_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices) ->
             ok
     end.
 
+%--------------------------------------------------------------
+%
+% 
+%--------------------------------------------------------------
+-spec show_tree_devices(string, string) -> {result, string}.
+show_tree_devices(CurrentBoard, Active) ->
+    {Result1, NumBoardsStr} = ini_file(?INI_FILE, "boards", "num_boards"),
+
+    case Result1 of
+        ok ->
+            {NumBoards, _} = string:to_integer(NumBoardsStr),
+            show_tree_devices_next_board(CurrentBoard, Active, 1, NumBoards);
+
+        _ ->
+            error
+    end.
+
+show_tree_devices_next_board(CurrentBoard, Active, Index, MaxBoards) ->
+    if
+        (Index =< MaxBoards) ->
+            {Result1, Board} = ini_file(?INI_FILE, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+
+            if
+                (Result1 == ok) ->
+                    %io:format("~s~n", [Board]),
+
+                    {_, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
+                    {NumDevices, _} = string:to_integer(NumDevicesStr),
+                    show_tree_devices_next_Device(Board, CurrentBoard, Active, 1, NumDevices, 0),
+                    show_tree_devices_next_board(CurrentBoard, Active, Index + 1, MaxBoards);
+
+                true ->
+                    error
+            end;
+
+        true ->
+            ok
+    end.
+
+show_tree_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices, Flag) ->
+    if
+        (Index =< MaxDevices) ->
+            {Result1, Device} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+            {Result2, Activecard} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
+            {Result3, Enabled} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+            
+            if
+                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and
+                ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
+                (Enabled == "1") and
+                (Flag == 0) ->
+                    io:format("~n"),
+                    io:format("             ~s~n", [Board]),
+                    io:format("              └── ~s~n", [Device]),
+                    show_tree_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+
+                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and
+                ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
+                (Enabled == "1") and
+                (Flag /= 0) ->
+                    io:format("              └── ~s~n", [Device]),
+                    show_tree_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+
+                true ->
+                    error
+            end;
+
+        true ->
+            ok
+    end.
