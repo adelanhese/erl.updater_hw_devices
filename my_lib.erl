@@ -54,7 +54,7 @@
 -export([enable_disable_device/4]).
 -export([show_help/0]).
 -export([show_devices/2]).
--export([show_tree_devices/2]).
+-export([show_boards_tree/2]).
 -export([platforms_list/0]).
 -export([check_for_supported_platform/1]).
 -export([check_for_supported_board/1]).
@@ -1221,20 +1221,21 @@ show_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices) ->
 %
 % 
 %-----------------------------------------------------------------------------
--spec show_tree_devices(string, string) -> ok | error.
-show_tree_devices(CurrentBoard, Active) ->
+-spec show_boards_tree(string, string) -> ok | error.
+show_boards_tree(CurrentBoard, Active) ->
     {Result1, NumBoardsStr} = ini_file(?INI_FILE, "boards", "num_boards"),
 
     case Result1 of
         ok ->
             {NumBoards, _} = string:to_integer(NumBoardsStr),
-            show_tree_devices_next_board(CurrentBoard, Active, 1, NumBoards);
+            show_boards_tree_next_board(CurrentBoard, Active, 1, NumBoards);
 
         _ ->
+            %io:format("error during initial board reading~n"),
             error
     end.
 
-show_tree_devices_next_board(CurrentBoard, Active, Index, MaxBoards) ->
+show_boards_tree_next_board(CurrentBoard, Active, Index, MaxBoards) ->
     if
         (Index =< MaxBoards) ->
             {Result1, Board} = ini_file(?INI_FILE, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
@@ -1245,10 +1246,11 @@ show_tree_devices_next_board(CurrentBoard, Active, Index, MaxBoards) ->
 
                     {_, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
                     {NumDevices, _} = string:to_integer(NumDevicesStr),
-                    show_tree_devices_next_Device(Board, CurrentBoard, Active, 1, NumDevices, 0),
-                    show_tree_devices_next_board(CurrentBoard, Active, Index + 1, MaxBoards);
+                    show_boards_tree_next_device(Board, CurrentBoard, Active, 1, NumDevices, 0),
+                    show_boards_tree_next_board(CurrentBoard, Active, Index + 1, MaxBoards);
 
                 true ->
+                    %io:format("error during board reading~n"),
                     error
             end;
 
@@ -1256,13 +1258,15 @@ show_tree_devices_next_board(CurrentBoard, Active, Index, MaxBoards) ->
             ok
     end.
 
-show_tree_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices, Flag) ->
+show_boards_tree_next_device(Board, CurrentBoard, Active, Index, MaxDevices, Flag) ->
     if
         (Index =< MaxDevices) ->
             {Result1, Device} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
             {Result2, Activecard} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
             {Result3, Enabled} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
             {Result4, Alias} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
+
+            %io:format("~s ~s ~s ~s ~s~n", [Board, Device, Alias, Enabled, Activecard]),
             
             if
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
@@ -1272,33 +1276,34 @@ show_tree_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices, Fl
                     io:format("~n"),
                     io:format("             ~s~n", [Board]),
                     io:format("              └── ~s~n", [Device]),
-                    show_tree_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+                    show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
                 (Enabled == "1") and (Alias == "") and
                 (Flag /= 0) ->
                     io:format("              └── ~s~n", [Device]),
-                    show_tree_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+                    show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
-                    (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
+                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
                 (Enabled == "1") and (Alias /= "") and
                 (Flag == 0) ->
                     io:format("~n"),
                     io:format("             ~s~n", [Board]),
                     io:format("              └── ~s (~s)~n", [Device, Alias]),
-                    show_tree_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+                    show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
                 (Enabled == "1") and (Alias /= "") and
                 (Flag /= 0) ->
                     io:format("              └── ~s (~s)~n", [Device, Alias]),
-                    show_tree_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+                    show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 true ->
-                    error
+                    %io:format("no devices found~n"),
+                    show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag)
             end;
 
         true ->
@@ -1349,72 +1354,6 @@ check_for_supported_board(Board, Index, MaxBoards) ->
         true ->
             error
     end.
-
-
-
-
-
-% Arguments:
-%   none
-% Returns:
-%   0 on success
-%   1 on fail
-%pdate_cfg_file() {
-%ocal num_boards=0
-%ocal board=${NULL}
-%ocal num_devices=0
-%ocal device=${NULL}
-%ocal alias=${NULL}
-%ocal run_at_active=0
-%ocal checkversion=0
-%ocal enabled=0
-%ocal base_board=0
-%ocal backplane_board=0
-%ocal hw_image_partition_backup=${hw_image_partition}
-%
-%   hw_image_partition=${NULL}
-%   num_boards=$(read_cfg_file boards num_boards)
-%
-%   if [[ ${num_boards} == ${NULL} || ${num_boards} == 0 ]]; then
-%       return $SUCCESS
-%   fi
-%
-%   for (( b = 1; b <= $num_boards; b++ )); do
-%       board=$(read_cfg_file boards board${b})
-%       num_devices=$(read_cfg_file ${board} num_devices)
-%
-%       for (( d = 1; d <= $num_devices; d++ )); do
-%           hw_image_partition=${NULL}
-%           device=$(read_cfg_file ${board} device${d})
-%           run_at_active=$(read_cfg_file ${board} activecard${d})
-%           enabled=$(read_cfg_file ${board} enabled${d})
-%           alias=$(read_cfg_file ${board} alias${d})
-%           base_board=0
-%           backplane_board=0
-%
-%           if [ ${board} == ${board_type} ]; then
-%               base_board=1
-%           fi
-%
-%           if [[ 1 == ${run_at_active}  &&  1 == ${active} ]]; then
-%               backplane_board=1
-%           fi
-%
-%           if [[ 1 == ${base_board} || 1 == ${backplane_board} ]]; then
-%               hw_image_partition=${SPK_PARTITION}
-%               index=$(get_device_index_from_cfg ${board} ${device} alias ${alias})
-%
-%               if [[ ${index} != ${NULL} && ${enabled} != ${NULL} ]]; then
-%                   write_cfg_file ${board} enabled${index} ${enabled}
-%               fi
-%           fi
-%       done
-%   done
-%
-%   hw_image_partition=${hw_image_partition_backup}
-%
-%   return $SUCCESS
-%
 
 
 %-----------------------------------------------------------------------------
