@@ -1094,19 +1094,20 @@ disable_device(Board, Device, Device_dependent, Index, MaxDevices) ->
         (Index =< MaxDevices) ->
             {Result1, Device1} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
 
-            io:format("Disabling... ~p ~p ~n", [Device1, Device_dependent]),
 
             if
                 (Result1 == ok) and
                 ((Device1 == Device) or (Device1 == Device_dependent)) ->
-                    ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), "0", wr);
+                    io:format("Disabling... ~p ~p ~n", [Device1, Device_dependent]),
+                    ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), "0", wr),
+                    disable_device(Board, Device, Device_dependent, Index + 1, MaxDevices);
 
                 true ->
                     disable_device(Board, Device, Device_dependent, Index + 1, MaxDevices)
             end;
 
         true ->
-            error
+            ok
     end.
 
 
@@ -1117,18 +1118,19 @@ enable_device(Board, Device, Device_dependent, Alias, NewState, Index, MaxDevice
             {Result1, Device1} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
             {Result2, Alias1} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
 
-            io:format("Enabling... ~p ~p ~p ~n", [Device1, Alias1, Device_dependent]),
 
             if
                 (Result1 == ok) and (Result2 == ok)  and
                 ((Device1 == Device) or (Device1 == Device_dependent)) and
                 (Alias == Alias1) ->
-                    ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), NewState, wr);
+                    io:format("Changing to: ~p => ~p ~p ~p ~n", [NewState, Device1, Alias1, Device_dependent]),
+                    ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), NewState, wr),
+                    enable_device(Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices);
 
                 true ->
                     enable_device(Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices)
             end;
 
         true ->
-            error
+            ok
     end.
