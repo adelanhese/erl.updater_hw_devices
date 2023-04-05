@@ -55,7 +55,9 @@
 -export([show_help/0]).
 -export([show_devices/2]).
 -export([show_tree_devices/2]).
-
+-export([platforms_list/0]).
+-export([check_for_supported_platform/1]).
+-export([check_for_supported_board/1]).
 
 
 
@@ -129,6 +131,10 @@
 -define(NUMFMT, "/usr/bin/numfmt").
 -define(NVIDIA_DETECTOR, "/usr/bin/nvidia-detector").
 -define(NVLC, "/usr/bin/nvlc").
+
+platforms_list() -> [?ETSC1,
+                     ?ETSC2,
+                     ?ETSC6].
 
 dependencies_list_test() -> [?NOHUP,
                         ?NOTIFY_SEND,
@@ -443,14 +449,15 @@ find_character(Char, String) ->
 
 %_____________________________________________________________________________________________
 %
-%    Utils for updater_hw_devices
+%                         Utils for updater_hw_devices
 %_____________________________________________________________________________________________
-    
-% Arguments:
-%   arg1: Composite string with: <board>_<device>/<alias>
-% Returns:
-%   device name
+
+
+
+%--------------------------------------------------------------
 %
+%
+%--------------------------------------------------------------
 extract_board_device(BoardDevice) ->
     Index1 = string:str(BoardDevice, "_"),
     Index2 = string:str(BoardDevice, "/"),
@@ -468,22 +475,10 @@ extract_board_device(BoardDevice) ->
     end.
  
 
-% Arguments:
-%   arg1: Composite string with: <board>_<device>/<alias>
-% Returns:
-%   device name
+%--------------------------------------------------------------
 %
-%extract_device() {
-%    str="$1"
-%    device="${str##*_}"
 %
-%    if [[ $str == *"/"* ]]; then
-%        alias="${device##*/}"
-%        device=${device%/${alias}*}
-%    fi
-%
-%    echo $device
-%}
+%--------------------------------------------------------------
 extract_device(BoardDevice) ->
     {Status, _, Device, _} = extract_board_device(BoardDevice),
     
@@ -496,17 +491,10 @@ extract_device(BoardDevice) ->
 
 
 
-% Arguments:
-%   arg1: Composite string with: <board>_<device>/<alias>
-% Returns:
-%   board name
+%--------------------------------------------------------------
 %
-%extract_board() {
-%    str="$1"
-%    device="${str##*_}"
-%    board=${str%_${device}*}
-%    echo $board
-%}
+%
+%--------------------------------------------------------------
 extract_board(BoardDevice) ->
     {Status, Board, _, _} = extract_board_device(BoardDevice),
     
@@ -518,16 +506,10 @@ extract_board(BoardDevice) ->
     end.
 
 
-% Arguments:
-%   arg1: Composite string with: <board>_<device>/<alias>
-% Returns:
-%   alias name
+%--------------------------------------------------------------
 %
-%extract_alias() {
-%    str="$1"
-%    alias="${str##*/}"
-%    echo $alias
-%}
+%
+%--------------------------------------------------------------
 extract_alias(BoardDevice) ->
     {Status, _, _, Alias} = extract_board_device(BoardDevice),
 
@@ -539,11 +521,10 @@ extract_alias(BoardDevice) ->
             ""
     end.
 
-% Arguments:
-%   arg1: Composite string with: <board>_<device>/<alias>
-% Returns:
-%   alias name
+%--------------------------------------------------------------
 %
+%
+%--------------------------------------------------------------
 concatena_strings(Data) ->
     unicode:characters_to_list(Data).
 
@@ -1238,7 +1219,7 @@ show_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices) ->
 %
 % 
 %--------------------------------------------------------------
--spec show_tree_devices(string, string) -> {result, string}.
+-spec show_tree_devices(string, string) -> ok | error.
 show_tree_devices(CurrentBoard, Active) ->
     {Result1, NumBoardsStr} = ini_file(?INI_FILE, "boards", "num_boards"),
 
@@ -1304,3 +1285,114 @@ show_tree_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices, Fl
         true ->
             ok
     end.
+
+
+%--------------------------------------------------------------
+%
+% 
+%--------------------------------------------------------------
+-spec check_for_supported_platform(string) -> boolean.
+check_for_supported_platform(Platform) ->
+    lists:member(Platform, platforms_list()).
+
+
+
+%--------------------------------------------------------------
+%
+% 
+%--------------------------------------------------------------
+-spec check_for_supported_board(string) -> boolean.
+check_for_supported_board(Board) ->
+    {Result1, NumBoardsStr} = ini_file(?INI_FILE, "boards", "num_boards"),
+
+    case Result1 of
+        ok ->
+            {NumBoards, _} = string:to_integer(NumBoardsStr),
+            check_for_supported_board(Board, 1, NumBoards);
+
+        _ ->
+            error
+    end.
+
+check_for_supported_board(Board, Index, MaxBoards) ->
+    if
+        (Index =< MaxBoards) ->
+            {Result1, BoardRead} = ini_file(?INI_FILE, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+
+            if
+                (Result1 == ok) and (BoardRead == Board) ->
+                    ok;
+
+                true ->
+                    check_for_supported_board(Board, Index + 1, MaxBoards)
+            end;
+
+        true ->
+            error
+    end.
+
+
+
+
+
+% Arguments:
+%   none
+% Returns:
+%   0 on success
+%   1 on fail
+%pdate_cfg_file() {
+%ocal num_boards=0
+%ocal board=${NULL}
+%ocal num_devices=0
+%ocal device=${NULL}
+%ocal alias=${NULL}
+%ocal run_at_active=0
+%ocal checkversion=0
+%ocal enabled=0
+%ocal base_board=0
+%ocal backplane_board=0
+%ocal hw_image_partition_backup=${hw_image_partition}
+%
+%   hw_image_partition=${NULL}
+%   num_boards=$(read_cfg_file boards num_boards)
+%
+%   if [[ ${num_boards} == ${NULL} || ${num_boards} == 0 ]]; then
+%       return $SUCCESS
+%   fi
+%
+%   for (( b = 1; b <= $num_boards; b++ )); do
+%       board=$(read_cfg_file boards board${b})
+%       num_devices=$(read_cfg_file ${board} num_devices)
+%
+%       for (( d = 1; d <= $num_devices; d++ )); do
+%           hw_image_partition=${NULL}
+%           device=$(read_cfg_file ${board} device${d})
+%           run_at_active=$(read_cfg_file ${board} activecard${d})
+%           enabled=$(read_cfg_file ${board} enabled${d})
+%           alias=$(read_cfg_file ${board} alias${d})
+%           base_board=0
+%           backplane_board=0
+%
+%           if [ ${board} == ${board_type} ]; then
+%               base_board=1
+%           fi
+%
+%           if [[ 1 == ${run_at_active}  &&  1 == ${active} ]]; then
+%               backplane_board=1
+%           fi
+%
+%           if [[ 1 == ${base_board} || 1 == ${backplane_board} ]]; then
+%               hw_image_partition=${SPK_PARTITION}
+%               index=$(get_device_index_from_cfg ${board} ${device} alias ${alias})
+%
+%               if [[ ${index} != ${NULL} && ${enabled} != ${NULL} ]]; then
+%                   write_cfg_file ${board} enabled${index} ${enabled}
+%               fi
+%           fi
+%       done
+%   done
+%
+%   hw_image_partition=${hw_image_partition_backup}
+%
+%   return $SUCCESS
+%
