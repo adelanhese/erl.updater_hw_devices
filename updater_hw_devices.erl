@@ -1018,7 +1018,7 @@ show_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices) ->
                     show_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices);
 
                 true ->
-                    error
+                    show_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices)
             end;
 
         true ->
