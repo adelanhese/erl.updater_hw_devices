@@ -53,7 +53,7 @@
 -export([check_for_supported_devices/4]).
 -export([enable_disable_device/4]).
 -export([show_help/0]).
--export([show_devices/0]).
+-export([show_devices/2]).
 
 
 
@@ -1086,7 +1086,7 @@ enable_device(Board, Device, Device_dependent, Alias, NewState, Index, MaxDevice
 
 %--------------------------------------------------------------
 %
-% io:format(
+% 
 %--------------------------------------------------------------
 show_help() ->
     io:format("~s: This tool provides the user interface to check and update the hw devices.~n", [?MODULE_NAME]),
@@ -1141,8 +1141,10 @@ show_help() ->
     io:format(" ~n"),
     io:format("              Note: If no chassis id is specified then the script will try discovery it.~n"),
     io:format(" ~n"),
+    io:format("           4) Supported devices for update in this board:~n"),
+    io:format(" ~n"),
 
-%    show_devices
+    show_devices("lc1", "1"),
 
     io:format(" ~n"),
     io:format(" Examples:~n"),
@@ -1169,119 +1171,64 @@ show_help() ->
     io:format("          # ~s -g -r -e=lc1_fpgajic/otu2~n", [?MODULE_NAME]),
     io:format(" ~n").
 
-%# Arguments:
-%#   none
-%# Returns:
-%#   0 on success
-%#   1 on fail
-%show_devices() {
-%local num_boards=0
-%local board=${NULL}
-%local num_devices=0
-%local device=${NULL}
-%local alias=${NULL}
-%local run_at_active=0
-%local checkversion=0
-%local enabled=0
-%local base_board=0
-%local backplane_board=0
+%--------------------------------------------------------------
 %
-%    num_boards=$(read_cfg_file boards num_boards)
-%
-%    if [[ ${num_boards} == ${NULL} || ${num_boards} == 0 ]]; then
-%        return $SUCCESS
-%    fi
-%
-%    echo -e "           ${BMAGENTA}4) Supported devices for update:${RESET}"
-%
-%    for (( b = 1; b <= $num_boards; b++ )); do
-%        board=$(read_cfg_file boards board${b})
-%        num_devices=$(read_cfg_file ${board} num_devices)
-%
-%        for (( d = 1; d <= $num_devices; d++ )); do
-%            device=$(read_cfg_file ${board} device${d})
-%            run_at_active=$(read_cfg_file ${board} activecard${d})
-%            checkversion=$(read_cfg_file ${board} checkversion${d})
-%            enabled=$(read_cfg_file ${board} enabled${d})
-%            alias=$(read_cfg_file ${board} alias${d})
-%            base_board=0
-%            backplane_board=0
-%
-%            if [ ${board} == ${board_type} ]; then
-%                base_board=1
-%            fi
-%
-%            if [[ 1 == ${run_at_active}  &&  1 == ${active} ]]; then
-%                backplane_board=1
-%            fi
-%
-%            if [[ 1 == ${base_board} || 1 == ${backplane_board} ]]  &&  [[ 1 == ${enabled} ]]; then
-%                if [[ ${alias} == ${NULL} ]]; then
-%                    echo -e "                      ${BMAGENTA}${board}_${device}${RESET}"
-%                else
-%                    echo -e "                      ${BMAGENTA}${board}_${device} (${alias})${RESET}"
-%                fi
-%                
-%            fi
-%        done
-%    done
-%
-%    return $SUCCESS
-%}
-
-%-spec show_devices(string, string) -> {result, string}.
-%show_devices(CurrentBoard, Active) ->
-show_devices() ->
+% 
+%--------------------------------------------------------------
+-spec show_devices(string, string) -> {result, string}.
+show_devices(CurrentBoard, Active) ->
     {Result1, NumBoardsStr} = ini_file(?INI_FILE, "boards", "num_boards"),
 
     case Result1 of
         ok ->
             {NumBoards, _} = string:to_integer(NumBoardsStr),
-            show_devices_next_board(1, NumBoards);
+            show_devices_next_board(CurrentBoard, Active, 1, NumBoards);
 
         _ ->
             error
     end.
 
-show_devices_next_board(Index, MaxBoards) ->
-
+show_devices_next_board(CurrentBoard, Active, Index, MaxBoards) ->
     if
         (Index =< MaxBoards) ->
             {Result1, Board} = ini_file(?INI_FILE, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
 
             if
                 (Result1 == ok) ->
-                    io:format("~s~n", [Board]),
+                    %io:format("~s~n", [Board]),
 
                     {_, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
                     {NumDevices, _} = string:to_integer(NumDevicesStr),
-                    show_devices_next_Device(Board, 1, NumDevices),
-                    show_devices_next_board(Index + 1, MaxBoards);
+                    show_devices_next_Device(Board, CurrentBoard, Active, 1, NumDevices),
+                    show_devices_next_board(CurrentBoard, Active, Index + 1, MaxBoards);
 
                 true ->
                     error
             end;
 
         true ->
-            error
+            ok
     end.
 
-show_devices_next_Device(Board, Index, MaxDevices) ->
-
+show_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices) ->
     if
         (Index =< MaxDevices) ->
             {Result1, Device} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
-
+            {Result2, Activecard} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
+            {Result3, Enabled} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+            
             if
-                (Result1 == ok) ->
-                    io:format("     ~s~n", [Device]),
-                    show_devices_next_Device(Board, Index + 1, MaxDevices);
+                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and
+                ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
+                (Enabled == "1") ->
+                    io:format("                ~s_~s~n", [Board, Device]),
+                    show_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices);
 
                 true ->
                     error
             end;
 
         true ->
-            error
+            ok
     end.
 
