@@ -1,31 +1,13 @@
-% usar a função bubble_sort/1,
-%  salve o código acima em um arquivo com extensão .erl (por
-%  exemplo, my_module.erl)
-%  e compile-o usando o comando erlc my_module.erl.
-%  Em seguida, abra o shell do Erlang com o comando erl e
-%  carregue o módulo usando o comando my_module:module_info()..
-%  Você pode então chamar a função bubble_sort/1 com
-%  uma lista de 10 elementos numéricos como argumento:
-% 
-% 1> my_module:bubble_sort([5, 2, 9, 1, 7, 3, 8, 6, 10, 4]).
-% [1,2,3,4,5,6,7,8,9,10]
 %
 %
 %   git push -u origin main
 %
--module(my_lib).
+-module(updater_hw_devices).
+-include("updater_hw_devices_defines.hrl").
+
 -export([bubble_sort/1]).
--export([update_var/2]).
 -export([procura_string/2]).
 -export([procura_string_arquivo/2]).
--export([show_menu/0]).
--export([read_option1/0]).
--export([read_option2/0]).
--export([read_option3/0]).
--export([print_loop/1]).
--export([print_loop1/2]).
--export([print_loop2/2]).
--export([print_loop3/2]).
 -export([find_character/2]).
 -export([extract_board_device/1]).
 -export([extract_device/1]).
@@ -61,78 +43,17 @@
 -export([update_cfg_file/2]).
 
 
+% ToDo
+-export([fpga_reload/0]).
+-export([dec2ascii/1]).
+-export([hex2dec/1]).
+-export([dec2hex/1]).
+-export([bin2hex/1]).
+-export([get_i2c_adapter/1]).
+-export([get_platform_type/0]).
+-export([get_dtb_name/0]).
+-export([get_board_type/0]).
 
-
-
-
--define(MODULE_NAME, "updater_hw_devices").
-
--define(INI_FILE, "arq.ini").
--define(IMAGES_PATH, "/opt/ets/hw/images/").
--define(SPK_PARTITION, "/mnt/update").
--define(KERNEL_CMDLINE, "/proc/cmdline").
--define(KERNEL_BZIMAGE, "/boot/bzImage").
--define(KEXEC_TIMEOUT, "2").
--define(DEVICES_VERSIONS_FILE, "/data/board/hw_devices_versions.csv").
-
-
--define(GPIOGET, "/usr/bin/gpioget").
--define(GPIOSET, "/usr/bin/gpioset").
--define(GPIOFIND, "/usr/bin/gpiofind").
--define(FPGAIO, "/usr/bin/fpgaio").
--define(I2CGET, "/usr/sbin/i2cget").
--define(I2CSET, "/usr/sbin/i2cset").
--define(I2CTRANSFER, "/usr/sbin/i2ctransfer").
--define(I2CDETECT, "/usr/sbin/i2cdetect").
--define(FAN, "/usr/bin/fan").
--define(DD, "/bin/dd").
--define(BTOOL, "/usr/bin/btool").
--define(MD5SUM, "/usr/bin/md5sum").
--define(MX25U256, "/dev/mx25u256").
--define(MACHXO2, "/usr/bin/machxo2").
--define(BLHOST, "/usr/bin/blhost").
--define(KEXEC, "/usr/sbin/kexec").
--define(ISSI_FLASH, "/usr/bin/issi_flash").
--define(SPI_CPLD_DRIVER, "/dev/spidev50.2").
--define(DATA_BOARD_PATH, "/data/board/").
--define(FLASHROM, "/usr/sbin/flashrom").
--define(EHALCLI, "/usr/bin/ehalcli").
-
--define(ETSC1, "etsc1").
--define(ETSC2, "etsc2").
--define(ETSC6, "etsc6").
--define(TEST, "test").
-
--define(NOHUP, "/usr/bin/nohup").
--define(NOTIFY_SEND, "/usr/bin/notify-send").
--define(NPROC, "/usr/bin/nproc").
--define(NROFF, "/usr/bin/nroff").
--define(NSENTER, "/usr/bin/nsenter").
--define(NSLOOKUP, "/usr/bin/nslookup").
--define(NSS_ADDBUILTIN, "/usr/bin/nss-addbuiltin").
--define(NSS_DBTEST, "/usr/bin/nss-dbtest").
--define(NSS_PP, "/usr/bin/nss-pp").
--define(NSTAT, "/usr/bin/nstat").
--define(NSUPDATE, "/usr/bin/nsupdate").
--define(NTFS_3G, "/usr/bin/ntfs-3g").
--define(NTFS_3G_PROBE, "/usr/bin/ntfs-3g.probe").
--define(NTFSCAT, "/usr/bin/ntfscat").
--define(NTFSCLUSTER, "/usr/bin/ntfscluster").
--define(NTFSCMP, "/usr/bin/ntfscmp").
--define(NTFSDECRYPT, "/usr/bin/ntfsdecrypt").
--define(NTFSFALLOCATE, "/usr/bin/ntfsfallocate").
--define(NTFSFIX, "/usr/bin/ntfsfix").
--define(NTFSINFO, "/usr/bin/ntfsinfo").
--define(NTFSLS, "/usr/bin/ntfsls").
--define(NTFSMOVE, "/usr/bin/ntfsmove").
--define(NTFSRECOVER, "/usr/bin/ntfsrecover").
--define(NTFSSECAUDIT, "/usr/bin/ntfssecaudit").
--define(NTFSTRUNCATE, "/usr/bin/ntfstruncate").
--define(NTFSUSERMAP, "/usr/bin/ntfsusermap").
--define(NTFSWIPE, "/usr/bin/ntfswipe").
--define(NUMFMT, "/usr/bin/numfmt").
--define(NVIDIA_DETECTOR, "/usr/bin/nvidia-detector").
--define(NVLC, "/usr/bin/nvlc").
 
 platforms_list() -> [?ETSC1,
                      ?ETSC2,
@@ -290,18 +211,6 @@ bubble([], _) ->
 %
 %
 %-----------------------------------------------------------------------------
-%
-%
-%
-update_var(Var, Valor) ->
-    Var = Valor.
-
-
-
-%-----------------------------------------------------------------------------
-%
-%
-%-----------------------------------------------------------------------------
 % função que procura uma string em um arquivo
 procura_string(NomeArquivo, StringProcurada) ->
     {ok, Arquivo} = file:open(NomeArquivo, [read]),
@@ -329,104 +238,11 @@ procura_string_arquivo(Arquivo, StringProcurada) ->
     end.
 
 
-%-----------------------------------------------------------------------------
-%
-%
-%-----------------------------------------------------------------------------
-% Função que mostra o menu e retorna a opção escolhida pelo usuário
-show_menu() ->
-    io:format("Escolha uma das opções abaixo:~n"),
-    io:format("1. Opção 1~n"),
-    io:format("2. Opção 2~n"),
-    io:format("3. Opção 3~n"),
-    io:format("4. Opção 4~n"),
-    io:format("5. Opção 5~n"),
-    read_option3().
-
-% Função auxiliar que lê e verifica se a opção escolhida é válida
-read_option1() ->
-    {ok, Opcao} = io:fread("Sua opção-> ", "~u"),
-    case  lists:nth(1, Opcao) of
-        1 ->
-            io:format("Opção válida.~n");
-        _ ->
-            io:format("Opção inválida.~n"),
-            read_option1()
-    end.    
-
-read_option2() ->
-    {ok, Opcao} = io:fread("Sua opção-> ", "~u"),
-
-    A = lists:nth(1, Opcao),
-
-    case A of
-        _ when (A < 1) or (A > 5) ->
-            io:format("Opção inválida. Escolha uma opção válida.~n"),
-            read_option2();
-        _ ->
-            A
-    end.
-
-read_option3() ->
-        {ok, Opcao} = io:fread("Sua opção-> ", "~u"),
-    
-        A = lists:nth(1, Opcao),
-    
-        if
-           (A < 1) or (A > 5) ->
-                B = A,
-                io:format("~p é uma opção inválida. Escolha uma opção válida.~n", [B]),
-                read_option3();
-            true ->
-                {ok, A}
-        end.
-
 
 %-----------------------------------------------------------------------------
 %
 %
 %-----------------------------------------------------------------------------
-% imprime uma mensagem N vezes
-print_loop(N) ->
-            print_loop3(1, N).
-        
-print_loop1(I, N) when I =< N ->
-            io:format("Mensagem ~w~n", [I]),
-            print_loop1(I+1, N);
-        print_loop1(_, _) ->
-            ok.
-
-print_loop2(I, N) ->
-
-        case N of
-           _ when (I =< N) ->
-                   io:format("Mensagem ~w~n", [I]),
-                   print_loop2(I+1, N);
-           _ ->
-                   ok
-        end.
-
-print_loop3(I, N) ->
-   if
-       (I =< N) ->
-          io:format("Mensagem ~w~n", [I]),
-          print_loop3(I+1, N);
-       true ->
-          ok
-   end.
-
-%-----------------------------------------------------------------------------
-%
-%
-%-----------------------------------------------------------------------------
-% Esta função extrai uma substring de String,
-% começando no terceiro caractere e com comprimento de cinco 
-% caracteres. Você pode chamar esta função passando uma string como 
-% argumento, como no exemplo a seguir:
-% 
-% 
-% Isso irá retornar a substring "lo, w". Você pode ajustar os valores de Start e
-% Length para extrair a substring desejada.
 extract_substring(String) ->
         Substring = string:substr(3, 5, String),
         Substring.
@@ -437,13 +253,6 @@ extract_substring(String) ->
 %
 %
 %-----------------------------------------------------------------------------
-% sta função encontra a primeira ocorrência de Char em
-% tring e retorna seu índice. Você pode chamar esta função passando 
-%  caractere e a string como argumentos, como no exemplo a seguir:
-% 
-% 
-% y_module:find_character($l,
-% Hello, world!").
 find_character(Char, String) ->
             Index = string:str(String, Char),
             Index.
@@ -490,7 +299,6 @@ extract_device(BoardDevice) ->
         error ->
             ""
     end.
-
 
 
 %-----------------------------------------------------------------------------
@@ -1231,7 +1039,6 @@ show_boards_tree(CurrentBoard, Active) ->
             show_boards_tree_next_board(CurrentBoard, Active, 1, NumBoards);
 
         _ ->
-            %io:format("error during initial board reading~n"),
             error
     end.
 
@@ -1250,7 +1057,6 @@ show_boards_tree_next_board(CurrentBoard, Active, Index, MaxBoards) ->
                     show_boards_tree_next_board(CurrentBoard, Active, Index + 1, MaxBoards);
 
                 true ->
-                    %io:format("error during board reading~n"),
                     error
             end;
 
@@ -1266,8 +1072,6 @@ show_boards_tree_next_device(Board, CurrentBoard, Active, Index, MaxDevices, Fla
             {Result3, Enabled} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
             {Result4, Alias} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
 
-            %io:format("~s ~s ~s ~s ~s~n", [Board, Device, Alias, Enabled, Activecard]),
-            
             if
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
@@ -1302,7 +1106,6 @@ show_boards_tree_next_device(Board, CurrentBoard, Active, Index, MaxDevices, Fla
                     show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 true ->
-                    %io:format("no devices found~n"),
                     show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag)
             end;
 
@@ -1413,3 +1216,98 @@ update_cfg_file_next_Device(Source, Target, Board, Index, MaxDevices) ->
         true ->
             ok
     end.
+
+
+%-----------------------------------------------------------------------------
+%
+%                             T o D o
+% 
+%-----------------------------------------------------------------------------
+
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec fpga_reload() -> ok.
+fpga_reload() ->
+    ok.
+
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec dec2ascii(number) -> ok.
+dec2ascii(Dec) ->
+    io:format("~p~n", [Dec]),
+    ok.
+
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec hex2dec(number) -> ok.
+hex2dec(Hex) ->
+    io:format("~p~n", [Hex]),
+    ok.
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec dec2hex(number) -> ok.
+dec2hex(Dec) ->
+    io:format("~p~n", [Dec]),
+    ok.
+
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec bin2hex(number) -> ok.
+bin2hex(Bin) ->
+    io:format("~p~n", [Bin]),
+    ok.
+
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec get_i2c_adapter(string) -> ok.
+get_i2c_adapter(I2CAdapterName) ->
+    io:format("~p~n", [I2CAdapterName]),
+    ok.
+
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec get_platform_type() -> ok.
+get_platform_type() ->
+    ok.
+
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec get_dtb_name() -> ok.
+get_dtb_name() ->
+    ok.
+
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec get_board_type() -> ok.
+get_board_type() ->
+    ok.
+
+
+    
