@@ -41,7 +41,7 @@
 -export([remove_char/2]).
 -export([read_field_from_cfg/3]).
 -export([read_field_from_cfg_anyway/3]).
--export([get_device_index_from_cfg/4]).
+-export([get_device_index_from_cfg/5]).
 -export([get_file_image_name/3]).
 -export([md5_check/2]).
 -export([binary_to_hex/1]).
@@ -58,6 +58,8 @@
 -export([platforms_list/0]).
 -export([check_for_supported_platform/1]).
 -export([check_for_supported_board/1]).
+-export([update_cfg_file/2]).
+
 
 
 
@@ -260,10 +262,10 @@ dependencies_list_etsc6() -> [?FPGAIO,
 %        options => []
 %    },
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 % bubble_sort
 %
@@ -284,10 +286,10 @@ bubble([], _) ->
     [].
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
 %
@@ -296,10 +298,10 @@ update_var(Var, Valor) ->
 
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 % função que procura uma string em um arquivo
 procura_string(NomeArquivo, StringProcurada) ->
     {ok, Arquivo} = file:open(NomeArquivo, [read]),
@@ -327,10 +329,10 @@ procura_string_arquivo(Arquivo, StringProcurada) ->
     end.
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 % Função que mostra o menu e retorna a opção escolhida pelo usuário
 show_menu() ->
     io:format("Escolha uma das opções abaixo:~n"),
@@ -380,10 +382,10 @@ read_option3() ->
         end.
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 % imprime uma mensagem N vezes
 print_loop(N) ->
             print_loop3(1, N).
@@ -413,10 +415,10 @@ print_loop3(I, N) ->
           ok
    end.
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 % Esta função extrai uma substring de String,
 % começando no terceiro caractere e com comprimento de cinco 
 % caracteres. Você pode chamar esta função passando uma string como 
@@ -431,10 +433,10 @@ extract_substring(String) ->
 
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 % sta função encontra a primeira ocorrência de Char em
 % tring e retorna seu índice. Você pode chamar esta função passando 
 %  caractere e a string como argumentos, como no exemplo a seguir:
@@ -454,10 +456,10 @@ find_character(Char, String) ->
 
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 extract_board_device(BoardDevice) ->
     Index1 = string:str(BoardDevice, "_"),
     Index2 = string:str(BoardDevice, "/"),
@@ -475,10 +477,10 @@ extract_board_device(BoardDevice) ->
     end.
  
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 extract_device(BoardDevice) ->
     {Status, _, Device, _} = extract_board_device(BoardDevice),
     
@@ -491,10 +493,10 @@ extract_device(BoardDevice) ->
 
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 extract_board(BoardDevice) ->
     {Status, Board, _, _} = extract_board_device(BoardDevice),
     
@@ -506,10 +508,10 @@ extract_board(BoardDevice) ->
     end.
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 extract_alias(BoardDevice) ->
     {Status, _, _, Alias} = extract_board_device(BoardDevice),
 
@@ -521,26 +523,26 @@ extract_alias(BoardDevice) ->
             ""
     end.
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 concatena_strings(Data) ->
     unicode:characters_to_list(Data).
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 list_replace(List, Index, NewValue) ->
     lists:sublist(List, Index-1) ++ [NewValue] ++ lists:nthtail(Index, List).
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 list_delete(List, Index) ->
     [Head | Tail] = List,
 
@@ -549,34 +551,34 @@ list_delete(List, Index) ->
         _ -> [Head | list_delete(Tail, Index-1)]
     end.
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 list_insert(List, Position, Element) ->
     lists:sublist(List, Position - 1) ++ [Element] ++ lists:nthtail(Position - 1, List).
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 remove_char(String, Char) ->
     %lists:filter(fun (C) -> C /= Char end, String).
     lists:flatten([C || C <- String, C /= Char]).
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 binary_to_hex(Binary) ->
     lists:flatten([io_lib:format("~2.16.0B", [Byte]) || <<Byte>> <= Binary]).
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 check_file_exists(File) ->
         case filelib:is_file(File) of
             true ->
@@ -586,10 +588,10 @@ check_file_exists(File) ->
                 {error, "file not found"}
         end.
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec md5_check(string, string) -> {result, string}.
 md5_check(FileName, ExpectedMD5Sum) ->
     
@@ -613,10 +615,10 @@ md5_check(FileName, ExpectedMD5Sum) ->
     end.
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 extract_field(Field) ->
     Index1 = string:str(Field, " = "),
     
@@ -630,19 +632,19 @@ extract_field(Field) ->
     end.
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec ini_file(string, string, string) -> {status, string}.
 ini_file(IniFile, Sector, Field) ->
     ini_file(IniFile, Sector, Field, "", rd).
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec ini_file(string, string, string, string, [rd|wr]) -> {status, string}.
 ini_file(IniFile, Sector, Field, NewFieldValue, Oper) ->
     {Status, FileData} = file:read_file(IniFile),
@@ -758,10 +760,10 @@ ini_file_replace_field(IniFile, List, Index, Field, CurrentFieldValue, NewFieldV
         end.
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec read_field_from_cfg(string, string, string) -> {result, string}.
 read_field_from_cfg(Board, Device, Field) ->
     {Result, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
@@ -797,10 +799,10 @@ read_field_from_cfg_search_for_device(Board, Device, Field, Index, MaxDevices) -
     end.
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec read_field_from_cfg_anyway(string, string, string) -> {result, string}.
 read_field_from_cfg_anyway(Board, Device, Field) ->
     {Result, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
@@ -833,36 +835,36 @@ read_field_from_cfg_anyway_search_for_device(Board, Device, Field, Index, MaxDev
     end.
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
--spec get_device_index_from_cfg(string, string, string, string) -> {result, number}.
-get_device_index_from_cfg(Board, Device, Field, Value) ->
-    {Result, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
+%-----------------------------------------------------------------------------
+-spec get_device_index_from_cfg(string, string, string, string, string) -> {result, number}.
+get_device_index_from_cfg(IniFileName, Board, Device, Field, Value) ->
+    {Result, NumDevicesStr} = ini_file(IniFileName, Board, "num_devices"),
 
     case Result of
         ok ->
             {NumDevices, _} = string:to_integer(NumDevicesStr),
-            get_device_index_from_cfg_search_for_device(Board, Device, Field, Value, 1, NumDevices);
+            get_device_index_from_cfg_search_for_device(IniFileName, Board, Device, Field, Value, 1, NumDevices);
 
         _ ->
             {error, -1}
     end.
 
-get_device_index_from_cfg_search_for_device(Board, Device, Field, Value, Index, MaxDevices) ->
+get_device_index_from_cfg_search_for_device(IniFileName, Board, Device, Field, Value, Index, MaxDevices) ->
 
     if
         (Index =< MaxDevices) ->
-            {Result1, DevicesValueStr} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
-            {Result2, FieldValueStr} = ini_file(?INI_FILE, Board, unicode:characters_to_list([Field, integer_to_list(Index)])),
+            {Result1, DevicesValueStr} = ini_file(IniFileName, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+            {Result2, FieldValueStr} = ini_file(IniFileName, Board, unicode:characters_to_list([Field, integer_to_list(Index)])),
             
             if
                 (Result1 == ok) and (Result2 == ok) and (DevicesValueStr == Device) and (FieldValueStr == Value) ->
                     {ok, Index};
 
                 true ->
-                    get_device_index_from_cfg_search_for_device(Board, Device, Field, Value, Index + 1, MaxDevices)
+                    get_device_index_from_cfg_search_for_device(IniFileName, Board, Device, Field, Value, Index + 1, MaxDevices)
             end;
 
         true ->
@@ -870,10 +872,10 @@ get_device_index_from_cfg_search_for_device(Board, Device, Field, Value, Index, 
     end.
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec get_file_image_name(string, string, string) -> {result, string}.
 get_file_image_name(Board, Device, InputFile) ->
 
@@ -905,10 +907,10 @@ get_file_image_name(Board, Device, InputFile) ->
 
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec check_for_dependencies(string) -> ok | error.
 check_for_dependencies(Platform) ->
 
@@ -952,12 +954,12 @@ check_for_dependencies(List, Index) ->
     end.
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
 %   io:format("~p ~p ~p ~n", [DevicesStr, EnabledStr, CheckversionStr]),
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec check_for_supported_devices(string, string, string, string) -> {result, string}.
 check_for_supported_devices(Board, Device, CurrentBoard, Active) ->
     {Result, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
@@ -994,10 +996,10 @@ check_for_supported_devices_search_for_device(Board, Device, CurrentBoard, Activ
 
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 %
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec enable_disable_device(string, string, string, string) -> ok | error.
 enable_disable_device(BoardDeviceAlias, NewState, CurrentBoard, Active) ->
     Board = extract_board(BoardDeviceAlias),
@@ -1067,10 +1069,10 @@ enable_device(Board, Device, Device_dependent, Alias, NewState, Index, MaxDevice
             ok
     end.
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 % 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 show_help() ->
     io:format("~s: This tool provides the user interface to check and update the hw devices.~n", [?MODULE_NAME]),
     io:format(" ~n"),
@@ -1154,10 +1156,10 @@ show_help() ->
     io:format("          # ~s -g -r -e=lc1_fpgajic/otu2~n", [?MODULE_NAME]),
     io:format(" ~n").
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 % 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec show_devices(string, string) -> {result, string}.
 show_devices(CurrentBoard, Active) ->
     {Result1, NumBoardsStr} = ini_file(?INI_FILE, "boards", "num_boards"),
@@ -1215,10 +1217,10 @@ show_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices) ->
             ok
     end.
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 % 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec show_tree_devices(string, string) -> ok | error.
 show_tree_devices(CurrentBoard, Active) ->
     {Result1, NumBoardsStr} = ini_file(?INI_FILE, "boards", "num_boards"),
@@ -1260,22 +1262,39 @@ show_tree_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices, Fl
             {Result1, Device} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
             {Result2, Activecard} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
             {Result3, Enabled} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+            {Result4, Alias} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
             
             if
-                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and
+                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
-                (Enabled == "1") and
+                (Enabled == "1") and (Alias == "") and
                 (Flag == 0) ->
                     io:format("~n"),
                     io:format("             ~s~n", [Board]),
                     io:format("              └── ~s~n", [Device]),
                     show_tree_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
-                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and
+                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
-                (Enabled == "1") and
+                (Enabled == "1") and (Alias == "") and
                 (Flag /= 0) ->
                     io:format("              └── ~s~n", [Device]),
+                    show_tree_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+
+                    (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
+                ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
+                (Enabled == "1") and (Alias /= "") and
+                (Flag == 0) ->
+                    io:format("~n"),
+                    io:format("             ~s~n", [Board]),
+                    io:format("              └── ~s (~s)~n", [Device, Alias]),
+                    show_tree_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+
+                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
+                ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
+                (Enabled == "1") and (Alias /= "") and
+                (Flag /= 0) ->
+                    io:format("              └── ~s (~s)~n", [Device, Alias]),
                     show_tree_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 true ->
@@ -1287,20 +1306,20 @@ show_tree_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices, Fl
     end.
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 % 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec check_for_supported_platform(string) -> boolean.
 check_for_supported_platform(Platform) ->
     lists:member(Platform, platforms_list()).
 
 
 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 %
 % 
-%--------------------------------------------------------------
+%-----------------------------------------------------------------------------
 -spec check_for_supported_board(string) -> boolean.
 check_for_supported_board(Board) ->
     {Result1, NumBoardsStr} = ini_file(?INI_FILE, "boards", "num_boards"),
@@ -1396,3 +1415,62 @@ check_for_supported_board(Board, Index, MaxBoards) ->
 %
 %   return $SUCCESS
 %
+
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec update_cfg_file(string, string) -> {result, string}.
+update_cfg_file(Source, Target) ->
+    {Result1, NumBoardsStr} = ini_file(Source, "boards", "num_boards"),
+
+    case Result1 of
+        ok ->
+            {NumBoards, _} = string:to_integer(NumBoardsStr),
+            update_cfg_file_next_board(Source, Target, 1, NumBoards);
+
+        _ ->
+            error
+    end.
+
+update_cfg_file_next_board(Source, Target, Index, MaxBoards) ->
+    if
+        (Index =< MaxBoards) and (MaxBoards > 0) ->
+            {Result1, Board} = ini_file(Source, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+
+            if
+                (Result1 == ok) ->
+                    {_, NumDevicesStr} = ini_file(Source, Board, "num_devices"),
+                    {NumDevices, _} = string:to_integer(NumDevicesStr),
+                    update_cfg_file_next_Device(Source, Target, Board, 1, NumDevices),
+                    update_cfg_file_next_board(Source, Target, Index + 1, MaxBoards);
+
+                true ->
+                    error
+            end;
+
+        true ->
+            ok
+    end.
+
+update_cfg_file_next_Device(Source, Target, Board, Index, MaxDevices) ->
+    if
+        (Index =< MaxDevices) ->
+            {Result1, Device} = ini_file(Source, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+            {Result2, Enabled} = ini_file(Source, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+            {Result3, Alias} = ini_file(Source, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
+            
+            if
+                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) ->
+                    {_, IndexTarget} = get_device_index_from_cfg(Target, Board, Device, "alias", Alias),
+                    ini_file(Target, Board, unicode:characters_to_list(["enabled", integer_to_list(IndexTarget)]), Enabled, wr),
+                    update_cfg_file_next_Device(Source, Target, Board, Index + 1, MaxDevices);
+
+                true ->
+                    error
+            end;
+
+        true ->
+            ok
+    end.
