@@ -1,9 +1,6 @@
 -module(updater_hw_devices_etsc2).
 -include("updater_hw_devices_defines.hrl").
 
--export([get_version_etsc2/2]).
--export([update_etsc2/2]).
-
 
 % ToDo
 -export([get_slot_id_etsc2_mngt/0]).
@@ -30,61 +27,6 @@
 -export([update_etsc2_lc5_cpld/0]).
 -export([update_etsc2_lc5_fpga/0]).
 -export([update_etsc2_lc5_pm6010/0]).
-
-%-----------------------------------------------------------------------------
-%
-% 
-%-----------------------------------------------------------------------------
--spec get_version_etsc2(string, string) -> {result, string}.
-get_version_etsc2(Board, Device) -> 
-    case Board of
-
-        ?LC4 ->
-            io:format("updater_hw_devices_etsc2:get_version_~p(~p)~n", [Board, Device]);
-
-        ?LC5 ->
-            io:format("updater_hw_devices_etsc2:get_version_~p(~p)~n", [Board, Device]);
-    
-        ?MNGT ->
-            io:format("updater_hw_devices_etsc2:get_version_~p(~p)~n", [Board, Device]);
-
-        ?FAN ->
-            io:format("updater_hw_devices_etsc2:get_version_~p(~p)~n", [Board, Device]);
-
-         _ ->
-            error
-
-    end,
-
-    ok.
-
-%-----------------------------------------------------------------------------
-%
-% 
-%-----------------------------------------------------------------------------
--spec update_etsc2(string, string) -> {result, string}.
-update_etsc2(Board, Device) -> 
-    case Board of
-
-    ?LC4 ->
-        io:format("updater_hw_devices_etsc2:update_~p(~p)~n", [Board, Device]);
-
-    ?LC5 ->
-        io:format("updater_hw_devices_etsc2:update_~p(~p)~n", [Board, Device]);
-
-    ?MNGT ->
-        io:format("updater_hw_devices_etsc2:update_~p(~p)~n", [Board, Device]);
-
-    ?FAN ->
-        io:format("updater_hw_devices_etsc2:update_~p(~p)~n", [Board, Device]);
-
-    _ ->
-        error
-
-    end,
-
-    ok.
-
 
 
 

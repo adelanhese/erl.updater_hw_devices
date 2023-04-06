@@ -1,9 +1,6 @@
 -module(updater_hw_devices_etsc6).
 -include("updater_hw_devices_defines.hrl").
 
--export([get_version_etsc6/2]).
--export([update_etsc6/2]).
-
 
 % ToDo
 -export([i2c_bkp_enable/0]).
@@ -46,68 +43,6 @@
 -export([update_etsc6_lc5_fpga/0]).
 -export([update_etsc6_lc5_pm6010/0]).
     
-
-%-----------------------------------------------------------------------------
-%
-% 
-%-----------------------------------------------------------------------------
--spec get_version_etsc6(string, string) -> {result, string}.
-get_version_etsc6(Board, Device) -> 
-    case Board of
-
-        ?LC4 ->
-            io:format("updater_hw_devices_etsc6:get_version_~p(~p)~n", [Board, Device]);
-
-        ?LC5 ->
-            io:format("updater_hw_devices_etsc6:get_version_~p(~p)~n", [Board, Device]);
-    
-        ?MNGT ->
-            io:format("updater_hw_devices_etsc6:get_version_~p(~p)~n", [Board, Device]);
-
-        ?SC2000 ->
-            io:format("updater_hw_devices_etsc6:get_version_~p(~p)~n", [Board, Device]);
-    
-        ?FAN ->
-            io:format("updater_hw_devices_etsc6:get_version_~p(~p)~n", [Board, Device]);
-
-         _ ->
-            error
-
-    end,
-
-    ok.
-
-%-----------------------------------------------------------------------------
-%
-% 
-%-----------------------------------------------------------------------------
--spec update_etsc6(string, string) -> {result, string}.
-update_etsc6(Board, Device) -> 
-    case Board of
-
-        ?LC4 ->
-            io:format("updater_hw_devices_etsc6:update_~p(~p)~n", [Board, Device]);
-
-        ?LC5 ->
-            io:format("updater_hw_devices_etsc6:update_~p(~p)~n", [Board, Device]);
-
-        ?MNGT ->
-            io:format("updater_hw_devices_etsc6:update_~p(~p)~n", [Board, Device]);
-
-        ?SC2000 ->
-            io:format("updater_hw_devices_etsc6:update_~p(~p)~n", [Board, Device]);
-    
-        ?FAN ->
-            io:format("updater_hw_devices_etsc6:update_~p(~p)~n", [Board, Device]);
-
-        _ ->
-        error
-
-    end,
-
-    ok.
-
-
 
 
 

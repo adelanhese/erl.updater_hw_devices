@@ -9,29 +9,64 @@
 -export([get_version/3]).
 -export([update/3]).
 -export([check_versions/3]).
+-export([power_cycle/2]).
+-export([get_slot_id/2]).
 
-%erlang:apply(?MODULE, Operacao, Argumentos);
+
+-export([call_function/3]).
+
+
+
+%-----------------------------------------------------------------------------
 %
-%-record(aps_group_info, {
-%    id = undefined :: aps:group_id(),
-%    client_id = undefined :: aps:endpoint_id(),
-%    working_id = undefined :: aps:endpoint_id(),
-%    protection_id = undefined :: aps:endpoint_id(),
+% 
+%-----------------------------------------------------------------------------
+-spec call_function(string, string, list) -> result.
+call_function(ModuleName, FuncName, Arguments) ->
+    erlang:apply(list_to_atom(ModuleName), list_to_atom(FuncName), Arguments).
+
+
+%-----------------------------------------------------------------------------
 %
-%    segment_id = tcm3 :: aps:segment_id(),
-%    snc_mode = snc_s :: aps:snc_mode(),
-%    direction = unidirectional :: aps:direction(),
-%    revertive = revertive :: aps:revertive(),
-%    wtr_period = 5 :: aps:wtr_period_minutes(),
-%    persistency_time = 0 :: aps:sf_persistency_time_ms(),
-%    holdoff_time = 0 :: aps:hold_off_time_ms(),
-%    warmup_period = 30000 :: aps:warmup_time_ms(),
+% 
+%-----------------------------------------------------------------------------
+-spec get_version(string, string, string) -> {result, string}.
+get_version(Platform, Board, Device) -> 
+    ModuleName = unicode:characters_to_list(["updater_hw_devices_", Platform]),
+    FuncName = unicode:characters_to_list(["get_version_", Platform, "_", Board, "_", Device]),
+    call_function(ModuleName, FuncName, []).
+
+
+%-----------------------------------------------------------------------------
 %
-%    northbound_event_handler = undefined ::
-%        undefined | aps:northbound_event_handler(),
-%    extra_data :: aps:user_defined()
-%}).
-%-type aps_group_info() :: #aps_group_info{}.
+% 
+%-----------------------------------------------------------------------------
+-spec update(string, string, string) -> {result, string}.
+update(Platform, Board, Device) -> 
+    ModuleName = unicode:characters_to_list(["updater_hw_devices_", Platform]),
+    FuncName = unicode:characters_to_list(["update", Platform, "_", Board, "_", Device]),
+    call_function(ModuleName, FuncName, []).
+
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec power_cycle(string, string) -> {result, string}.
+power_cycle(Platform, Board) -> 
+    ModuleName = unicode:characters_to_list(["updater_hw_devices_", Platform]),
+    FuncName = unicode:characters_to_list(["power_cycle", Platform, "_", Board]),
+    call_function(ModuleName, FuncName, []).
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec get_slot_id(string, string) -> {result, string}.
+get_slot_id(Platform, Board) -> 
+    ModuleName = unicode:characters_to_list(["updater_hw_devices_", Platform]),
+    FuncName = unicode:characters_to_list(["get_slot_id", Platform, "_", Board]),
+    call_function(ModuleName, FuncName, []).
 
 
 %-----------------------------------------------------------------------------
@@ -122,53 +157,7 @@ show_help() ->
     io:format(" ~n").
 
 
-%-----------------------------------------------------------------------------
-%
-% 
-%-----------------------------------------------------------------------------
--spec get_version(string, string, string) -> {result, string}.
-get_version(Platform, Board, Device) -> 
-    case Platform of
 
-        ?ETSC1 ->
-            io:format("updater_hw_devices_etsc1:get_version_~p(~p, ~p)~n", [Platform, Board, Device]);
-
-        ?ETSC2 ->
-            io:format("updater_hw_devices_etsc2:get_version_~p(~p, ~p)~n", [Platform, Board, Device]);
-
-        ?ETSC6 ->
-            io:format("updater_hw_devices_etsc6:get_version_~p(~p, ~p)~n", [Platform, Board, Device]);
-
-         _ ->
-            error
-
-    end,
-
-    ok.
-
-%-----------------------------------------------------------------------------
-%
-% 
-%-----------------------------------------------------------------------------
--spec update(string, string, string) -> {result, string}.
-update(Platform, Board, Device) -> 
-    case Platform of
-
-        ?ETSC1 ->
-            io:format("updater_hw_devices_etsc1:update_~p(~p, ~p)~n", [Platform, Board, Device]);
-
-        ?ETSC2 ->
-            io:format("updater_hw_devices_etsc2:update_~p(~p, ~p)~n", [Platform, Board, Device]);
-
-        ?ETSC6 ->
-            io:format("updater_hw_devices_etsc6:update_~p(~p, ~p)~n", [Platform, Board, Device]);
-
-         _ ->
-            error
-
-    end,
-
-    ok.
 
 %check_versions() {
 %local outdated_count=0
@@ -319,7 +308,6 @@ check_versions(A, B, C) ->
         true ->
             io:format("C /= 1~n")
     end.
-
 
 
 
