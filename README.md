@@ -13,11 +13,11 @@
 
                /opt/ets/hw/images/<platform>
 
-  2 - Example in the case of ETSc1:
+  2 - Example in the case of MYPLAT1:
 
-              /opt/ets/hw/images/etsc1
+              /opt/ets/hw/images/myplat1
                        |
-                       └── etsc1_devices.cfg
+                       └── myplat1_devices.cfg
 
 
   3 - Configuration file structure
@@ -68,7 +68,7 @@
              alias1 = otu2
              model1 = stratix
              version1 = 3GW00356AAAA24
-             file1 = /opt/ets/hw/images/etsc1/lc1/fpga/10g/3GW00356AAAA24_FPGA_LC1_TOP_REV1_0_jic.rpd
+             file1 = /opt/ets/hw/images/myplat1/lc1/fpga/10g/3GW00356AAAA24_FPGA_LC1_TOP_REV1_0_jic.rpd
              md51 = 84bfec9a08ed142db6e9a5fa4b07015a
              devport1 = /dev/mx25u256
              adapter1 = 0
@@ -81,7 +81,7 @@
              model2 = stratix
              alias2 = otu2
              version2 = 3GW00356AAAA24
-             file2 = /opt/ets/hw/images/etsc1/lc1/fpga/10g/3GW00356AAAA24_FPGA_LC1_TOP_REV1_0.core.rbf
+             file2 = /opt/ets/hw/images/myplat1/lc1/fpga/10g/3GW00356AAAA24_FPGA_LC1_TOP_REV1_0.core.rbf
              md52 = ccdc5d423beb17278ca4a6b406af14e2
              devport2 = /dev/altera_cvp
              adapter2 = 0
@@ -94,7 +94,7 @@
              alias3 = otu4
              model3 = stratix
              version3 = 3GW00339ABAA69
-             file3 = /opt/ets/hw/images/etsc1/lc1/fpga/100g/3GW00339ABAA69_01_lc1_fpga_jic.rpd
+             file3 = /opt/ets/hw/images/myplat1/lc1/fpga/100g/3GW00339ABAA69_01_lc1_fpga_jic.rpd
              md53 = 82ca92f367f82fa7085e610cd7caa268
              devport3 = /dev/mx25u256
              adapter3 = 0
@@ -107,7 +107,7 @@
              model4 = stratix
              alias4 = otu4
              version4 = 3GW00339ABAA69
-             file4 = /opt/ets/hw/images/etsc1/lc1/fpga/100g/3GW00339ABAA69_01_lc1_fpga.core.rbf
+             file4 = /opt/ets/hw/images/myplat1/lc1/fpga/100g/3GW00339ABAA69_01_lc1_fpga.core.rbf
              md54 = 0eab19a4d7a7356fe04e6c84536ec81e
              devport4 = /dev/altera_cvp
              adapter4 = 0
@@ -120,7 +120,7 @@
              model5 = s66jev98
              alias5 =
              version5 = 1.0.202203160734
-             file5 = /opt/ets/hw/images/etsc1/lc1/lpc55s6x/lpc55s66jev98_etsc1_lc_1_0_202203160734.hex
+             file5 = /opt/ets/hw/images/myplat1/lc1/lpc55s6x/lpc55s66jev98_myplat1_lc_1_0_202203160734.hex
              md55 = df4914b3c06c84a62acf6b1a0a79a56b
              devport5 = /dev/i2c-5
              adapter5 = 5
@@ -135,7 +135,7 @@
              model1 = machx02
              alias1 = 
              version1 = 4
-             file1 = /opt/ets/hw/images/etsc1/fan/cpld/CPLD_FAN_ETSc1_v04.jed
+             file1 = /opt/ets/hw/images/myplat1/fan/cpld/CPLD_FAN_MYPLAT1_v04.jed
              md51 = ac4b38fc63716157bfdd6f14680df55d
              devport1 = /dev/i2c-34
              adpater1 = 34
@@ -148,7 +148,7 @@
              model2 = s69
              alias2 = 
              version2 = 1.0.202203210757
-             file2 = /opt/ets/hw/images/etsc1/fan/lpc55s6x/lpc55s69_etsc1_fan_1_0_202203210757.hex
+             file2 = /opt/ets/hw/images/myplat1/fan/lpc55s6x/lpc55s69_myplat1_fan_1_0_202203210757.hex
              md52 = aa757761ad56e872e6e3a6e097c6118d
              devport2 = /dev/i2c-34
              adapter2 = 34

@@ -23,9 +23,9 @@
 -export([get_file_image_name/3]).
 -export([md5_check/2]).
 -export([binary_to_hex/1]).
--export([dependencies_list_etsc1/0]).
--export([dependencies_list_etsc2/0]).
--export([dependencies_list_etsc6/0]).
+-export([dependencies_list_myplat1/0]).
+-export([dependencies_list_myplat2/0]).
+-export([dependencies_list_myplat6/0]).
 -export([check_for_dependencies/1]).
 -export([check_file_exists/1]).
 -export([check_for_supported_devices/4]).
@@ -51,9 +51,9 @@
 -export([get_slot_id/2]).
 
 %
-platforms_list() -> [?ETSC1,
-                     ?ETSC2,
-                     ?ETSC6].
+platforms_list() -> [?MYPLAT1,
+                     ?MYPLAT2,
+                     ?MYPLAT6].
 
 dependencies_list_test() -> [?NOHUP,
                         ?NOTIFY_SEND,
@@ -87,7 +87,7 @@ dependencies_list_test() -> [?NOHUP,
                         ?NVLC].
 
 
-dependencies_list_etsc1() -> [?FPGAIO,
+dependencies_list_myplat1() -> [?FPGAIO,
                                ?I2CGET,
                                ?I2CSET,
                                ?I2CTRANSFER,
@@ -104,7 +104,7 @@ dependencies_list_etsc1() -> [?FPGAIO,
                                ?KEXEC,
                                ?EHALCLI].
 
-dependencies_list_etsc2() -> [?FPGAIO,
+dependencies_list_myplat2() -> [?FPGAIO,
                                ?I2CGET,
                                ?I2CSET,
                                ?I2CTRANSFER,
@@ -123,7 +123,7 @@ dependencies_list_etsc2() -> [?FPGAIO,
                                ?FLASHROM,
                                ?EHALCLI].
 
-dependencies_list_etsc6() -> [?FPGAIO,
+dependencies_list_myplat6() -> [?FPGAIO,
                                ?I2CGET,
                                ?I2CSET,
                                ?I2CTRANSFER,
@@ -756,14 +756,14 @@ check_for_dependencies(Platform) ->
 
     case Platform of
 
-        ?ETSC1 ->
-            check_for_dependencies(dependencies_list_etsc1(), 1);
+        ?MYPLAT1 ->
+            check_for_dependencies(dependencies_list_myplat1(), 1);
 
-        ?ETSC2 ->
-            check_for_dependencies(dependencies_list_etsc2(), 1);
+        ?MYPLAT2 ->
+            check_for_dependencies(dependencies_list_myplat2(), 1);
 
-        ?ETSC6 ->
-            check_for_dependencies(dependencies_list_etsc6(), 1);
+        ?MYPLAT6 ->
+            check_for_dependencies(dependencies_list_myplat6(), 1);
     
         ?TEST ->
             check_for_dependencies(dependencies_list_test(), 1);
@@ -1171,14 +1171,14 @@ update_cfg_file_next_Device(Source, Target, Board, Index, MaxDevices) ->
 get_slot_id(Platform, Board) ->
     case Platform of
 
-        ?ETSC1 ->
-            io:format("updater_hw_devices_etsc1:get_slot_id_~p(~p)~n", [Platform, Board]);
+        ?MYPLAT1 ->
+            io:format("updater_hw_devices_myplat1:get_slot_id_~p(~p)~n", [Platform, Board]);
 
-        ?ETSC2 ->
-            io:format("updater_hw_devices_etsc2:get_slot_id_~p(~p)~n", [Platform, Board]);
+        ?MYPLAT2 ->
+            io:format("updater_hw_devices_myplat2:get_slot_id_~p(~p)~n", [Platform, Board]);
 
-        ?ETSC6 ->
-            io:format("updater_hw_devices_etsc6:get_slot_id_~p(~p)~n", [Platform, Board]);
+        ?MYPLAT6 ->
+            io:format("updater_hw_devices_myplat6:get_slot_id_~p(~p)~n", [Platform, Board]);
 
          _ ->
             error
