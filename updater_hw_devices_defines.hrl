@@ -3,6 +3,21 @@
 
 -define(MODULE_NAME, "updater_hw_devices").
 
+-define(ETSC1, "etsc1").
+-define(ETSC2, "etsc2").
+-define(ETSC6, "etsc6").
+-define(TEST, "test").
+
+-define(LC1, "lc1").
+-define(LC4, "lc4").
+-define(LC5, "lc5").
+-define(MNGT, "mngt").
+-define(SC2000, "sc2000").
+-define(FAN, "fan").
+
+-define(NOT_IMPLEMENTED, "not implemented").
+
+
 -define(INI_FILE, "arq.ini").
 -define(IMAGES_PATH, "/opt/ets/hw/images/").
 -define(SPK_PARTITION, "/mnt/update").
@@ -20,7 +35,7 @@
 -define(I2CSET, "/usr/sbin/i2cset").
 -define(I2CTRANSFER, "/usr/sbin/i2ctransfer").
 -define(I2CDETECT, "/usr/sbin/i2cdetect").
--define(FAN, "/usr/bin/fan").
+-define(FANSCRIPT, "/usr/bin/fan").
 -define(DD, "/bin/dd").
 -define(BTOOL, "/usr/bin/btool").
 -define(MD5SUM, "/usr/bin/md5sum").
@@ -33,11 +48,6 @@
 -define(DATA_BOARD_PATH, "/data/board/").
 -define(FLASHROM, "/usr/sbin/flashrom").
 -define(EHALCLI, "/usr/bin/ehalcli").
-
--define(ETSC1, "etsc1").
--define(ETSC2, "etsc2").
--define(ETSC6, "etsc6").
--define(TEST, "test").
 
 -define(NOHUP, "/usr/bin/nohup").
 -define(NOTIFY_SEND, "/usr/bin/notify-send").
