@@ -36,9 +36,9 @@
 -export([update_myplat6_mngt_fpga/0]).
 -export([update_myplat6_lc4_lpc55/0]).
 -export([update_myplat6_lc4_cpld/0]).
+-export([update_myplat6_lc4_fpga/0]).
 -export([update_myplat6_sc2000_lpc55/0]).
 -export([update_myplat6_sc2000_cpld/0]).
--export([update_myplat6_lc4_fpga/0]).
 -export([update_myplat6_lc5_cpld/0]).
 -export([update_myplat6_lc5_fpga/0]).
 -export([update_myplat6_lc5_pm6010/0]).

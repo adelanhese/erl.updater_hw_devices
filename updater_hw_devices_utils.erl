@@ -23,10 +23,7 @@
 -export([get_file_image_name/3]).
 -export([md5_check/2]).
 -export([binary_to_hex/1]).
--export([dependencies_list_myplat1/0]).
--export([dependencies_list_myplat2/0]).
--export([dependencies_list_myplat6/0]).
--export([check_for_dependencies/1]).
+-export([check_for_files_dependencies/2]).
 -export([check_file_exists/1]).
 -export([check_for_supported_devices/4]).
 -export([enable_disable_device/4]).
@@ -48,99 +45,12 @@
 -export([get_platform_type/0]).
 -export([get_dtb_name/0]).
 -export([get_board_type/0]).
--export([get_slot_id/2]).
+
 
 %
 platforms_list() -> [?MYPLAT1,
                      ?MYPLAT2,
                      ?MYPLAT6].
-
-dependencies_list_test() -> [?NOHUP,
-                        ?NOTIFY_SEND,
-                        ?NPROC,
-                        ?NROFF,
-                        ?NSENTER,
-                        ?NSLOOKUP,
-                        ?NSS_ADDBUILTIN,
-                        ?NSS_DBTEST,
-                        ?NSS_PP,
-                        ?NSTAT,
-                        ?NSUPDATE,
-                        ?NTFS_3G,
-                        ?NTFS_3G_PROBE,
-                        ?NTFSCAT,
-                        ?NTFSCLUSTER,
-                        ?NTFSCMP,
-                        ?NTFSDECRYPT,
-                        ?NTFSFALLOCATE,
-                        ?NTFSFIX,
-                        ?NTFSINFO,
-                        ?NTFSLS,
-                        ?NTFSMOVE,
-                        ?NTFSRECOVER,
-                        ?NTFSSECAUDIT,
-                        ?NTFSTRUNCATE,
-                        ?NTFSUSERMAP,
-                        ?NTFSWIPE,
-                        ?NUMFMT,
-                        ?NVIDIA_DETECTOR,
-                        ?NVLC].
-
-
-dependencies_list_myplat1() -> [?FPGAIO,
-                               ?I2CGET,
-                               ?I2CSET,
-                               ?I2CTRANSFER,
-                               ?I2CDETECT,
-                               ?FAN,
-                               ?DD,
-                               ?MD5SUM,
-                               ?MACHXO2,
-                               ?GPIOGET,
-                               ?GPIOSET,
-                               ?GPIOFIND,
-                               ?BLHOST,
-                               ?BTOOL,
-                               ?KEXEC,
-                               ?EHALCLI].
-
-dependencies_list_myplat2() -> [?FPGAIO,
-                               ?I2CGET,
-                               ?I2CSET,
-                               ?I2CTRANSFER,
-                               ?I2CDETECT,
-                               ?FAN,
-                               ?DD,
-                               ?MD5SUM,
-                               ?MACHXO2,
-                               ?GPIOGET,
-                               ?GPIOSET,
-                               ?GPIOFIND,
-                               ?BLHOST,
-                               ?BTOOL,
-                               ?KEXEC,
-                               ?ISSI_FLASH,
-                               ?FLASHROM,
-                               ?EHALCLI].
-
-dependencies_list_myplat6() -> [?FPGAIO,
-                               ?I2CGET,
-                               ?I2CSET,
-                               ?I2CTRANSFER,
-                               ?I2CDETECT,
-                               ?FAN,
-                               ?DD,
-                               ?MD5SUM,
-                               ?MACHXO2,
-                               ?GPIOGET,
-                               ?GPIOSET,
-                               ?GPIOFIND,
-                               ?BLHOST,
-                               ?BTOOL,
-                               ?KEXEC,
-                               ?ISSI_FLASH,
-                               ?FLASHROM,
-                               ?EHALCLI].
 
 
 %-record(person,
@@ -746,54 +656,6 @@ get_file_image_name(Board, Device, InputFile) ->
     end.
 
 
-
-%-----------------------------------------------------------------------------
-%
-%
-%-----------------------------------------------------------------------------
--spec check_for_dependencies(string) -> ok | error.
-check_for_dependencies(Platform) ->
-
-    case Platform of
-
-        ?MYPLAT1 ->
-            check_for_dependencies(dependencies_list_myplat1(), 1);
-
-        ?MYPLAT2 ->
-            check_for_dependencies(dependencies_list_myplat2(), 1);
-
-        ?MYPLAT6 ->
-            check_for_dependencies(dependencies_list_myplat6(), 1);
-    
-        ?TEST ->
-            check_for_dependencies(dependencies_list_test(), 1);
-        
-         _ ->
-            error
-
-    end.
-
-check_for_dependencies(List, Index) ->
-
-    if
-        (Index =< length(List)) and (Index > 0) ->
-
-            Current = lists:nth(Index, List),
-            {Result, _} = check_file_exists(Current),
-
-            case Result of
-                ok ->
-                    check_for_dependencies(List, Index + 1);
-
-                error ->
-                    error
-            end;
-
-        true ->
-            ok
-    end.
-
-
 %-----------------------------------------------------------------------------
 %
 %
@@ -1163,29 +1025,32 @@ update_cfg_file_next_Device(Source, Target, Board, Index, MaxDevices) ->
             ok
     end.
 
+
 %-----------------------------------------------------------------------------
 %
-% 
+%
 %-----------------------------------------------------------------------------
--spec get_slot_id(string, string) -> {result, string}.
-get_slot_id(Platform, Board) ->
-    case Platform of
+-spec check_for_files_dependencies(string, string) -> result.
+check_for_files_dependencies(List, Index) ->
 
-        ?MYPLAT1 ->
-            io:format("updater_hw_devices_myplat1:get_slot_id_~p(~p)~n", [Platform, Board]);
+    if
+        (Index =< length(List)) and (Index > 0) ->
 
-        ?MYPLAT2 ->
-            io:format("updater_hw_devices_myplat2:get_slot_id_~p(~p)~n", [Platform, Board]);
+            Current = lists:nth(Index, List),
+            {Result, _} = check_file_exists(Current),
 
-        ?MYPLAT6 ->
-            io:format("updater_hw_devices_myplat6:get_slot_id_~p(~p)~n", [Platform, Board]);
+            case Result of
+                ok ->
+                    check_for_files_dependencies(List, Index + 1);
 
-         _ ->
-            error
+                error ->
+                    error
+            end;
 
-    end,
+        true ->
+            ok
+    end.
 
-    ok.
 
 %-----------------------------------------------------------------------------
 %

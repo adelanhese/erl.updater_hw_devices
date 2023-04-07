@@ -11,9 +11,100 @@
 -export([check_versions/3]).
 -export([power_cycle/2]).
 -export([get_slot_id/2]).
-
+-export([check_for_dependencies/1]).
+-export([dependencies_list_myplat1/0]).
+-export([dependencies_list_myplat2/0]).
+-export([dependencies_list_myplat6/0]).
+-export([dependencies_list_test/0]).
 
 -export([call_function/3]).
+
+dependencies_list_test() -> [?NOHUP,
+                        ?NOTIFY_SEND,
+                        ?NPROC,
+                        ?NROFF,
+                        ?NSENTER,
+                        ?NSLOOKUP,
+                        ?NSS_ADDBUILTIN,
+                        ?NSS_DBTEST,
+                        ?NSS_PP,
+                        ?NSTAT,
+                        ?NSUPDATE,
+                        ?NTFS_3G,
+                        ?NTFS_3G_PROBE,
+                        ?NTFSCAT,
+                        ?NTFSCLUSTER,
+                        ?NTFSCMP,
+                        ?NTFSDECRYPT,
+                        ?NTFSFALLOCATE,
+                        ?NTFSFIX,
+                        ?NTFSINFO,
+                        ?NTFSLS,
+                        ?NTFSMOVE,
+                        ?NTFSRECOVER,
+                        ?NTFSSECAUDIT,
+                        ?NTFSTRUNCATE,
+                        ?NTFSUSERMAP,
+                        ?NTFSWIPE,
+                        ?NUMFMT,
+                        ?NVIDIA_DETECTOR,
+                        ?NVLC].
+
+
+dependencies_list_myplat1() -> [?FPGAIO,
+                               ?I2CGET,
+                               ?I2CSET,
+                               ?I2CTRANSFER,
+                               ?I2CDETECT,
+                               ?FAN,
+                               ?DD,
+                               ?MD5SUM,
+                               ?MACHXO2,
+                               ?GPIOGET,
+                               ?GPIOSET,
+                               ?GPIOFIND,
+                               ?BLHOST,
+                               ?BTOOL,
+                               ?KEXEC,
+                               ?EHALCLI].
+
+dependencies_list_myplat2() -> [?FPGAIO,
+                               ?I2CGET,
+                               ?I2CSET,
+                               ?I2CTRANSFER,
+                               ?I2CDETECT,
+                               ?FAN,
+                               ?DD,
+                               ?MD5SUM,
+                               ?MACHXO2,
+                               ?GPIOGET,
+                               ?GPIOSET,
+                               ?GPIOFIND,
+                               ?BLHOST,
+                               ?BTOOL,
+                               ?KEXEC,
+                               ?ISSI_FLASH,
+                               ?FLASHROM,
+                               ?EHALCLI].
+
+dependencies_list_myplat6() -> [?FPGAIO,
+                               ?I2CGET,
+                               ?I2CSET,
+                               ?I2CTRANSFER,
+                               ?I2CDETECT,
+                               ?FAN,
+                               ?DD,
+                               ?MD5SUM,
+                               ?MACHXO2,
+                               ?GPIOGET,
+                               ?GPIOSET,
+                               ?GPIOFIND,
+                               ?BLHOST,
+                               ?BTOOL,
+                               ?KEXEC,
+                               ?ISSI_FLASH,
+                               ?FLASHROM,
+                               ?EHALCLI].
 
 
 
@@ -32,8 +123,8 @@ call_function(ModuleName, FuncName, Arguments) ->
 %-----------------------------------------------------------------------------
 -spec get_version(string, string, string) -> {result, string}.
 get_version(Platform, Board, Device) -> 
-    ModuleName = unicode:characters_to_list(["updater_hw_devices_", Platform]),
-    FuncName = unicode:characters_to_list(["get_version_", Platform, "_", Board, "_", Device]),
+    ModuleName = unicode:characters_to_list([?MODULE_NAME,"_", Platform]),
+    FuncName = unicode:characters_to_list([atom_to_list(?FUNCTION_NAME),"_", Platform, "_", Board, "_", Device]),
     call_function(ModuleName, FuncName, []).
 
 
@@ -43,8 +134,8 @@ get_version(Platform, Board, Device) ->
 %-----------------------------------------------------------------------------
 -spec update(string, string, string) -> {result, string}.
 update(Platform, Board, Device) -> 
-    ModuleName = unicode:characters_to_list(["updater_hw_devices_", Platform]),
-    FuncName = unicode:characters_to_list(["update", Platform, "_", Board, "_", Device]),
+    ModuleName = unicode:characters_to_list([?MODULE_NAME,"_", Platform]),
+    FuncName = unicode:characters_to_list([atom_to_list(?FUNCTION_NAME),"_", Platform, "_", Board, "_", Device]),
     call_function(ModuleName, FuncName, []).
 
 
@@ -54,8 +145,8 @@ update(Platform, Board, Device) ->
 %-----------------------------------------------------------------------------
 -spec power_cycle(string, string) -> {result, string}.
 power_cycle(Platform, Board) -> 
-    ModuleName = unicode:characters_to_list(["updater_hw_devices_", Platform]),
-    FuncName = unicode:characters_to_list(["power_cycle", Platform, "_", Board]),
+    ModuleName = unicode:characters_to_list([?MODULE_NAME,"_", Platform]),
+    FuncName = unicode:characters_to_list([atom_to_list(?FUNCTION_NAME), "_", Platform, "_", Board]),
     call_function(ModuleName, FuncName, []).
 
 %-----------------------------------------------------------------------------
@@ -64,9 +155,19 @@ power_cycle(Platform, Board) ->
 %-----------------------------------------------------------------------------
 -spec get_slot_id(string, string) -> {result, string}.
 get_slot_id(Platform, Board) -> 
-    ModuleName = unicode:characters_to_list(["updater_hw_devices_", Platform]),
-    FuncName = unicode:characters_to_list(["get_slot_id", Platform, "_", Board]),
+    ModuleName = unicode:characters_to_list([?MODULE_NAME,"_", Platform]),
+    FuncName = unicode:characters_to_list([atom_to_list(?FUNCTION_NAME),"_", Platform, "_", Board]),
     call_function(ModuleName, FuncName, []).
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec check_for_dependencies(string) -> ok | error.
+check_for_dependencies(Platform) ->
+    FuncName = unicode:characters_to_list(["dependencies_list_", Platform]),
+    DependenciesList = call_function(?MODULE_NAME, FuncName, []),
+    updater_hw_devices_utils:check_for_files_dependencies(DependenciesList, 1).
 
 
 %-----------------------------------------------------------------------------
@@ -282,32 +383,69 @@ show_help() ->
 %}
 %
 
-check_versions(A, B, C) ->
-    io:format("check_versions~n"),
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec check_versions(string, string, string) -> {result, string}.
+check_versions(Platform, CurrentBoard, Active) ->
+    {Result1, NumBoardsStr} = updater_hw_devices_utils:ini_file(?INI_FILE, "boards", "num_boards"),
 
-    if
-        (A >= 1) ->
-            io:format("A >= 1~n");
+    case Result1 of
+        ok ->
+            updater_hw_devices_utils:show_boards_tree(CurrentBoard, Active),
+            io:format("~n"),
+            {NumBoards, _} = string:to_integer(NumBoardsStr),
+            check_versions_next_board(Platform, CurrentBoard, Active, 1, NumBoards);
 
-        true ->
-            io:format("A /= 1~n")
-    end,
-
-    if
-        (B >= 1) ->
-            io:format("B >= 1~n");
-
-        true ->
-            io:format("B /= 1~n")
-    end,
-
-    if
-        (C >= 1) ->
-            io:format("C >= 1~n");
-
-        true ->
-            io:format("C /= 1~n")
+        _ ->
+            error
     end.
 
+check_versions_next_board(Platform, CurrentBoard, Active, Index, MaxBoards) ->
+    if
+        (Index =< MaxBoards) ->
+            {Result1, Board} = updater_hw_devices_utils:ini_file(?INI_FILE, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+
+            if
+                (Result1 == ok) ->
+                    %io:format("~s~n", [Board]),
+
+                    {_, NumDevicesStr} = updater_hw_devices_utils:ini_file(?INI_FILE, Board, "num_devices"),
+                    {NumDevices, _} = string:to_integer(NumDevicesStr),
+                    check_versions_next_Device(Platform, Board, CurrentBoard, Active, 1, NumDevices),
+                    check_versions_next_board(Platform, CurrentBoard, Active, Index + 1, MaxBoards);
+
+                true ->
+                    error
+            end;
+
+        true ->
+            ok
+    end.
+
+check_versions_next_Device(Platform, Board, CurrentBoard, Active, Index, MaxDevices) ->
+    if
+        (Index =< MaxDevices) ->
+            {Result1, Device} = updater_hw_devices_utils:ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+            {Result2, Activecard} = updater_hw_devices_utils:ini_file(?INI_FILE, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
+            {Result3, Enabled} = updater_hw_devices_utils:ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+            {Result4, Checkversion} = updater_hw_devices_utils:ini_file(?INI_FILE, Board, unicode:characters_to_list(["checkversion", integer_to_list(Index)])),
+            
+            if
+                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
+                ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
+                (Enabled == "1") and (Checkversion == "1")->
+                    {_, Resultx} = get_version(Platform, Board, Device),
+                    io:format("~s_~s => ~s ~n", [Board, Device, Resultx]),
+                    check_versions_next_Device(Platform, Board, CurrentBoard, Active, Index + 1, MaxDevices);
+
+                true ->
+                    check_versions_next_Device(Platform, Board, CurrentBoard, Active, Index + 1, MaxDevices)
+            end;
+
+        true ->
+            ok
+    end.
 
 
