@@ -165,7 +165,7 @@
           information need to check and update the new device (see the example above)
 
 
-       4.2 Create the two new procedures to check and update the device
+       4.2 Create the four new procedures to check and update the device
 
            4.2.1 Proceure to check the version
 
@@ -181,7 +181,23 @@
 
                        update_<platform_name>_<board_name>_<device_name>
 
+           4.2.3 Procedure to perform the power cycle in the board
 
-   Note: No changes will be necessary to add new devices in this app. Only the 3 steps will be necessary.
+                  You need to create one procedure to perform the power cycle on the board. 
+                  The name of this new procedure must follow the rule:
+
+                       power_cycle_<platform_name>_<board_name>
+
+           4.2.4 Procedure to get the slot ID in the board
+
+                  You need to create one procedure to get the slot ID on the board. 
+                  The name of this new procedure must follow the rule:
+
+                       get_slot_id_<platform_name>_<board_name>
+
+
+   Note: 1-No changes in the main code will be necessary to add new devices in this app. Only these 4 new procdures will be necessary.
+         2-Each platform must have your own module. Example: "updater_hw_devices_<platform_name>.erl"
+         2-These procedures describled in the item 4, will be add in the correct module: 
 
 
