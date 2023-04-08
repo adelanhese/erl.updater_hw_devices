@@ -38,18 +38,23 @@ read_fpga_reg_version() ->
 get_slot_id_myplat1_lc1() ->
     {error, ?NOT_IMPLEMENTED}.
 
+
 get_version_myplat1_lc1_fpgajic() ->
-    {error, ?NOT_IMPLEMENTED}.
+    % this is a stub. Must be replace with the correct code.
+    updater_hw_devices_utils:read_field_from_cfg("lc1", "fpgajic", "version").
 
 
 get_version_myplat1_fan_cpld() ->
-    {error, ?NOT_IMPLEMENTED}.
+    % this is a stub. Must be replace with the correct code.
+    updater_hw_devices_utils:read_field_from_cfg("fan", "cpld", "version").
 
 get_version_myplat1_lc1_lpc55() ->
-    {error, ?NOT_IMPLEMENTED}.
+    % this is a stub. Must be replace with the correct code.
+    updater_hw_devices_utils:read_field_from_cfg("lc1", "lpc55", "version").
 
 get_version_myplat1_fan_lpc55() ->
-    {error, ?NOT_IMPLEMENTED}.
+    % this is a stub. Must be replace with the correct code.
+    updater_hw_devices_utils:read_field_from_cfg("fan", "lpc55", "version").
 
 update_myplat1_lc1_fpgajic() ->
     {error, ?NOT_IMPLEMENTED}.
