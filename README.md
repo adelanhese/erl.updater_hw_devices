@@ -197,6 +197,7 @@
 
 
    Notes: 
+   
          1-No changes in the main code will be necessary to add new devices in this app. Only these 4 new procdures will be necessary.
 
          2-Each platform must have your own module. Example: "updater_hw_devices_<platform_name>.erl"
