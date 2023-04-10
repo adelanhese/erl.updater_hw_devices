@@ -29,49 +29,61 @@
 %-----------------------------------------------------------------------------
 
 power_cycle_myplat1_lc1() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 read_fpga_reg_version() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 get_slot_id_myplat1_lc1() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 get_version_myplat1_lc1_fpgajic() ->
     % this is a stub. Must be replace with the correct code.
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     updater_hw_devices_utils:read_field_from_cfg("lc1", "fpgajic", "version").
 
 
 get_version_myplat1_fan_cpld() ->
     % this is a stub. Must be replace with the correct code.
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     updater_hw_devices_utils:read_field_from_cfg("fan", "cpld", "version").
 
 get_version_myplat1_lc1_lpc55() ->
     % this is a stub. Must be replace with the correct code.
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     updater_hw_devices_utils:read_field_from_cfg("lc1", "lpc55", "version").
 
 get_version_myplat1_fan_lpc55() ->
     % this is a stub. Must be replace with the correct code.
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     updater_hw_devices_utils:read_field_from_cfg("fan", "lpc55", "version").
 
 update_myplat1_lc1_fpgajic() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 update_myplat1_lc1_fpgacvp() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 update_myplat1_lc1_lpc55() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 update_myplat1_fan_lpc55() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 update_myplat1_fan_cpld() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 

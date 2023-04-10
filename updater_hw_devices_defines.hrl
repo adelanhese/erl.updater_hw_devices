@@ -3,9 +3,9 @@
 
 -define(MODULE_NAME, "updater_hw_devices").
 
--define(MYPLAT1, "etsc1").
--define(MYPLAT2, "etsc2").
--define(MYPLAT6, "etsc6").
+-define(MYPLAT1, "myplat1").
+-define(MYPLAT2, "myplat2").
+-define(MYPLAT6, "myplat6").
 -define(TEST, "test").
 
 -define(LC1, "lc1").

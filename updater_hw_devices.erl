@@ -359,17 +359,11 @@ main(Args) ->
         true ->
             {ok, OptionsMap1, CommandMap1} = parse_params(Args, 1, OptionsMap, CommandMap),
 
-            {Command, _} = maps:take("command", CommandMap1),
-            {Platform_type, _} = maps:take("platform_type", OptionsMap1),
-            {Board_type, _} = maps:take("board_type", OptionsMap1),
-            {Active, _} = maps:take("active", OptionsMap1),
-            {Device_to_update, _} = maps:take("device_to_update", OptionsMap1),
-
-            %io:format("Command: ~p~n", [Command]),
-            %io:format("Platform_type: ~p~n", [Platform_type]),
-            %io:format("Board_type: ~p~n", [Board_type]),
-            %io:format("Active: ~p~n", [Active]),
-            %io:format("Device_to_update: ~p~n", [Device_to_update]),
+            Command = maps:get("command", CommandMap1),
+            Platform_type = maps:get("platform_type", OptionsMap1),
+            Board_type = maps:get("board_type", OptionsMap1),
+            Active = maps:get("active", OptionsMap1),
+            Device_to_update = maps:get("device_to_update", OptionsMap1),
 
             case Command of
                 "show_help" ->

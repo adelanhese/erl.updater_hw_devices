@@ -5,7 +5,18 @@
 %    Args = init:get_arguments(),
 %_______________________________________________________________
 main(Args) ->
-    updater_hw_devices:main(Args).
+    Background1 = lists:member("-g", Args),
+    Background2 = lists:member("--background", Args),
+
+    if
+        (Background1 == true) or (Background2 == true) ->
+            io:format("Running in background mode...~n"),
+            spawn(updater_hw_devices, main, [Args]);
+
+        true ->
+            updater_hw_devices:main(Args)
+    end.
+    
 
 
 
