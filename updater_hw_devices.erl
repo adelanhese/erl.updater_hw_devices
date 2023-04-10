@@ -5,6 +5,7 @@
 -module(updater_hw_devices).
 -include("updater_hw_devices_defines.hrl").
 
+-export([main/1]).
 -export([show_help/0]).
 -export([get_version/3]).
 -export([update/3]).
@@ -16,6 +17,7 @@
 -export([dependencies_list_myplat2/0]).
 -export([dependencies_list_myplat6/0]).
 -export([dependencies_list_test/0]).
+
 
 -export([call_function/3]).
 
@@ -201,7 +203,7 @@ show_help() ->
     io:format("    -u=<device> or --update=<device>               = perform to device update (see note 4)~n"),
     io:format("    -d=<device/alias> or --disable=<device/alias>  = disable device from list (see note 4)~n"),
     io:format("    -e=<device/alias> or --enable=<device/alias>   = enable device from list (see note 4)~n"),
-    io:format("    -x=<device> or --examine=<device>  = examine for the current alias (see note 4)~n"),
+    io:format("    -x=<device> or --examine=<device>              = examine for the current alias (see note 4)~n"),
     io:format(" ~n"),
     io:format(" Notes:~n"),
     io:format("           1) verbose mode levels~n"),
@@ -257,131 +259,6 @@ show_help() ->
     io:format("          # ~s -g -r -e=lc1_fpgajic/otu2~n", [?MODULE_NAME]),
     io:format(" ~n").
 
-
-
-
-%check_versions() {
-%local outdated_count=0
-%local auto_updated_count=0
-%local res=0
-%local num_boards=0
-%local board=${NULL}
-%local num_devices=0
-%local device=${NULL}
-%local file_version=${NULL}
-%local device_version=${NULL}
-%local file_name=${NULL}
-%local run_at_active=0
-%local color=${NULL}
-%local checkversion=${NULL}
-%local enabled=${NULL}
-%local base_board=0
-%local backplane_board=0
-%local state="not checked"
-%local restart_type=${NULL}
-%
-%    log_msg ${INFO} "Checking devices for ${platform_type}"
-%
-%    num_boards=$(read_cfg_file boards num_boards)
-%
-%    if [[ 0 == ${spk_updater} ]]; then
-%        echo "Platform;Board;Device;Installed;Expected;State;Restart-Type;Estimated-Time" > ${hw_image_partition}${DEVICES_VERSIONS_FILE}
-%    fi
-%
-%    if [[ ${num_boards} == ${NULL} || ${num_boards} == 0 ]]; then
-%        log_msg ${INFO} "No board found. Nothing to do."
-%        return $SUCCESS
-%    fi
-%
-%    # scan for all boards
-%    for (( b = 1; b <= $num_boards; b++ )); do
-%        board=$(read_cfg_file boards board${b})
-%        num_devices=$(read_cfg_file ${board} num_devices)
-%
-%        # scan for all devices inside of the board
-%        for (( d = 1; d <= $num_devices; d++ )); do
-%            run_at_active=$(read_cfg_file ${board} activecard${d})
-%            checkversion=$(read_cfg_file ${board} checkversion${d})
-%            enabled=$(read_cfg_file ${board} enabled${d})
-%            base_board=0
-%            backplane_board=0
-%            state="not checked"
-%
-%            if [ ${board} == ${board_type} ]; then
-%                base_board=1
-%            fi
-%
-%            if [[ 1 == ${run_at_active}  &&  1 == ${active} ]]; then
-%                backplane_board=1
-%            fi
-%
-%            if [[ 1 == ${base_board} || 1 == ${backplane_board} ]] &&  [[ 1 == ${checkversion} ]] && [[ 1 == ${enabled} ]]; then
-%                device=$(read_cfg_file ${board} device${d})
-%                file_version=$(read_cfg_file ${board} version${d})
-%                restart_type=$(read_cfg_file ${board} restart_type${d})
-%                estimated_time=$(read_cfg_file ${board} estimated_time${d})
-%
-%                device_version=$(get_version_${platform_type}_${board}_${device} ${board} ${device})
-%                res=$?
-%
-%                if [[ $res != ${SUCCESS} ]]; then
-%                    device_version=$UNKNOWN
-%                fi
-%
-%                if [[ $show_filename == ${TRUE} ]]; then
-%                   file_name="    => File = "$(read_cfg_file ${board} file${d})""
-%                fi
-%
-%                color=${RED}
-%                if [[ ${file_version} == ${NULL} || ${device_version} == ${NULL} ]]; then
-%                    state="not checked"
-%                    color=${BYELLOW}
-%                fi
-%
-%                if [[ ${file_version} == ${device_version} && ${file_version} != ${NULL} && ${device_version} != ${NULL} ]]; then
-%                   state="updated"
-%                   log_msg ${INFO} "${BGREEN}[${board}_${device}] = ${device_version} => ${state} ${RESET}${file_name}"
-%                else
-%                    state="outdated"
-%                    log_msg ${INFO} "${color}[${board}_${device}] Installed = ${device_version} / Expected = ${file_version} => ${state} ${RESET}${file_name}"
-%                    outdated_count=$(( outdated_count + 1 ))
-%
-%                    if [[ $auto_update == ${TRUE} && ${file_version} != ${NULL} && ${device_version} != ${NULL} ]]; then
-%                       log_msg ${INFO} "Auto updating..."
-%                       update_${platform_type}_${board}_${device} ${board} ${device}
-%                       res=$?
-%
-%                        if [[ $res == ${SUCCESS} ]]; then
-%                            outdated_count=$(( outdated_count - 1 ))
-%                            auto_updated_count=$(( auto_updated_count + 1))
-%                        fi
-%                    fi
-%                fi
-%
-%                if [[ 0 == ${spk_updater} ]]; then
-%                    echo ${platform_type}";"${board}";"${device}";"${device_version}";"${file_version}";"${state}";"${restart_type}";"${estimated_time} >> ${hw_image_partition}${DEVICES_VERSIONS_FILE}
-%                fi
-%            fi
-%        done
-%    done
-%
-%    if [[ ${outdated_count} != 0 ]]; then
-%       log_msg ${INFO} "The ${MODULE_NAME} found ${outdated_count} outdated device(s) or not checked on this board."
-%       res=$OUTDATED_ERROR
-%    else
-%       log_msg ${INFO} "All devices on this board are updated."
-%       res=$SUCCESS
-%    fi
-%
-%    if [ ${auto_update} == 1 ] && [ ${auto_updated_count} != 0 ]; then
-%       log_msg ${INFO} "   ${auto_updated_count} device(s) was automatically updated."
-%       log_msg ${INFO} "   Run ${MODULE_NAME} again to confirm that"
-%       res=$SUCCESS
-%    fi
-%
-%    return $res
-%}
-%
 
 %-----------------------------------------------------------------------------
 %
@@ -446,6 +323,174 @@ check_versions_next_Device(Platform, Board, CurrentBoard, Active, Index, MaxDevi
 
         true ->
             ok
+    end.
+
+
+
+
+%-----------------------------------------------------------------------------
+% 
+%
+%-----------------------------------------------------------------------------
+main(Args) ->
+
+    OptionsMap = #{"background" => false,
+                   "auto_update" => false,
+                   "show_filename" => false,
+                   "spk_updater" => false,
+                   "fpga_reload_after_update" => false,
+                   "power_cycle_after_update" => false,
+                   "system_reboot_after_update" => false,
+                   "log_level" => "",
+                   "board_type" => "",
+                   "platform_type" => "",
+                   "dtb_file" => "",
+                   "active" => "0",
+                   "input_file" => "",
+                   "device_to_update" => "",
+                   "enable_disable_val" => "0"},
+
+    CommandMap = #{"command" => ""},
+
+    if 
+        length(Args) == 0 ->
+            show_help();
+
+        true ->
+            {ok, OptionsMap1, CommandMap1} = parse_params(Args, 1, OptionsMap, CommandMap),
+
+            {Command, _} = maps:take("command", CommandMap1),
+            {Platform_type, _} = maps:take("platform_type", OptionsMap1),
+            {Board_type, _} = maps:take("board_type", OptionsMap1),
+            {Active, _} = maps:take("active", OptionsMap1),
+            {Device_to_update, _} = maps:take("device_to_update", OptionsMap1),
+
+            %io:format("Command: ~p~n", [Command]),
+            %io:format("Platform_type: ~p~n", [Platform_type]),
+            %io:format("Board_type: ~p~n", [Board_type]),
+            %io:format("Active: ~p~n", [Active]),
+            %io:format("Device_to_update: ~p~n", [Device_to_update]),
+
+            case Command of
+                "show_help" ->
+                    show_help();
+
+               "check" ->
+                    check_versions(Platform_type, Board_type, Active);
+
+                "update" ->
+                    Board = updater_hw_devices_utils:extract_board(Device_to_update),
+                    Device = updater_hw_devices_utils:extract_device(Device_to_update),
+                    update(Platform_type, Board, Device);
+                  
+                "disable" ->
+                    updater_hw_devices_utils:enable_disable_device(Device_to_update, "0", Board_type, Active);
+
+                "enable" ->
+                    updater_hw_devices_utils:enable_disable_device(Device_to_update, "1", Board_type, Active);
+
+                "examine" ->
+                    Board = updater_hw_devices_utils:extract_board(Device_to_update),
+                    Device = updater_hw_devices_utils:extract_device(Device_to_update),
+                    {_, Value} = updater_hw_devices_utils:read_field_from_cfg(Board, Device, "alias"),
+                    io:format("~s~n", [Value]);
+
+                _ ->
+                    io:format("Invalid command~n"),
+                error
+            end
+    end.
+
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+parse_params(Args, Index, OptionsMap, CommandMap) ->
+
+    if
+        Index =< length(Args) ->
+            {Parameter, SubParameter} = updater_hw_devices_utils:split_paramenter(lists:nth(Index, Args), "="),
+
+            if
+                % options parameters
+                (Parameter == "-g") or (Parameter == "--background") ->
+                    parse_params(Args, Index + 1, maps:put("background", true, OptionsMap), CommandMap);
+
+                (Parameter == "-v") or (Parameter == "--verbose") ->
+                    parse_params(Args, Index + 1, maps:put("log_level", SubParameter, OptionsMap), CommandMap);
+                
+                (Parameter == "-o") or (Parameter == "--cardid") ->
+                    parse_params(Args, Index + 1, maps:put("board_type", SubParameter, OptionsMap), CommandMap);
+                
+                (Parameter == "-q") or (Parameter == "--chassisid") ->
+                    parse_params(Args, Index + 1, maps:put("platform_type", SubParameter, OptionsMap), CommandMap);
+                
+                (Parameter == "-t") or (Parameter == "--dtb") ->
+                    parse_params(Args, Index + 1, maps:put("dtb_file", SubParameter, OptionsMap), CommandMap);
+                
+                (Parameter == "-a") or (Parameter == "--auto") ->
+                    parse_params(Args, Index + 1, maps:put("auto_update", true, OptionsMap), CommandMap);
+                
+                (Parameter == "-b") or (Parameter == "--backplane") ->
+                    parse_params(Args, Index + 1, maps:put("active", "1", OptionsMap), CommandMap);
+                
+                (Parameter == "-f") or (Parameter == "--file") ->
+                    parse_params(Args, Index + 1, maps:put("show_filename", true, OptionsMap), CommandMap);
+                
+                (Parameter == "-g") or (Parameter == "--background") ->
+                    parse_params(Args, Index + 1, maps:put("background", true, OptionsMap), CommandMap);
+                
+                (Parameter == "-s") or (Parameter == "--spk") ->
+                    parse_params(Args, Index + 1, maps:put("spk_updater", true, OptionsMap), CommandMap);
+                
+                (Parameter == "-i") or (Parameter == "--input") ->
+                    parse_params(Args, Index + 1, maps:put("input_file", SubParameter, OptionsMap), CommandMap);
+                
+                (Parameter == "-r") or (Parameter == "--fpga-reload") ->
+                    parse_params(Args, Index + 1, maps:put("fpga_reload_after_update", true, OptionsMap), CommandMap);
+                
+                (Parameter == "-p") or (Parameter == "--power-cycle") ->
+                    parse_params(Args, Index + 1, maps:put("power_cycle_after_update", true, OptionsMap), CommandMap);
+                
+                (Parameter == "-l") or (Parameter == "--system-reboot") ->
+                    parse_params(Args, Index + 1, maps:put("system_reboot_after_update", true, OptionsMap), CommandMap);
+
+
+
+                % commands paramenters
+                (Parameter == "-h") or (Parameter == "--help") ->
+                    parse_params(Args, Index + 1, OptionsMap, maps:put("command", "show_help", CommandMap));
+                
+                (Parameter == "-c") or (Parameter == "--check") ->
+                    parse_params(Args, Index + 1, OptionsMap, maps:put("command", "check", CommandMap));
+                
+                (Parameter == "-u") or (Parameter == "--update") ->
+                    OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
+                    parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "update", CommandMap));
+                
+                (Parameter == "-d") or (Parameter == "--disable") ->
+                    OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
+                    OptionsMapTemp2 =maps:put("enable_disable_val", "0", OptionsMapTemp),
+                    parse_params(Args, Index + 1, OptionsMapTemp2, maps:put("command", "enable_disable", CommandMap));
+                
+                (Parameter == "-e") or (Parameter == "--enable") ->
+                    OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
+                    OptionsMapTemp2 = maps:put("enable_disable_val", "1", OptionsMapTemp),
+                    parse_params(Args, Index + 1, OptionsMapTemp2, maps:put("command", "enable_disable", CommandMap));
+                
+                (Parameter == "-x") or (Parameter == "--examine") ->
+                    OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
+
+                    parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "examine", CommandMap));
+                                   
+                true ->
+                    io:format("Unknown parameter: ~s~n", [Parameter]),
+                    {ok, OptionsMap, CommandMap}
+            end;
+        
+        true ->
+            {ok, OptionsMap, CommandMap}
     end.
 
 

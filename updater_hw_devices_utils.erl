@@ -37,6 +37,8 @@
 -export([hex2dec/1]).
 -export([dec2hex/1]).
 -export([bin2hex/1]).
+-export([split_paramenter/2]).
+
 
 
 % ToDo
@@ -168,6 +170,23 @@ find_character(Char, String) ->
 %_____________________________________________________________________________________________
 
 
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+split_paramenter(Parameter, Char) ->
+    Index = string:str(Parameter, Char),
+
+    if
+        (Index > 0 ) ->
+            Par1 = string:slice(Parameter, 0, Index-1),
+            Par2 = string:slice(Parameter, Index, abs(length(Parameter)-Index)),
+            {Par1, Par2};
+     
+        true ->
+           {Parameter, []}
+    end.
+
 
 %-----------------------------------------------------------------------------
 %
@@ -178,13 +197,19 @@ extract_board_device(BoardDevice) ->
     Index2 = string:str(BoardDevice, "/"),
 
     if
-        (Index1 > 0 ) ->
+        (Index1 > 0 ) and (Index2 > 0) ->
             SizeBoardDevice = string:length(BoardDevice)-Index2,
             SizeAlias = string:length(BoardDevice)-SizeBoardDevice,
             Board = string:slice(BoardDevice, 0, Index1-1),
             Device = string:slice(BoardDevice, Index1, abs(Index2-Index1-1)),
             Alias = string:slice(BoardDevice, Index2, SizeAlias),
             {ok, Board, Device, Alias};
+
+        (Index1 > 0 ) and (Index2 == 0) ->
+            Board = string:slice(BoardDevice, 0, Index1-1),
+            Device = string:slice(BoardDevice, Index1, abs(string:length(BoardDevice)-Index1)),
+            {ok, Board, Device, []};
+     
         true ->
            {error, [], [], []}
     end.
@@ -887,14 +912,14 @@ show_boards_tree_next_device(Board, CurrentBoard, Active, Index, MaxDevices, Fla
                 (Flag == 0) ->
                     io:format("~n"),
                     io:format("             ~s~n", [Board]),
-                    io:format("              └── ~s~n", [Device]),
+                    io:format("              +-- ~s~n", [Device]),
                     show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
                 (Enabled == "1") and (Alias == "") and
                 (Flag /= 0) ->
-                    io:format("              └── ~s~n", [Device]),
+                    io:format("              +-- ~s~n", [Device]),
                     show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
@@ -903,14 +928,14 @@ show_boards_tree_next_device(Board, CurrentBoard, Active, Index, MaxDevices, Fla
                 (Flag == 0) ->
                     io:format("~n"),
                     io:format("             ~s~n", [Board]),
-                    io:format("              └── ~s (~s)~n", [Device, Alias]),
+                    io:format("              +-- ~s (~s)~n", [Device, Alias]),
                     show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
                 (Enabled == "1") and (Alias /= "") and
                 (Flag /= 0) ->
-                    io:format("              └── ~s (~s)~n", [Device, Alias]),
+                    io:format("              +-- ~s (~s)~n", [Device, Alias]),
                     show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 true ->
