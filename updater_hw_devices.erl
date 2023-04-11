@@ -7,9 +7,9 @@
 
 -export([main/1]).
 -export([show_help/0]).
--export([get_version/3]).
+-export([get_version/4]).
 -export([update/3]).
--export([check_versions/3]).
+-export([check_versions/4]).
 -export([power_cycle/2]).
 -export([get_slot_id/2]).
 -export([check_for_dependencies/1]).
@@ -123,11 +123,11 @@ call_function(ModuleName, FuncName, Arguments) ->
 %
 % 
 %-----------------------------------------------------------------------------
--spec get_version(string, string, string) -> {result, string}.
-get_version(Platform, Board, Device) -> 
+-spec get_version(string, string, string, string) -> {result, string}.
+get_version(IniFile, Platform, Board, Device) -> 
     ModuleName = unicode:characters_to_list([?MODULE_NAME,"_", Platform]),
     FuncName = unicode:characters_to_list([atom_to_list(?FUNCTION_NAME),"_", Platform, "_", Board, "_", Device]),
-    call_function(ModuleName, FuncName, []).
+    call_function(ModuleName, FuncName, [IniFile]).
 
 
 %-----------------------------------------------------------------------------
@@ -264,35 +264,35 @@ show_help() ->
 %
 % 
 %-----------------------------------------------------------------------------
--spec check_versions(string, string, string) -> {result, string}.
-check_versions(Platform, CurrentBoard, Active) ->
-    {Result1, NumBoardsStr} = updater_hw_devices_utils:ini_file(?INI_FILE, "boards", "num_boards"),
+-spec check_versions(string, string, string, string) -> {result, string}.
+check_versions(IniFile, Platform, CurrentBoard, Active) ->
+    {Result1, NumBoardsStr} = updater_hw_devices_utils:ini_file(IniFile, "boards", "num_boards"),
 
     case Result1 of
         ok ->
-            updater_hw_devices_utils:show_boards_tree(CurrentBoard, Active),
+            updater_hw_devices_utils:show_boards_tree(IniFile, CurrentBoard, Active),
             io:format("~n"),
             {NumBoards, _} = string:to_integer(NumBoardsStr),
-            check_versions_next_board(Platform, CurrentBoard, Active, 1, NumBoards);
+            check_versions_next_board(IniFile, Platform, CurrentBoard, Active, 1, NumBoards);
 
         _ ->
             io:format("Error: ~p~n", [NumBoardsStr]),
             error
     end.
 
-check_versions_next_board(Platform, CurrentBoard, Active, Index, MaxBoards) ->
+check_versions_next_board(IniFile, Platform, CurrentBoard, Active, Index, MaxBoards) ->
     if
         (Index =< MaxBoards) ->
-            {Result1, Board} = updater_hw_devices_utils:ini_file(?INI_FILE, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+            {Result1, Board} = updater_hw_devices_utils:ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
 
             if
                 (Result1 == ok) ->
                     %io:format("~s~n", [Board]),
 
-                    {_, NumDevicesStr} = updater_hw_devices_utils:ini_file(?INI_FILE, Board, "num_devices"),
+                    {_, NumDevicesStr} = updater_hw_devices_utils:ini_file(IniFile, Board, "num_devices"),
                     {NumDevices, _} = string:to_integer(NumDevicesStr),
-                    check_versions_next_Device(Platform, Board, CurrentBoard, Active, 1, NumDevices),
-                    check_versions_next_board(Platform, CurrentBoard, Active, Index + 1, MaxBoards);
+                    check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, 1, NumDevices),
+                    check_versions_next_board(IniFile, Platform, CurrentBoard, Active, Index + 1, MaxBoards);
 
                 true ->
                     error
@@ -302,24 +302,24 @@ check_versions_next_board(Platform, CurrentBoard, Active, Index, MaxBoards) ->
             ok
     end.
 
-check_versions_next_Device(Platform, Board, CurrentBoard, Active, Index, MaxDevices) ->
+check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, Index, MaxDevices) ->
     if
         (Index =< MaxDevices) ->
-            {Result1, Device} = updater_hw_devices_utils:ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
-            {Result2, Activecard} = updater_hw_devices_utils:ini_file(?INI_FILE, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
-            {Result3, Enabled} = updater_hw_devices_utils:ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
-            {Result4, Checkversion} = updater_hw_devices_utils:ini_file(?INI_FILE, Board, unicode:characters_to_list(["checkversion", integer_to_list(Index)])),
+            {Result1, Device} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+            {Result2, Activecard} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
+            {Result3, Enabled} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+            {Result4, Checkversion} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["checkversion", integer_to_list(Index)])),
             
             if
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
                 (Enabled == "1") and (Checkversion == "1")->
-                    {_, Version} = get_version(Platform, Board, Device),
+                    {_, Version} = get_version(IniFile, Platform, Board, Device),
                     io:format("~s_~s => ~s ~n", [Board, Device, Version]),
-                    check_versions_next_Device(Platform, Board, CurrentBoard, Active, Index + 1, MaxDevices);
+                    check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, Index + 1, MaxDevices);
 
                 true ->
-                    check_versions_next_Device(Platform, Board, CurrentBoard, Active, Index + 1, MaxDevices)
+                    check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, Index + 1, MaxDevices)
             end;
 
         true ->
@@ -351,8 +351,6 @@ main(Args) ->
                    "device_to_update" => "",
                    "hw_image_partition" => "",
                    "ini_file" => ""},
-                
-%${hw_image_partition}${IMAGES_PATH}${platform_type}/${platform_type}_devices.cfg
 
     CommandMap = #{"command" => ""},
 
@@ -369,8 +367,8 @@ main(Args) ->
             Active = maps:get("active", OptionsMap1),
             Device_to_update = maps:get("device_to_update", OptionsMap1),
 
-            %Hw_image_partition = maps:get("hw_image_partition", OptionsMap1),
-            %Ini_file = unicode:characters_to_list([Hw_image_partition, ?IMAGES_PATH, Platform_type, "/", Platform_type, "_devices.cfg"]),
+            Hw_image_partition = maps:get("hw_image_partition", OptionsMap1),
+            IniFile = unicode:characters_to_list([Hw_image_partition, ?IMAGES_PATH, Platform_type, "/", Platform_type, "_devices.cfg"]),
             %OptionsMap2 = maps:put("ini_file", Ini_file, OptionsMap1),
 
             case Command of
@@ -378,7 +376,7 @@ main(Args) ->
                     show_help();
 
                "check" ->
-                    check_versions(Platform_type, Board_type, Active);
+                    check_versions(IniFile, Platform_type, Board_type, Active);
 
                 "update" ->
                     Board = updater_hw_devices_utils:extract_board(Device_to_update),

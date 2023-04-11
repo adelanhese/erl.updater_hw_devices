@@ -17,28 +17,28 @@
 -export([ini_file/5]).
 -export([list_delete/2]).
 -export([remove_char/2]).
--export([read_field_from_cfg/3]).
--export([read_field_from_cfg_anyway/3]).
+-export([read_field_from_cfg/4]).
+-export([read_field_from_cfg_anyway/4]).
 -export([get_device_index_from_cfg/5]).
--export([get_file_image_name/3]).
+-export([get_file_image_name/4]).
 -export([md5_check/2]).
 -export([binary_to_hex/1]).
 -export([check_for_files_dependencies/2]).
 -export([check_file_exists/1]).
--export([check_for_supported_devices/4]).
--export([enable_disable_device/4]).
--export([show_devices/2]).
--export([show_boards_tree/2]).
+-export([check_for_supported_devices/5]).
+-export([enable_disable_device/5]).
+-export([show_devices/3]).
+-export([show_boards_tree/3]).
 -export([platforms_list/0]).
 -export([check_for_supported_platform/1]).
--export([check_for_supported_board/1]).
+-export([check_for_supported_board/2]).
 -export([update_cfg_file/2]).
 -export([dec2ascii/1]).
 -export([hex2dec/1]).
 -export([dec2hex/1]).
 -export([bin2hex/1]).
 -export([split_paramenter/2]).
-
+-export([extract_platform/2]).
 
 
 % ToDo
@@ -49,7 +49,6 @@
 -export([get_board_type/0]).
 
 
-%
 platforms_list() -> [?MYPLAT1,
                      ?MYPLAT2,
                      ?MYPLAT6].
@@ -258,6 +257,23 @@ extract_alias(BoardDevice) ->
             Alias;
         error ->
             ""
+    end.
+
+%-----------------------------------------------------------------------------
+%
+% 
+%-----------------------------------------------------------------------------
+-spec extract_platform(string, string) -> {result, string}.
+extract_platform(Input, Prefix) ->
+    Index = string:str(Input, Prefix),
+
+    if
+        (Index > 0 ) ->
+            Platform = string:slice(Input, abs(Index + length(Prefix) - 1), 5),
+            {ok, Platform};
+     
+        true ->
+            {error, []}
     end.
 
 %-----------------------------------------------------------------------------
@@ -539,34 +555,34 @@ ini_file_replace_field(IniFile, List, Index, Field, CurrentFieldValue, NewFieldV
 %
 %
 %-----------------------------------------------------------------------------
--spec read_field_from_cfg(string, string, string) -> {result, string}.
-read_field_from_cfg(Board, Device, Field) ->
-    {Result, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
+-spec read_field_from_cfg(string, string, string, string) -> {result, string}.
+read_field_from_cfg(IniFile, Board, Device, Field) ->
+    {Result, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
 
     case Result of
         ok ->
             {NumDevices, _} = string:to_integer(NumDevicesStr),
-            read_field_from_cfg_search_for_device(Board, Device, Field, 1, NumDevices);
+            read_field_from_cfg_search_for_device(IniFile, Board, Device, Field, 1, NumDevices);
 
         _ ->
             {error, NumDevicesStr}
     end.
 
-read_field_from_cfg_search_for_device(Board, Device, Field, Index, MaxDevices) ->
+read_field_from_cfg_search_for_device(IniFile, Board, Device, Field, Index, MaxDevices) ->
     DeviceFieldStr = unicode:characters_to_list(["device", integer_to_list(Index)]),
     EnabledFieldStr = unicode:characters_to_list(["enabled", integer_to_list(Index)]),
     FieldStr = unicode:characters_to_list([Field, integer_to_list(Index)]),
-    {Result1, DevicesStr} = ini_file(?INI_FILE, Board, DeviceFieldStr),
-    {Result2, EnabledStr} = ini_file(?INI_FILE, Board, EnabledFieldStr),
+    {Result1, DevicesStr} = ini_file(IniFile, Board, DeviceFieldStr),
+    {Result2, EnabledStr} = ini_file(IniFile, Board, EnabledFieldStr),
 
     if
         (Index =< MaxDevices) ->
             if
                 (Result1 == ok) and (Result2 == ok) and (DevicesStr == Device) and (EnabledStr == "1") ->
-                    ini_file(?INI_FILE, Board, FieldStr);
+                    ini_file(IniFile, Board, FieldStr);
 
                 true ->
-                    read_field_from_cfg_search_for_device(Board, Device, Field, Index + 1, MaxDevices)
+                    read_field_from_cfg_search_for_device(IniFile, Board, Device, Field, Index + 1, MaxDevices)
             end;
 
         true ->
@@ -578,31 +594,31 @@ read_field_from_cfg_search_for_device(Board, Device, Field, Index, MaxDevices) -
 %
 %
 %-----------------------------------------------------------------------------
--spec read_field_from_cfg_anyway(string, string, string) -> {result, string}.
-read_field_from_cfg_anyway(Board, Device, Field) ->
-    {Result, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
+-spec read_field_from_cfg_anyway(string, string, string, string) -> {result, string}.
+read_field_from_cfg_anyway(IniFile, Board, Device, Field) ->
+    {Result, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
 
     case Result of
         ok ->
             {NumDevices, _} = string:to_integer(NumDevicesStr),
-            read_field_from_cfg_anyway_search_for_device(Board, Device, Field, 1, NumDevices);
+            read_field_from_cfg_anyway_search_for_device(IniFile, Board, Device, Field, 1, NumDevices);
 
         _ ->
             {error, NumDevicesStr}
     end.
 
-read_field_from_cfg_anyway_search_for_device(Board, Device, Field, Index, MaxDevices) ->
+read_field_from_cfg_anyway_search_for_device(IniFile, Board, Device, Field, Index, MaxDevices) ->
 
     if
         (Index =< MaxDevices) ->
-            {Result1, DevicesStr} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+            {Result1, DevicesStr} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
 
             if
                 (Result1 == ok) and (DevicesStr == Device) ->
-                    ini_file(?INI_FILE, Board, unicode:characters_to_list([Field, integer_to_list(Index)]));
+                    ini_file(IniFile, Board, unicode:characters_to_list([Field, integer_to_list(Index)]));
 
                 true ->
-                    read_field_from_cfg_anyway_search_for_device(Board, Device, Field, Index + 1, MaxDevices)
+                    read_field_from_cfg_anyway_search_for_device(IniFile, Board, Device, Field, Index + 1, MaxDevices)
             end;
 
         true ->
@@ -651,13 +667,13 @@ get_device_index_from_cfg_search_for_device(IniFileName, Board, Device, Field, V
 %
 %
 %-----------------------------------------------------------------------------
--spec get_file_image_name(string, string, string) -> {result, string}.
-get_file_image_name(Board, Device, InputFile) ->
+-spec get_file_image_name(string, string, string, string) -> {result, string}.
+get_file_image_name(IniFile, Board, Device, InputFile) ->
 
     case (InputFile == "") of
         true ->
-            {Result1, File} = read_field_from_cfg(Board, Device, "file"),
-            {Result2, Md5} = read_field_from_cfg(Board, Device, "md5"),
+            {Result1, File} = read_field_from_cfg(IniFile, Board, Device, "file"),
+            {Result2, Md5} = read_field_from_cfg(IniFile, Board, Device, "md5"),
 
             if
                 (Result1 == ok) and (Result2 == ok) ->
@@ -687,25 +703,25 @@ get_file_image_name(Board, Device, InputFile) ->
 %   io:format("~p ~p ~p ~n", [DevicesStr, EnabledStr, CheckversionStr]),
 %
 %-----------------------------------------------------------------------------
--spec check_for_supported_devices(string, string, string, string) -> {result, string}.
-check_for_supported_devices(Board, Device, CurrentBoard, Active) ->
-    {Result, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
+-spec check_for_supported_devices(string, string, string, string, string) -> {result, string}.
+check_for_supported_devices(IniFile, Board, Device, CurrentBoard, Active) ->
+    {Result, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
 
     case Result of
         ok ->
             {NumDevices, _} = string:to_integer(NumDevicesStr),
-            check_for_supported_devices_search_for_device(Board, Device, CurrentBoard, Active, 1, NumDevices);
+            check_for_supported_devices_search_for_device(IniFile, Board, Device, CurrentBoard, Active, 1, NumDevices);
 
         _ ->
             error
     end.
 
-check_for_supported_devices_search_for_device(Board, Device, CurrentBoard, Active, Index, MaxDevices) ->
+check_for_supported_devices_search_for_device(IniFile, Board, Device, CurrentBoard, Active, Index, MaxDevices) ->
 
     if
         (Index =< MaxDevices) ->
-            {Result1, DevicesStr} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
-            {Result2, ActivecardStr} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
+            {Result1, DevicesStr} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+            {Result2, ActivecardStr} = ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
 
             if
                 (Result1 == ok) and (Result2 == ok)  and
@@ -714,7 +730,7 @@ check_for_supported_devices_search_for_device(Board, Device, CurrentBoard, Activ
                     ok;
 
                 true ->
-                    check_for_supported_devices_search_for_device(Board, Device, CurrentBoard, Active, Index + 1, MaxDevices)
+                    check_for_supported_devices_search_for_device(IniFile, Board, Device, CurrentBoard, Active, Index + 1, MaxDevices)
             end;
 
         true ->
@@ -727,23 +743,23 @@ check_for_supported_devices_search_for_device(Board, Device, CurrentBoard, Activ
 %
 %
 %-----------------------------------------------------------------------------
--spec enable_disable_device(string, string, string, string) -> ok | error.
-enable_disable_device(BoardDeviceAlias, NewState, CurrentBoard, Active) ->
+-spec enable_disable_device(string, string, string, string, string) -> ok | error.
+enable_disable_device(IniFile, BoardDeviceAlias, NewState, CurrentBoard, Active) ->
     Board = extract_board(BoardDeviceAlias),
     Device = extract_device (BoardDeviceAlias),
     Alias = extract_alias (BoardDeviceAlias),
 
-    case check_for_supported_devices(Board, Device, CurrentBoard, Active) of
+    case check_for_supported_devices(IniFile, Board, Device, CurrentBoard, Active) of
         ok ->
-            {Result1, Num_devicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
-            {Result2, Dependencies1} = read_field_from_cfg_anyway(Board, Device, "dependencies"),
+            {Result1, Num_devicesStr} = ini_file(IniFile, Board, "num_devices"),
+            {Result2, Dependencies1} = read_field_from_cfg_anyway(IniFile, Board, Device, "dependencies"),
             Device_dependent = extract_device(Dependencies1),
             {Num_devices, _} = string:to_integer(Num_devicesStr),
 
             if
                 (Result1 == ok) and (Result2 == ok) ->
-                    disable_device(Board, Device, Device_dependent, 1, Num_devices),
-                    enable_device(Board, Device, Device_dependent, Alias, NewState, 1, Num_devices);
+                    disable_device(IniFile, Board, Device, Device_dependent, 1, Num_devices),
+                    enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, 1, Num_devices);
                 
                 true ->
                     error
@@ -753,20 +769,20 @@ enable_disable_device(BoardDeviceAlias, NewState, CurrentBoard, Active) ->
             error
     end.
 
-disable_device(Board, Device, Device_dependent, Index, MaxDevices) ->
+disable_device(IniFile, Board, Device, Device_dependent, Index, MaxDevices) ->
 
     if
         (Index =< MaxDevices) ->
-            {Result1, Device1} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+            {Result1, Device1} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
 
             if
                 (Result1 == ok) and
                 ((Device1 == Device) or (Device1 == Device_dependent)) ->
-                    ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), "0", wr),
-                    disable_device(Board, Device, Device_dependent, Index + 1, MaxDevices);
+                    ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), "0", wr),
+                    disable_device(IniFile, Board, Device, Device_dependent, Index + 1, MaxDevices);
 
                 true ->
-                    disable_device(Board, Device, Device_dependent, Index + 1, MaxDevices)
+                    disable_device(IniFile, Board, Device, Device_dependent, Index + 1, MaxDevices)
             end;
 
         true ->
@@ -774,22 +790,22 @@ disable_device(Board, Device, Device_dependent, Index, MaxDevices) ->
     end.
 
 
-enable_device(Board, Device, Device_dependent, Alias, NewState, Index, MaxDevices) ->
+enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, Index, MaxDevices) ->
 
     if
         (Index =< MaxDevices) ->
-            {Result1, Device1} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
-            {Result2, Alias1} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
+            {Result1, Device1} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+            {Result2, Alias1} = ini_file(IniFile, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
 
             if
                 (Result1 == ok) and (Result2 == ok)  and
                 ((Device1 == Device) or (Device1 == Device_dependent)) and
                 (Alias == Alias1) ->
-                    ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), NewState, wr),
-                    enable_device(Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices);
+                    ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), NewState, wr),
+                    enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices);
 
                 true ->
-                    enable_device(Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices)
+                    enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices)
             end;
 
         true ->
@@ -801,32 +817,32 @@ enable_device(Board, Device, Device_dependent, Alias, NewState, Index, MaxDevice
 %
 % 
 %-----------------------------------------------------------------------------
--spec show_devices(string, string) -> {result, string}.
-show_devices(CurrentBoard, Active) ->
-    {Result1, NumBoardsStr} = ini_file(?INI_FILE, "boards", "num_boards"),
+-spec show_devices(string, string, string) -> {result, string}.
+show_devices(IniFile, CurrentBoard, Active) ->
+    {Result1, NumBoardsStr} = ini_file(IniFile, "boards", "num_boards"),
 
     case Result1 of
         ok ->
             {NumBoards, _} = string:to_integer(NumBoardsStr),
-            show_devices_next_board(CurrentBoard, Active, 1, NumBoards);
+            show_devices_next_board(IniFile, CurrentBoard, Active, 1, NumBoards);
 
         _ ->
             error
     end.
 
-show_devices_next_board(CurrentBoard, Active, Index, MaxBoards) ->
+show_devices_next_board(IniFile, CurrentBoard, Active, Index, MaxBoards) ->
     if
         (Index =< MaxBoards) ->
-            {Result1, Board} = ini_file(?INI_FILE, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+            {Result1, Board} = ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
 
             if
                 (Result1 == ok) ->
                     %io:format("~s~n", [Board]),
 
-                    {_, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
+                    {_, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
                     {NumDevices, _} = string:to_integer(NumDevicesStr),
-                    show_devices_next_Device(Board, CurrentBoard, Active, 1, NumDevices),
-                    show_devices_next_board(CurrentBoard, Active, Index + 1, MaxBoards);
+                    show_devices_next_Device(IniFile, Board, CurrentBoard, Active, 1, NumDevices),
+                    show_devices_next_board(IniFile, CurrentBoard, Active, Index + 1, MaxBoards);
 
                 true ->
                     error
@@ -836,22 +852,22 @@ show_devices_next_board(CurrentBoard, Active, Index, MaxBoards) ->
             ok
     end.
 
-show_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices) ->
+show_devices_next_Device(IniFile, Board, CurrentBoard, Active, Index, MaxDevices) ->
     if
         (Index =< MaxDevices) ->
-            {Result1, Device} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
-            {Result2, Activecard} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
-            {Result3, Enabled} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+            {Result1, Device} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+            {Result2, Activecard} = ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
+            {Result3, Enabled} = ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
             
             if
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
                 (Enabled == "1") ->
                     io:format("                ~s_~s~n", [Board, Device]),
-                    show_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices);
+                    show_devices_next_Device(IniFile, Board, CurrentBoard, Active, Index + 1, MaxDevices);
 
                 true ->
-                    show_devices_next_Device(Board, CurrentBoard, Active, Index + 1, MaxDevices)
+                    show_devices_next_Device(IniFile, Board, CurrentBoard, Active, Index + 1, MaxDevices)
             end;
 
         true ->
@@ -862,32 +878,32 @@ show_devices_next_Device(Board, CurrentBoard, Active, Index, MaxDevices) ->
 %
 % 
 %-----------------------------------------------------------------------------
--spec show_boards_tree(string, string) -> ok | error.
-show_boards_tree(CurrentBoard, Active) ->
-    {Result1, NumBoardsStr} = ini_file(?INI_FILE, "boards", "num_boards"),
+-spec show_boards_tree(string, string, string) -> ok | error.
+show_boards_tree(IniFile, CurrentBoard, Active) ->
+    {Result1, NumBoardsStr} = ini_file(IniFile, "boards", "num_boards"),
 
     case Result1 of
         ok ->
             {NumBoards, _} = string:to_integer(NumBoardsStr),
-            show_boards_tree_next_board(CurrentBoard, Active, 1, NumBoards);
+            show_boards_tree_next_board(IniFile, CurrentBoard, Active, 1, NumBoards);
 
         _ ->
             error
     end.
 
-show_boards_tree_next_board(CurrentBoard, Active, Index, MaxBoards) ->
+show_boards_tree_next_board(IniFile, CurrentBoard, Active, Index, MaxBoards) ->
     if
         (Index =< MaxBoards) ->
-            {Result1, Board} = ini_file(?INI_FILE, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+            {Result1, Board} = ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
 
             if
                 (Result1 == ok) ->
                     %io:format("~s~n", [Board]),
 
-                    {_, NumDevicesStr} = ini_file(?INI_FILE, Board, "num_devices"),
+                    {_, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
                     {NumDevices, _} = string:to_integer(NumDevicesStr),
-                    show_boards_tree_next_device(Board, CurrentBoard, Active, 1, NumDevices, 0),
-                    show_boards_tree_next_board(CurrentBoard, Active, Index + 1, MaxBoards);
+                    show_boards_tree_next_device(IniFile, Board, CurrentBoard, Active, 1, NumDevices, 0),
+                    show_boards_tree_next_board(IniFile, CurrentBoard, Active, Index + 1, MaxBoards);
 
                 true ->
                     error
@@ -897,13 +913,13 @@ show_boards_tree_next_board(CurrentBoard, Active, Index, MaxBoards) ->
             ok
     end.
 
-show_boards_tree_next_device(Board, CurrentBoard, Active, Index, MaxDevices, Flag) ->
+show_boards_tree_next_device(IniFile, Board, CurrentBoard, Active, Index, MaxDevices, Flag) ->
     if
         (Index =< MaxDevices) ->
-            {Result1, Device} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
-            {Result2, Activecard} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
-            {Result3, Enabled} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
-            {Result4, Alias} = ini_file(?INI_FILE, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
+            {Result1, Device} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+            {Result2, Activecard} = ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
+            {Result3, Enabled} = ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+            {Result4, Alias} = ini_file(IniFile, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
 
             if
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
@@ -913,14 +929,14 @@ show_boards_tree_next_device(Board, CurrentBoard, Active, Index, MaxDevices, Fla
                     io:format("~n"),
                     io:format("             ~s~n", [Board]),
                     io:format("              +-- ~s~n", [Device]),
-                    show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+                    show_boards_tree_next_device(IniFile, Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
                 (Enabled == "1") and (Alias == "") and
                 (Flag /= 0) ->
                     io:format("              +-- ~s~n", [Device]),
-                    show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+                    show_boards_tree_next_device(IniFile, Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
@@ -929,17 +945,17 @@ show_boards_tree_next_device(Board, CurrentBoard, Active, Index, MaxDevices, Fla
                     io:format("~n"),
                     io:format("             ~s~n", [Board]),
                     io:format("              +-- ~s (~s)~n", [Device, Alias]),
-                    show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+                    show_boards_tree_next_device(IniFile, Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
                 (Enabled == "1") and (Alias /= "") and
                 (Flag /= 0) ->
                     io:format("              +-- ~s (~s)~n", [Device, Alias]),
-                    show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
+                    show_boards_tree_next_device(IniFile, Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag + 1);
 
                 true ->
-                    show_boards_tree_next_device(Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag)
+                    show_boards_tree_next_device(IniFile, Board, CurrentBoard, Active, Index + 1, MaxDevices, Flag)
             end;
 
         true ->
@@ -961,30 +977,30 @@ check_for_supported_platform(Platform) ->
 %
 % 
 %-----------------------------------------------------------------------------
--spec check_for_supported_board(string) -> boolean.
-check_for_supported_board(Board) ->
-    {Result1, NumBoardsStr} = ini_file(?INI_FILE, "boards", "num_boards"),
+-spec check_for_supported_board(string, string) -> boolean.
+check_for_supported_board(IniFile, Board) ->
+    {Result1, NumBoardsStr} = ini_file(IniFile, "boards", "num_boards"),
 
     case Result1 of
         ok ->
             {NumBoards, _} = string:to_integer(NumBoardsStr),
-            check_for_supported_board(Board, 1, NumBoards);
+            check_for_supported_board(IniFile, Board, 1, NumBoards);
 
         _ ->
             error
     end.
 
-check_for_supported_board(Board, Index, MaxBoards) ->
+check_for_supported_board(IniFile, Board, Index, MaxBoards) ->
     if
         (Index =< MaxBoards) ->
-            {Result1, BoardRead} = ini_file(?INI_FILE, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+            {Result1, BoardRead} = ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
 
             if
                 (Result1 == ok) and (BoardRead == Board) ->
                     ok;
 
                 true ->
-                    check_for_supported_board(Board, Index + 1, MaxBoards)
+                    check_for_supported_board(IniFile, Board, Index + 1, MaxBoards)
             end;
 
         true ->
@@ -1103,14 +1119,15 @@ get_i2c_adapter(I2CAdapterName) ->
     io:format("~p~n", [I2CAdapterName]),
     ok.
 
-
 %-----------------------------------------------------------------------------
 %
-% 
+%  Whoami = "cc 6 PM_MNGT_ETSc 7 rm_etsc6 1"
 %-----------------------------------------------------------------------------
 -spec get_platform_type() -> ok.
 get_platform_type() ->
-    ok.
+    Cmd = unicode:characters_to_list([?EHALCLI, " whoami"]),
+    Whoami = os:cmd(Cmd),
+    extract_platform(Whoami, " rm_").
 
 
 %-----------------------------------------------------------------------------

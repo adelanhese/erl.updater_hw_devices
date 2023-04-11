@@ -10,7 +10,8 @@
 
 -define(NOT_IMPLEMENTED, "not implemented").
 
--define(INI_FILE, "/home/adilson.delanhese/opt/ets/hw/images/myplat6/myplat6_devices.cfg").
+% ToDo: replace the IMAGES_PATH to the correct path
+%-define(IMAGES_PATH, "/opt/ets/hw/images/").
 -define(IMAGES_PATH, "/home/adilson.delanhese/opt/ets/hw/images/").
 -define(SPK_PARTITION, "/mnt/update").
 -define(KERNEL_CMDLINE, "/proc/cmdline").

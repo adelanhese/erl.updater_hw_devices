@@ -8,10 +8,10 @@
 -export([power_cycle_myplat1_lc1/0]).
 -export([get_slot_id_myplat1_lc1/0]).
 
--export([get_version_myplat1_lc1_fpgajic/0]).
--export([get_version_myplat1_fan_cpld/0]).
--export([get_version_myplat1_lc1_lpc55/0]).
--export([get_version_myplat1_fan_lpc55/0]).
+-export([get_version_myplat1_lc1_fpgajic/1]).
+-export([get_version_myplat1_fan_cpld/1]).
+-export([get_version_myplat1_lc1_lpc55/1]).
+-export([get_version_myplat1_fan_lpc55/1]).
 
 -export([update_myplat1_lc1_fpgajic/0]).
 -export([update_myplat1_lc1_fpgacvp/0]).
@@ -41,22 +41,22 @@ get_slot_id_myplat1_lc1() ->
     {error, ?NOT_IMPLEMENTED}.
 
 
-get_version_myplat1_lc1_fpgajic() ->
+get_version_myplat1_lc1_fpgajic(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg("lc1", "fpgajic", "version").
+    updater_hw_devices_utils:read_field_from_cfg(IniFile, "lc1", "fpgajic", "version").
 
 
-get_version_myplat1_fan_cpld() ->
+get_version_myplat1_fan_cpld(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg("fan", "cpld", "version").
+    updater_hw_devices_utils:read_field_from_cfg(IniFile, "fan", "cpld", "version").
 
-get_version_myplat1_lc1_lpc55() ->
+get_version_myplat1_lc1_lpc55(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg("lc1", "lpc55", "version").
+    updater_hw_devices_utils:read_field_from_cfg(IniFile, "lc1", "lpc55", "version").
 
-get_version_myplat1_fan_lpc55() ->
+get_version_myplat1_fan_lpc55(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg("fan", "lpc55", "version").
+    updater_hw_devices_utils:read_field_from_cfg(IniFile, "fan", "lpc55", "version").
 
 update_myplat1_lc1_fpgajic() ->
     io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
