@@ -8,24 +8,15 @@
 -define(MYPLAT6, "myplat6").
 -define(TEST, "test").
 
--define(LC1, "lc1").
--define(LC4, "lc4").
--define(LC5, "lc5").
--define(MNGT, "mngt").
--define(SC2000, "sc2000").
--define(FAN, "fan").
-
 -define(NOT_IMPLEMENTED, "not implemented").
 
-
--define(INI_FILE, "arq.ini").
--define(IMAGES_PATH, "/opt/ets/hw/images/").
+-define(INI_FILE, "/home/adilson.delanhese/opt/ets/hw/images/myplat6/myplat6_devices.cfg").
+-define(IMAGES_PATH, "/home/adilson.delanhese/opt/ets/hw/images/").
 -define(SPK_PARTITION, "/mnt/update").
 -define(KERNEL_CMDLINE, "/proc/cmdline").
 -define(KERNEL_BZIMAGE, "/boot/bzImage").
 -define(KEXEC_TIMEOUT, "2").
 -define(DEVICES_VERSIONS_FILE, "/data/board/hw_devices_versions.csv").
-
 
 -define(GPIOGET, "/usr/bin/gpioget").
 -define(GPIOSET, "/usr/bin/gpioset").

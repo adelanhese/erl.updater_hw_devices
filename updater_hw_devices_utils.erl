@@ -450,7 +450,7 @@ ini_file(IniFile, Sector, Field, NewFieldValue, Oper) ->
             end;
 
         true ->
-            {error, "Fail to access the file"}
+            {error, "Fail to access the configuration file"}
             
     end.
 

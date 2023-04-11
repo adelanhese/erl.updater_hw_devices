@@ -58,7 +58,7 @@ dependencies_list_myplat1() -> [?FPGAIO,
                                ?I2CSET,
                                ?I2CTRANSFER,
                                ?I2CDETECT,
-                               ?FAN,
+                               ?FANSCRIPT,
                                ?DD,
                                ?MD5SUM,
                                ?MACHXO2,
@@ -75,7 +75,7 @@ dependencies_list_myplat2() -> [?FPGAIO,
                                ?I2CSET,
                                ?I2CTRANSFER,
                                ?I2CDETECT,
-                               ?FAN,
+                               ?FANSCRIPT,
                                ?DD,
                                ?MD5SUM,
                                ?MACHXO2,
@@ -94,7 +94,7 @@ dependencies_list_myplat6() -> [?FPGAIO,
                                ?I2CSET,
                                ?I2CTRANSFER,
                                ?I2CDETECT,
-                               ?FAN,
+                               ?FANSCRIPT,
                                ?DD,
                                ?MD5SUM,
                                ?MACHXO2,
@@ -276,6 +276,7 @@ check_versions(Platform, CurrentBoard, Active) ->
             check_versions_next_board(Platform, CurrentBoard, Active, 1, NumBoards);
 
         _ ->
+            io:format("Error: ~p~n", [NumBoardsStr]),
             error
     end.
 
@@ -313,8 +314,8 @@ check_versions_next_Device(Platform, Board, CurrentBoard, Active, Index, MaxDevi
                 (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
                 ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
                 (Enabled == "1") and (Checkversion == "1")->
-                    {_, Resultx} = get_version(Platform, Board, Device),
-                    io:format("~s_~s => ~s ~n", [Board, Device, Resultx]),
+                    {_, Version} = get_version(Platform, Board, Device),
+                    io:format("~s_~s => ~s ~n", [Board, Device, Version]),
                     check_versions_next_Device(Platform, Board, CurrentBoard, Active, Index + 1, MaxDevices);
 
                 true ->
@@ -348,7 +349,10 @@ main(Args) ->
                    "active" => "0",
                    "input_file" => "",
                    "device_to_update" => "",
-                   "enable_disable_val" => "0"},
+                   "hw_image_partition" => "",
+                   "ini_file" => ""},
+                
+%${hw_image_partition}${IMAGES_PATH}${platform_type}/${platform_type}_devices.cfg
 
     CommandMap = #{"command" => ""},
 
@@ -364,6 +368,10 @@ main(Args) ->
             Board_type = maps:get("board_type", OptionsMap1),
             Active = maps:get("active", OptionsMap1),
             Device_to_update = maps:get("device_to_update", OptionsMap1),
+
+            %Hw_image_partition = maps:get("hw_image_partition", OptionsMap1),
+            %Ini_file = unicode:characters_to_list([Hw_image_partition, ?IMAGES_PATH, Platform_type, "/", Platform_type, "_devices.cfg"]),
+            %OptionsMap2 = maps:put("ini_file", Ini_file, OptionsMap1),
 
             case Command of
                 "show_help" ->
@@ -436,7 +444,8 @@ parse_params(Args, Index, OptionsMap, CommandMap) ->
                     parse_params(Args, Index + 1, maps:put("background", true, OptionsMap), CommandMap);
                 
                 (Parameter == "-s") or (Parameter == "--spk") ->
-                    parse_params(Args, Index + 1, maps:put("spk_updater", true, OptionsMap), CommandMap);
+                    OptionsMapTemp1 = maps:put("spk_updater", true, OptionsMap),
+                    parse_params(Args, Index + 1, maps:put("hw_image_partition", ?SPK_PARTITION, OptionsMapTemp1), CommandMap);
                 
                 (Parameter == "-i") or (Parameter == "--input") ->
                     parse_params(Args, Index + 1, maps:put("input_file", SubParameter, OptionsMap), CommandMap);
@@ -465,17 +474,14 @@ parse_params(Args, Index, OptionsMap, CommandMap) ->
                 
                 (Parameter == "-d") or (Parameter == "--disable") ->
                     OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
-                    OptionsMapTemp2 =maps:put("enable_disable_val", "0", OptionsMapTemp),
-                    parse_params(Args, Index + 1, OptionsMapTemp2, maps:put("command", "enable_disable", CommandMap));
+                    parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "disable", CommandMap));
                 
                 (Parameter == "-e") or (Parameter == "--enable") ->
                     OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
-                    OptionsMapTemp2 = maps:put("enable_disable_val", "1", OptionsMapTemp),
-                    parse_params(Args, Index + 1, OptionsMapTemp2, maps:put("command", "enable_disable", CommandMap));
+                    parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "enable", CommandMap));
                 
                 (Parameter == "-x") or (Parameter == "--examine") ->
                     OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
-
                     parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "examine", CommandMap));
                                    
                 true ->
