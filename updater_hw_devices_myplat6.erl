@@ -8,43 +8,40 @@
 -export([sc2000_cpld_wr/0]).
 -export([sc2000_jericho2c_turn_off/0]).
 
--export([get_slot_id_myplat6_mngt/0]).
--export([get_slot_id_myplat6_lc4/0]).
--export([get_slot_id_myplat6_sc2000/0]).
--export([get_slot_id_myplat6_lc5/0]).
+-export([get_slot_id_myplat6_mngt/0,
+         get_slot_id_myplat6_lc4/0,
+         get_slot_id_myplat6_sc2000/0,
+         get_slot_id_myplat6_lc5/0]).
 
--export([power_cycle_myplat6_mngt/0]).
--export([power_cycle_myplat6_lc4/0]).
--export([power_cycle_myplat6_sc2000/0]).
--export([power_cycle_myplat6_lc5/0]).
+-export([power_cycle_myplat6_mngt/0,
+         power_cycle_myplat6_lc4/0,
+         power_cycle_myplat6_sc2000/0,
+         power_cycle_myplat6_lc5/0]).
 
--export([get_version_myplat6_mngt_fpga/1]).
--export([get_version_myplat6_fan_lpc55/1]).
--export([get_version_myplat6_fan_cpld/1]).
--export([get_version_myplat6_lc4_lpc55/1]).
--export([get_version_myplat6_lc4_fpga/1]).
--export([get_version_myplat6_lc4_cpld/1]).
--export([get_version_myplat6_sc2000_lpc55/1]).
--export([get_version_myplat6_sc2000_cpld/1]).
--export([get_version_myplat6_lc5_lpc55/1]).
--export([get_version_myplat6_lc5_fpga/1]).
--export([get_version_myplat6_lc5_cpld/1]).
--export([get_version_myplat6_lc5_pm6010/1]).
+-export([get_version_myplat6_mngt_fpga/1,
+         get_version_myplat6_fan_lpc55/1,
+         get_version_myplat6_fan_cpld/1,
+         get_version_myplat6_lc4_lpc55/1,
+         get_version_myplat6_lc4_fpga/1,
+         get_version_myplat6_lc4_cpld/1,
+         get_version_myplat6_sc2000_lpc55/1,
+         get_version_myplat6_sc2000_cpld/1,
+         get_version_myplat6_lc5_lpc55/1,
+         get_version_myplat6_lc5_fpga/1,
+         get_version_myplat6_lc5_cpld/1,
+         get_version_myplat6_lc5_pm6010/1]).
 
--export([update_myplat6_fan_lpc55/0]).
--export([update_myplat6_fan_cpld/0]).
--export([update_myplat6_mngt_fpga/0]).
--export([update_myplat6_lc4_lpc55/0]).
--export([update_myplat6_lc4_cpld/0]).
--export([update_myplat6_lc4_fpga/0]).
--export([update_myplat6_sc2000_lpc55/0]).
--export([update_myplat6_sc2000_cpld/0]).
--export([update_myplat6_lc5_cpld/0]).
--export([update_myplat6_lc5_fpga/0]).
--export([update_myplat6_lc5_pm6010/0]).
-    
-
-
+-export([update_myplat6_fan_lpc55/0,
+         update_myplat6_fan_cpld/0,
+         update_myplat6_mngt_fpga/0,
+         update_myplat6_lc4_lpc55/0,
+         update_myplat6_lc4_cpld/0,
+         update_myplat6_lc4_fpga/0,
+         update_myplat6_sc2000_lpc55/0,
+         update_myplat6_sc2000_cpld/0,
+         update_myplat6_lc5_cpld/0,
+         update_myplat6_lc5_fpga/0,
+         update_myplat6_lc5_pm6010/0]).
 
 %-----------------------------------------------------------------------------
 %

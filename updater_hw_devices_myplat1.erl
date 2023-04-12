@@ -8,19 +8,16 @@
 -export([power_cycle_myplat1_lc1/0]).
 -export([get_slot_id_myplat1_lc1/0]).
 
--export([get_version_myplat1_lc1_fpgajic/1]).
--export([get_version_myplat1_fan_cpld/1]).
--export([get_version_myplat1_lc1_lpc55/1]).
--export([get_version_myplat1_fan_lpc55/1]).
+-export([get_version_myplat1_lc1_fpgajic/1,
+         get_version_myplat1_fan_cpld/1,
+         get_version_myplat1_lc1_lpc55/1,
+         get_version_myplat1_fan_lpc55/1]).
 
--export([update_myplat1_lc1_fpgajic/0]).
--export([update_myplat1_lc1_fpgacvp/0]).
--export([update_myplat1_lc1_lpc55/0]).
--export([update_myplat1_fan_lpc55/0]).
--export([update_myplat1_fan_cpld/0]).
-
-
-
+-export([update_myplat1_lc1_fpgajic/0,
+         update_myplat1_lc1_fpgacvp/0,
+         update_myplat1_lc1_lpc55/0,
+         update_myplat1_fan_lpc55/0,
+         update_myplat1_fan_cpld/0]).
 
 %-----------------------------------------------------------------------------
 %

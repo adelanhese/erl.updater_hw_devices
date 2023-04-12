@@ -1,53 +1,54 @@
 -module(updater_hw_devices_utils).
 -include("updater_hw_devices_defines.hrl").
 
--export([bubble_sort/1]).
--export([procura_string/2]).
--export([procura_string_arquivo/2]).
--export([find_character/2]).
--export([extract_board_device/1]).
--export([extract_device/1]).
--export([extract_board/1]).
--export([extract_alias/1]).
--export([extract_substring/3]).
--export([concatena_strings/1]).
--export([list_replace/3]).
--export([list_insert/3]).
--export([ini_file/3]).
--export([ini_file/5]).
--export([list_delete/2]).
--export([remove_char/2]).
--export([read_field_from_cfg/4]).
--export([read_field_from_cfg_anyway/4]).
--export([get_device_index_from_cfg/5]).
--export([get_file_image_name/4]).
--export([md5_check/2]).
--export([binary_to_hex/1]).
--export([check_for_files_dependencies/2]).
--export([check_file_exists/1]).
--export([check_for_supported_devices/5]).
--export([enable_disable_device/5]).
--export([show_devices/3]).
--export([show_boards_tree/3]).
--export([platforms_list/0]).
--export([check_for_supported_platform/1]).
--export([check_for_supported_board/2]).
--export([update_cfg_file/2]).
--export([dec2ascii/1]).
--export([hex2dec/1]).
--export([dec2hex/1]).
--export([bin2hex/1]).
--export([split_paramenter/2]).
--export([extract_platform/2]).
+% Already tested and working
+-export([bubble_sort/1,
+         procura_string/2,
+         procura_string_arquivo/2,
+         find_character/2,
+         extract_board_device/1,
+         extract_device/1,
+         extract_board/1,
+         extract_alias/1,
+         extract_substring/3,
+         concatena_strings/1,
+         list_replace/3,
+         list_insert/3,
+         ini_file/3,
+         ini_file/5,
+         list_delete/2,
+         remove_char/2,
+         read_field_from_cfg/4,
+         read_field_from_cfg_anyway/4,
+         get_device_index_from_cfg/5,
+         get_file_image_name/4,
+         md5_check/2,
+         binary_to_hex/1,
+         check_for_files_dependencies/2,
+         check_file_exists/1,
+         check_for_supported_devices/5,
+         enable_disable_device/5,
+         show_devices/3,
+         show_boards_tree/3,
+         platforms_list/0,
+         check_for_supported_platform/1,
+         check_for_supported_board/2,
+         update_cfg_file/2,
+         dec2ascii/1,
+         hex2dec/1,
+         dec2hex/1,
+         bin2hex/1,
+         split_paramenter/2,
+         extract_platform/2]).
 
 
 % ToDo
--export([fpga_reload/0]).
--export([get_i2c_adapter/1]).
--export([get_platform_type/0]).
--export([get_dtb_name/0]).
--export([get_board_type/0]).
-
+-export([fpga_reload/0,
+         get_i2c_adapter/1,
+         get_platform_type/0,
+         get_dtb_name/0,
+         get_board_type/0]).
+         
 
 platforms_list() -> [?MYPLAT1,
                      ?MYPLAT2,

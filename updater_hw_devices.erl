@@ -5,21 +5,19 @@
 -module(updater_hw_devices).
 -include("updater_hw_devices_defines.hrl").
 
--export([main/1]).
--export([show_help/3]).
--export([get_version/4]).
--export([update/3]).
--export([check_versions/4]).
--export([power_cycle/2]).
--export([get_slot_id/2]).
--export([check_for_dependencies/1]).
--export([dependencies_list_myplat1/0]).
--export([dependencies_list_myplat2/0]).
--export([dependencies_list_myplat6/0]).
--export([dependencies_list_test/0]).
-
-
--export([call_function/3]).
+-export([main/1,
+         show_help/3,
+         get_version/4,
+         update/3,
+         check_versions/4,
+         power_cycle/2,
+         get_slot_id/2,
+         check_for_dependencies/1,
+         dependencies_list_myplat1/0,
+         dependencies_list_myplat2/0,
+         dependencies_list_myplat6/0,
+         dependencies_list_test/0,
+         call_function/3]).
 
 dependencies_list_test() -> [?NOHUP,
                         ?NOTIFY_SEND,
@@ -109,7 +107,6 @@ dependencies_list_myplat6() -> [?FPGAIO,
                                ?EHALCLI].
 
 
-
 %-----------------------------------------------------------------------------
 %
 % 
@@ -120,7 +117,8 @@ call_function(ModuleName, FuncName, Arguments) ->
 
 
 %-----------------------------------------------------------------------------
-%
+% Call the function following the rule:
+%     updater_hw_devices_<platform>:get_version_<platform>_<board>_<device>
 % 
 %-----------------------------------------------------------------------------
 -spec get_version(string, string, string, string) -> {result, string}.
@@ -131,7 +129,8 @@ get_version(IniFile, Platform, Board, Device) ->
 
 
 %-----------------------------------------------------------------------------
-%
+% Call the function following the rule:
+%     updater_hw_devices_<platform>:update_<platform>_<board>_<device>
 % 
 %-----------------------------------------------------------------------------
 -spec update(string, string, string) -> {result, string}.
@@ -142,7 +141,8 @@ update(Platform, Board, Device) ->
 
 
 %-----------------------------------------------------------------------------
-%
+% Call the function following the rule:
+%     updater_hw_devices_<platform>:power_cycle_<platform>_<board>
 % 
 %-----------------------------------------------------------------------------
 -spec power_cycle(string, string) -> {result, string}.
@@ -152,7 +152,8 @@ power_cycle(Platform, Board) ->
     call_function(ModuleName, FuncName, []).
 
 %-----------------------------------------------------------------------------
-%
+% Call the function following the rule:
+%     updater_hw_devices_<platform>:get_slot_id_<platform>_<board>
 % 
 %-----------------------------------------------------------------------------
 -spec get_slot_id(string, string) -> {result, string}.
@@ -314,7 +315,6 @@ check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, Index
        _ ->
            check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, Index + 1, MaxDevices)
    end;
-   
 
 check_versions_next_Device(_, _, _, _, _, _, _) ->
     ok.

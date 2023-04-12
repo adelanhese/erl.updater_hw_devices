@@ -6,30 +6,27 @@
 -export([get_slot_id_myplat2_mngt/0]).
 -export([get_slot_id_myplat2_lc4/0]).
 
--export([power_cycle_myplat2_mngt/0]).
--export([power_cycle_myplat2_lc4/0]).
--export([power_cycle_myplat2_lc5/0]).
+-export([power_cycle_myplat2_mngt/0,
+         power_cycle_myplat2_lc4/0,
+         power_cycle_myplat2_lc5/0]).
 
--export([get_version_myplat2_mngt_fpga/1]).
--export([get_version_myplat2_fan_lpc55/1]).
--export([get_version_myplat2_fan_cpld/1]).
--export([get_version_myplat2_lc4_lpc55/1]).
--export([get_version_myplat2_lc4_fpga/1]).
--export([get_version_myplat2_lc4_cpld/1]).
--export([get_version_myplat2_lc5_fpga/1]).
--export([get_version_myplat2_lc5_cpld/1]).
--export([get_version_myplat2_lc5_pm6010/1]).
+-export([get_version_myplat2_mngt_fpga/1,
+         get_version_myplat2_fan_lpc55/1,
+         get_version_myplat2_fan_cpld/1,
+         get_version_myplat2_lc4_lpc55/1,
+         get_version_myplat2_lc4_fpga/1,
+         get_version_myplat2_lc4_cpld/1,
+         get_version_myplat2_lc5_fpga/1,
+         get_version_myplat2_lc5_cpld/1,
+         get_version_myplat2_lc5_pm6010/1]).
 
--export([update_myplat2_fan_cpld/0]).
--export([update_myplat2_lc4_lpc55/0]).
--export([update_myplat2_lc4_fpga/0]).
--export([update_myplat2_lc5_lpc55/0]).
--export([update_myplat2_lc5_cpld/0]).
--export([update_myplat2_lc5_fpga/0]).
--export([update_myplat2_lc5_pm6010/0]).
-
-
-
+-export([update_myplat2_fan_cpld/0,
+         update_myplat2_lc4_lpc55/0,
+         update_myplat2_lc4_fpga/0,
+         update_myplat2_lc5_lpc55/0,
+         update_myplat2_lc5_cpld/0,
+         update_myplat2_lc5_fpga/0,
+         update_myplat2_lc5_pm6010/0]).
 
 %-----------------------------------------------------------------------------
 %
