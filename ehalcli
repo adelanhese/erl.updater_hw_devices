@@ -1,0 +1,25 @@
+#!/usr/bin/env escript
+
+-define(DTB_NAME, "/etc/dtb/device_tree_lc1_etsc1.dtb").
+-define(WHOAMI, "lc 7 PM_LC1_ETSc 7 rm_plat1 1").
+
+%_______________________________________________________________
+%
+%    Args = init:get_arguments(),
+%_______________________________________________________________
+main(Args) when (length(Args) > 0) ->
+    Parameter = lists:nth(1, Args),
+
+    case Parameter of
+        _ when (Parameter == "whoami") ->
+            io:format("~s~n", [?WHOAMI]);
+
+        _ when (Parameter == "device-tree") ->
+            io:format("~s~n", [?DTB_NAME]);
+    
+        _ ->
+            io:format("Invalid parameter~n")
+    end;
+
+main(_) ->
+    io:format("Invalid parameter~n").

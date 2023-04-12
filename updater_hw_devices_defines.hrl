@@ -3,10 +3,17 @@
 
 -define(MODULE_NAME, "updater_hw_devices").
 
--define(MYPLAT1, "myplat1").
--define(MYPLAT2, "myplat2").
--define(MYPLAT6, "myplat6").
+-define(PLAT1, "plat1").
+-define(PLAT2, "plat2").
+-define(PLAT6, "plat6").
 -define(TEST, "test").
+
+-define(NULL, "").
+-define(LC4, "lc4").
+-define(SC2000, "sc2000").
+-define(MNGT, "mngt").
+-define(LC1, "lc1").
+-define(LC5, "lc5").
 
 -define(NOT_IMPLEMENTED, "not implemented").
 

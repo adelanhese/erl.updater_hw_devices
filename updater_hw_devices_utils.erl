@@ -39,22 +39,37 @@
          dec2hex/1,
          bin2hex/1,
          split_paramenter/2,
-         extract_platform/2]).
+         extract_platform/2,
+         remove_substring/2,
+         boards_list/0]).
 
 
 % ToDo
 -export([fpga_reload/0,
          get_i2c_adapter/1,
-         get_platform_type/0,
-         get_dtb_name/0,
-         get_board_type/0]).
+         get_active/1,
+         get_platform_type/1,
+         get_dtb_name/1,
+         get_board_type/1]).
          
 
-platforms_list() -> [?MYPLAT1,
-                     ?MYPLAT2,
-                     ?MYPLAT6].
+platforms_list() -> [?PLAT1,
+                     ?PLAT2,
+                     ?PLAT6].
 
-
+boards_list() -> [?NULL,
+                  ?NULL,
+                  ?NULL,
+                  ?LC4,
+                  ?SC2000,
+                  ?MNGT,
+                  ?LC1,
+                  ?NULL,
+                  ?NULL,
+                  ?NULL,
+                  ?LC5,
+                  ?NULL].
+   
 %-record(person,
 %            {
 %                name,
@@ -320,6 +335,12 @@ remove_char(String, Char) ->
     %lists:filter(fun (C) -> C /= Char end, String).
     lists:flatten([C || C <- String, C /= Char]).
 
+%-----------------------------------------------------------------------------
+%
+%
+%-----------------------------------------------------------------------------
+remove_substring(String, Substring) ->
+   string:replace(String, Substring, "").
 
 %-----------------------------------------------------------------------------
 %
@@ -1042,31 +1063,70 @@ get_i2c_adapter(I2CAdapterName) ->
 
 %-----------------------------------------------------------------------------
 %
-%  Whoami = "cc 6 PM_MNGT_ETSc 7 rm_etsc6 1"
+% 
 %-----------------------------------------------------------------------------
--spec get_platform_type() -> ok.
-get_platform_type() ->
+-spec get_active(string) -> ok.
+get_active(Active) when (Active == "0") ->
+    % ToDo: insert here the active pin reading
+    ActivePin = "0",
+    {ok, ActivePin};
+
+get_active(Active) ->
+    {ok, Active}.
+
+%-----------------------------------------------------------------------------
+%
+%  Whoami = "cc 6 PM_MNGT_ETSc 7 rm_etsc6 1"
+%           "lc 11 PM_LC5-MP4-D 1 rm_etsc6 1"
+%           "sc 5 PM_SC2000 5 rm_etsc6 1"
+%
+%  4 = lc4
+%  5 = sc2000
+%  6 = mngt
+%  7 = lc1
+%  11 = lc5
+%-----------------------------------------------------------------------------
+-spec get_platform_type(string) -> ok.
+get_platform_type(PlatFormType) when (PlatFormType == "") ->
     Cmd = unicode:characters_to_list([?EHALCLI, " whoami"]),
-    Whoami = os:cmd(Cmd),
-    extract_platform(Whoami, " rm_").
+    Whoami = remove_char(os:cmd(Cmd), 10),
+    extract_platform(Whoami, " rm_");
+
+get_platform_type(PlatFormType) ->
+    {ok, PlatFormType}.
 
 %-----------------------------------------------------------------------------
 %
 % /etc/dtb/device_tree_cc_etsc6.dtb
 %-----------------------------------------------------------------------------
--spec get_dtb_name() -> ok.
-get_dtb_name() ->
+-spec get_dtb_name(string) -> ok.
+get_dtb_name(DtbName) when (DtbName == "") ->
     Cmd = unicode:characters_to_list([?EHALCLI, " device-tree"]),
-    os:cmd(Cmd).
+    Dtb_name = remove_char(os:cmd(Cmd), 10),
+    {ok, Dtb_name};
+
+get_dtb_name(DtbName) ->
+    {ok, DtbName}.
 
 %-----------------------------------------------------------------------------
 %
 % 
 %-----------------------------------------------------------------------------
--spec get_board_type() -> ok.
-get_board_type() ->
-    ok.
+-spec get_board_type(string) -> ok.
+get_board_type(BoardType) when (BoardType == "") ->
+    Cmd = unicode:characters_to_list([?EHALCLI, " whoami", " | awk '{ print $2 }'"]),
+    Whoami = remove_char(os:cmd(Cmd), 10),
+    Index = list_to_integer(Whoami, 10),
+    BoardList = boards_list(),
 
+    case (Index < length(BoardList)) of
+        true ->
+            {ok,  lists:nth(Index, BoardList)};
 
+        false ->
+            {error, "Invalid board"}
+    end;
 
+get_board_type(BoardType) ->
+    {ok, BoardType}.
 

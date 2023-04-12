@@ -13,9 +13,9 @@
          power_cycle/2,
          get_slot_id/2,
          check_for_dependencies/1,
-         dependencies_list_myplat1/0,
-         dependencies_list_myplat2/0,
-         dependencies_list_myplat6/0,
+         dependencies_list_plat1/0,
+         dependencies_list_plat2/0,
+         dependencies_list_plat6/0,
          dependencies_list_test/0,
          call_function/3]).
 
@@ -51,7 +51,7 @@ dependencies_list_test() -> [?NOHUP,
                         ?NVLC].
 
 
-dependencies_list_myplat1() -> [?FPGAIO,
+dependencies_list_plat1() -> [?FPGAIO,
                                ?I2CGET,
                                ?I2CSET,
                                ?I2CTRANSFER,
@@ -68,7 +68,7 @@ dependencies_list_myplat1() -> [?FPGAIO,
                                ?KEXEC,
                                ?EHALCLI].
 
-dependencies_list_myplat2() -> [?FPGAIO,
+dependencies_list_plat2() -> [?FPGAIO,
                                ?I2CGET,
                                ?I2CSET,
                                ?I2CTRANSFER,
@@ -87,7 +87,7 @@ dependencies_list_myplat2() -> [?FPGAIO,
                                ?FLASHROM,
                                ?EHALCLI].
 
-dependencies_list_myplat6() -> [?FPGAIO,
+dependencies_list_plat6() -> [?FPGAIO,
                                ?I2CGET,
                                ?I2CSET,
                                ?I2CTRANSFER,
@@ -224,9 +224,9 @@ show_help(IniFile, Board_type, Active) ->
     io:format("               Note: If no card id is specified then the script will try discovery it.~n"),
     io:format(" ~n"),
     io:format("           3) chassis id values must be the chassis where the script is running~n"),
-    io:format("              -q=myplat1~n"),
-    io:format("              -q=myplat2~n"),
-    io:format("              -q=myplat6~n"),
+    io:format("              -q=plat1~n"),
+    io:format("              -q=plat2~n"),
+    io:format("              -q=plat6~n"),
     io:format(" ~n"),
     io:format("              Note: If no chassis id is specified then the script will try discovery it.~n"),
     io:format(" ~n"),
@@ -347,11 +347,11 @@ main(Args) when (length(Args) > 0) ->
     {ok, OptionsMap1, CommandMap1} = parse_params(Args, 1, OptionsMap, CommandMap),
 
     Command = maps:get("command", CommandMap1),
-    Platform_type = maps:get("platform_type", OptionsMap1),
-    Board_type = maps:get("board_type", OptionsMap1),
-    Active = maps:get("active", OptionsMap1),
-    Device_to_update = maps:get("device_to_update", OptionsMap1),
+    {ok, Platform_type} = updater_hw_devices_utils:get_platform_type(maps:get("platform_type", OptionsMap1)),
+    {ok, Board_type} = updater_hw_devices_utils:get_board_type(maps:get("board_type", OptionsMap1)),
+    {ok, Active} = updater_hw_devices_utils:get_active(maps:get("active", OptionsMap1)),
 
+    Device_to_update = maps:get("device_to_update", OptionsMap1),
     Hw_image_partition = maps:get("hw_image_partition", OptionsMap1),
     IniFile = unicode:characters_to_list([Hw_image_partition, ?IMAGES_PATH, Platform_type, "/", Platform_type, "_devices.cfg"]),
     %OptionsMap2 = maps:put("ini_file", Ini_file, OptionsMap1),
