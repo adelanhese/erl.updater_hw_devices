@@ -6,7 +6,7 @@
 -include("updater_hw_devices_defines.hrl").
 
 -export([main/1]).
--export([show_help/0]).
+-export([show_help/3]).
 -export([get_version/4]).
 -export([update/3]).
 -export([check_versions/4]).
@@ -176,7 +176,7 @@ check_for_dependencies(Platform) ->
 %
 % 
 %-----------------------------------------------------------------------------
-show_help() ->
+show_help(IniFile, Board_type, Active) ->
     io:format("~s: This tool provides the user interface to check and update the hw devices.~n", [?MODULE_NAME]),
     io:format(" ~n"),
     io:format("Tool usage:~n"),
@@ -232,7 +232,7 @@ show_help() ->
     io:format("           4) Supported devices for update in this board:~n"),
     io:format(" ~n"),
 
-    updater_hw_devices_utils:show_devices("lc1", "1"),
+    updater_hw_devices_utils:show_devices(IniFile, Board_type, Active),
 
     io:format(" ~n"),
     io:format(" Examples:~n"),
@@ -280,60 +280,50 @@ check_versions(IniFile, Platform, CurrentBoard, Active) ->
             error
     end.
 
-check_versions_next_board(IniFile, Platform, CurrentBoard, Active, Index, MaxBoards) ->
-    if
-        (Index =< MaxBoards) ->
-            {Result1, Board} = updater_hw_devices_utils:ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+check_versions_next_board(IniFile, Platform, CurrentBoard, Active, Index, MaxBoards) when (Index =< MaxBoards) ->
+    {Result1, Board} = updater_hw_devices_utils:ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
 
-            if
-                (Result1 == ok) ->
-                    %io:format("~s~n", [Board]),
+    case Result1 of
+        ok ->
+            {_, NumDevicesStr} = updater_hw_devices_utils:ini_file(IniFile, Board, "num_devices"),
+            {NumDevices, _} = string:to_integer(NumDevicesStr),
+            check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, 1, NumDevices),
+            check_versions_next_board(IniFile, Platform, CurrentBoard, Active, Index + 1, MaxBoards);
 
-                    {_, NumDevicesStr} = updater_hw_devices_utils:ini_file(IniFile, Board, "num_devices"),
-                    {NumDevices, _} = string:to_integer(NumDevicesStr),
-                    check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, 1, NumDevices),
-                    check_versions_next_board(IniFile, Platform, CurrentBoard, Active, Index + 1, MaxBoards);
+        _ ->
+            error
+    end;
 
-                true ->
-                    error
-            end;
+check_versions_next_board(_, _, _, _, _, _) ->
+    ok.
 
-        true ->
-            ok
-    end.
-
-check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, Index, MaxDevices) ->
-    if
-        (Index =< MaxDevices) ->
-            {Result1, Device} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
-            {Result2, Activecard} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
-            {Result3, Enabled} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
-            {Result4, Checkversion} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["checkversion", integer_to_list(Index)])),
-            
-            if
-                (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
-                ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
-                (Enabled == "1") and (Checkversion == "1")->
+check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, Index, MaxDevices) when  (Index =< MaxDevices)->
+   {Result1, Device} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+   {Result2, Activecard} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
+   {Result3, Enabled} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+   {Result4, Checkversion} = updater_hw_devices_utils:ini_file(IniFile, Board, unicode:characters_to_list(["checkversion", integer_to_list(Index)])),
+   
+   case Result1 of
+       _ when (Result1 == ok) and (Result2 == ok) and (Result3 == ok) and (Result4 == ok) and
+              ((CurrentBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
+              (Enabled == "1") and (Checkversion == "1")->
                     {_, Version} = get_version(IniFile, Platform, Board, Device),
                     io:format("~s_~s => ~s ~n", [Board, Device, Version]),
                     check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, Index + 1, MaxDevices);
 
-                true ->
-                    check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, Index + 1, MaxDevices)
-            end;
+       _ ->
+           check_versions_next_Device(IniFile, Platform, Board, CurrentBoard, Active, Index + 1, MaxDevices)
+   end;
+   
 
-        true ->
-            ok
-    end.
-
-
-
+check_versions_next_Device(_, _, _, _, _, _, _) ->
+    ok.
 
 %-----------------------------------------------------------------------------
 % 
 %
 %-----------------------------------------------------------------------------
-main(Args) ->
+main(Args) when (length(Args) > 0) ->
 
     OptionsMap = #{"background" => false,
                    "auto_update" => false,
@@ -354,141 +344,131 @@ main(Args) ->
 
     CommandMap = #{"command" => ""},
 
-    if 
-        length(Args) == 0 ->
-            show_help();
+    {ok, OptionsMap1, CommandMap1} = parse_params(Args, 1, OptionsMap, CommandMap),
 
-        true ->
-            {ok, OptionsMap1, CommandMap1} = parse_params(Args, 1, OptionsMap, CommandMap),
+    Command = maps:get("command", CommandMap1),
+    Platform_type = maps:get("platform_type", OptionsMap1),
+    Board_type = maps:get("board_type", OptionsMap1),
+    Active = maps:get("active", OptionsMap1),
+    Device_to_update = maps:get("device_to_update", OptionsMap1),
 
-            Command = maps:get("command", CommandMap1),
-            Platform_type = maps:get("platform_type", OptionsMap1),
-            Board_type = maps:get("board_type", OptionsMap1),
-            Active = maps:get("active", OptionsMap1),
-            Device_to_update = maps:get("device_to_update", OptionsMap1),
+    Hw_image_partition = maps:get("hw_image_partition", OptionsMap1),
+    IniFile = unicode:characters_to_list([Hw_image_partition, ?IMAGES_PATH, Platform_type, "/", Platform_type, "_devices.cfg"]),
+    %OptionsMap2 = maps:put("ini_file", Ini_file, OptionsMap1),
 
-            Hw_image_partition = maps:get("hw_image_partition", OptionsMap1),
-            IniFile = unicode:characters_to_list([Hw_image_partition, ?IMAGES_PATH, Platform_type, "/", Platform_type, "_devices.cfg"]),
-            %OptionsMap2 = maps:put("ini_file", Ini_file, OptionsMap1),
+    case Command of
+        "show_help" ->
+            show_help(IniFile, Board_type, Active);
 
-            case Command of
-                "show_help" ->
-                    show_help();
+       "check" ->
+            check_versions(IniFile, Platform_type, Board_type, Active);
 
-               "check" ->
-                    check_versions(IniFile, Platform_type, Board_type, Active);
+        "update" ->
+            Board = updater_hw_devices_utils:extract_board(Device_to_update),
+            Device = updater_hw_devices_utils:extract_device(Device_to_update),
+            update(Platform_type, Board, Device);
+          
+        "disable" ->
+            updater_hw_devices_utils:enable_disable_device(IniFile, Device_to_update, "0", Board_type, Active);
 
-                "update" ->
-                    Board = updater_hw_devices_utils:extract_board(Device_to_update),
-                    Device = updater_hw_devices_utils:extract_device(Device_to_update),
-                    update(Platform_type, Board, Device);
-                  
-                "disable" ->
-                    updater_hw_devices_utils:enable_disable_device(Device_to_update, "0", Board_type, Active);
+        "enable" ->
+            updater_hw_devices_utils:enable_disable_device(IniFile, Device_to_update, "1", Board_type, Active);
 
-                "enable" ->
-                    updater_hw_devices_utils:enable_disable_device(Device_to_update, "1", Board_type, Active);
+        "examine" ->
+            Board = updater_hw_devices_utils:extract_board(Device_to_update),
+            Device = updater_hw_devices_utils:extract_device(Device_to_update),
+            {_, Value} = updater_hw_devices_utils:read_field_from_cfg(Board, Device, "alias"),
+            io:format("~s~n", [Value]);
 
-                "examine" ->
-                    Board = updater_hw_devices_utils:extract_board(Device_to_update),
-                    Device = updater_hw_devices_utils:extract_device(Device_to_update),
-                    {_, Value} = updater_hw_devices_utils:read_field_from_cfg(Board, Device, "alias"),
-                    io:format("~s~n", [Value]);
+        _ ->
+            io:format("Invalid command~n"),
+        error
+    end;
 
-                _ ->
-                    io:format("Invalid command~n"),
-                error
-            end
-    end.
-
+main(_) ->
+    show_help("","","").
 
 %-----------------------------------------------------------------------------
 %
 % 
 %-----------------------------------------------------------------------------
-parse_params(Args, Index, OptionsMap, CommandMap) ->
+parse_params(Args, Index, OptionsMap, CommandMap) when (Index =< length(Args)) ->
+    {Parameter, SubParameter} = updater_hw_devices_utils:split_paramenter(lists:nth(Index, Args), "="),
 
     if
-        Index =< length(Args) ->
-            {Parameter, SubParameter} = updater_hw_devices_utils:split_paramenter(lists:nth(Index, Args), "="),
+        % options parameters
+        (Parameter == "-g") or (Parameter == "--background") ->
+            parse_params(Args, Index + 1, maps:put("background", true, OptionsMap), CommandMap);
 
-            if
-                % options parameters
-                (Parameter == "-g") or (Parameter == "--background") ->
-                    parse_params(Args, Index + 1, maps:put("background", true, OptionsMap), CommandMap);
-
-                (Parameter == "-v") or (Parameter == "--verbose") ->
-                    parse_params(Args, Index + 1, maps:put("log_level", SubParameter, OptionsMap), CommandMap);
-                
-                (Parameter == "-o") or (Parameter == "--cardid") ->
-                    parse_params(Args, Index + 1, maps:put("board_type", SubParameter, OptionsMap), CommandMap);
-                
-                (Parameter == "-q") or (Parameter == "--chassisid") ->
-                    parse_params(Args, Index + 1, maps:put("platform_type", SubParameter, OptionsMap), CommandMap);
-                
-                (Parameter == "-t") or (Parameter == "--dtb") ->
-                    parse_params(Args, Index + 1, maps:put("dtb_file", SubParameter, OptionsMap), CommandMap);
-                
-                (Parameter == "-a") or (Parameter == "--auto") ->
-                    parse_params(Args, Index + 1, maps:put("auto_update", true, OptionsMap), CommandMap);
-                
-                (Parameter == "-b") or (Parameter == "--backplane") ->
-                    parse_params(Args, Index + 1, maps:put("active", "1", OptionsMap), CommandMap);
-                
-                (Parameter == "-f") or (Parameter == "--file") ->
-                    parse_params(Args, Index + 1, maps:put("show_filename", true, OptionsMap), CommandMap);
-                
-                (Parameter == "-g") or (Parameter == "--background") ->
-                    parse_params(Args, Index + 1, maps:put("background", true, OptionsMap), CommandMap);
-                
-                (Parameter == "-s") or (Parameter == "--spk") ->
-                    OptionsMapTemp1 = maps:put("spk_updater", true, OptionsMap),
-                    parse_params(Args, Index + 1, maps:put("hw_image_partition", ?SPK_PARTITION, OptionsMapTemp1), CommandMap);
-                
-                (Parameter == "-i") or (Parameter == "--input") ->
-                    parse_params(Args, Index + 1, maps:put("input_file", SubParameter, OptionsMap), CommandMap);
-                
-                (Parameter == "-r") or (Parameter == "--fpga-reload") ->
-                    parse_params(Args, Index + 1, maps:put("fpga_reload_after_update", true, OptionsMap), CommandMap);
-                
-                (Parameter == "-p") or (Parameter == "--power-cycle") ->
-                    parse_params(Args, Index + 1, maps:put("power_cycle_after_update", true, OptionsMap), CommandMap);
-                
-                (Parameter == "-l") or (Parameter == "--system-reboot") ->
-                    parse_params(Args, Index + 1, maps:put("system_reboot_after_update", true, OptionsMap), CommandMap);
-
-
-
-                % commands paramenters
-                (Parameter == "-h") or (Parameter == "--help") ->
-                    parse_params(Args, Index + 1, OptionsMap, maps:put("command", "show_help", CommandMap));
-                
-                (Parameter == "-c") or (Parameter == "--check") ->
-                    parse_params(Args, Index + 1, OptionsMap, maps:put("command", "check", CommandMap));
-                
-                (Parameter == "-u") or (Parameter == "--update") ->
-                    OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
-                    parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "update", CommandMap));
-                
-                (Parameter == "-d") or (Parameter == "--disable") ->
-                    OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
-                    parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "disable", CommandMap));
-                
-                (Parameter == "-e") or (Parameter == "--enable") ->
-                    OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
-                    parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "enable", CommandMap));
-                
-                (Parameter == "-x") or (Parameter == "--examine") ->
-                    OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
-                    parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "examine", CommandMap));
-                                   
-                true ->
-                    io:format("Unknown parameter: ~s~n", [Parameter]),
-                    {ok, OptionsMap, CommandMap}
-            end;
+        (Parameter == "-v") or (Parameter == "--verbose") ->
+            parse_params(Args, Index + 1, maps:put("log_level", SubParameter, OptionsMap), CommandMap);
         
+        (Parameter == "-o") or (Parameter == "--cardid") ->
+            parse_params(Args, Index + 1, maps:put("board_type", SubParameter, OptionsMap), CommandMap);
+        
+        (Parameter == "-q") or (Parameter == "--chassisid") ->
+            parse_params(Args, Index + 1, maps:put("platform_type", SubParameter, OptionsMap), CommandMap);
+        
+        (Parameter == "-t") or (Parameter == "--dtb") ->
+            parse_params(Args, Index + 1, maps:put("dtb_file", SubParameter, OptionsMap), CommandMap);
+        
+        (Parameter == "-a") or (Parameter == "--auto") ->
+            parse_params(Args, Index + 1, maps:put("auto_update", true, OptionsMap), CommandMap);
+        
+        (Parameter == "-b") or (Parameter == "--backplane") ->
+            parse_params(Args, Index + 1, maps:put("active", "1", OptionsMap), CommandMap);
+        
+        (Parameter == "-f") or (Parameter == "--file") ->
+            parse_params(Args, Index + 1, maps:put("show_filename", true, OptionsMap), CommandMap);
+        
+        (Parameter == "-g") or (Parameter == "--background") ->
+            parse_params(Args, Index + 1, maps:put("background", true, OptionsMap), CommandMap);
+        
+        (Parameter == "-s") or (Parameter == "--spk") ->
+            OptionsMapTemp1 = maps:put("spk_updater", true, OptionsMap),
+            parse_params(Args, Index + 1, maps:put("hw_image_partition", ?SPK_PARTITION, OptionsMapTemp1), CommandMap);
+        
+        (Parameter == "-i") or (Parameter == "--input") ->
+            parse_params(Args, Index + 1, maps:put("input_file", SubParameter, OptionsMap), CommandMap);
+        
+        (Parameter == "-r") or (Parameter == "--fpga-reload") ->
+            parse_params(Args, Index + 1, maps:put("fpga_reload_after_update", true, OptionsMap), CommandMap);
+        
+        (Parameter == "-p") or (Parameter == "--power-cycle") ->
+            parse_params(Args, Index + 1, maps:put("power_cycle_after_update", true, OptionsMap), CommandMap);
+        
+        (Parameter == "-l") or (Parameter == "--system-reboot") ->
+            parse_params(Args, Index + 1, maps:put("system_reboot_after_update", true, OptionsMap), CommandMap);
+
+
+
+        % commands paramenters
+        (Parameter == "-h") or (Parameter == "--help") ->
+            parse_params(Args, Index + 1, OptionsMap, maps:put("command", "show_help", CommandMap));
+        
+        (Parameter == "-c") or (Parameter == "--check") ->
+            parse_params(Args, Index + 1, OptionsMap, maps:put("command", "check", CommandMap));
+        
+        (Parameter == "-u") or (Parameter == "--update") ->
+            OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
+            parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "update", CommandMap));
+        
+        (Parameter == "-d") or (Parameter == "--disable") ->
+            OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
+            parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "disable", CommandMap));
+        
+        (Parameter == "-e") or (Parameter == "--enable") ->
+            OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
+            parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "enable", CommandMap));
+        
+        (Parameter == "-x") or (Parameter == "--examine") ->
+            OptionsMapTemp = maps:put("device_to_update", SubParameter, OptionsMap),
+            parse_params(Args, Index + 1, OptionsMapTemp, maps:put("command", "examine", CommandMap));
+                           
         true ->
+            io:format("Unknown parameter: ~s~n", [Parameter]),
             {ok, OptionsMap, CommandMap}
-    end.
+    end;
 
-
+parse_params(_, _, OptionsMap, CommandMap) ->
+    {ok, OptionsMap, CommandMap}.
