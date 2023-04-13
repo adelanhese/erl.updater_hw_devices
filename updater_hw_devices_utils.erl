@@ -926,18 +926,15 @@ check_for_supported_platform(Platform) ->
 %
 % 
 %-----------------------------------------------------------------------------
--spec check_for_supported_board(string, string) -> boolean.
+-spec check_for_supported_board(string, string) -> ok | error | not_found.
 check_for_supported_board(IniFile, Board) ->
-    {Result1, NumBoardsStr} = ini_file(IniFile, "boards", "num_boards"),
+    check_for_supported_board(IniFile, ini_file(IniFile, "boards", "num_boards"), Board).
 
-    case Result1 of
-        ok ->
-            {NumBoards, _} = string:to_integer(NumBoardsStr),
-            check_for_supported_board(IniFile, Board, 1, NumBoards);
-
-        _ ->
-            error
-    end.
+check_for_supported_board(IniFile, {ok, NumBoardsStr}, Board) ->
+    {NumBoards, _} = string:to_integer(NumBoardsStr),
+    check_for_supported_board(IniFile, Board, 1, NumBoards);
+check_for_supported_board(_IniFile, {error,_}, _Board) ->
+    error.
 
 check_for_supported_board(_IniFile, _Board, Index, MaxBoards) when Index > MaxBoards ->
     not_found;
