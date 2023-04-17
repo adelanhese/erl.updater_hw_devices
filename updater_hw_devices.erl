@@ -267,6 +267,8 @@ main(Args) when (length(Args) > 0) ->
     
     Command = maps:get(command, OptionsMap1),
 
+    %io:format("map: ~p~n", [OptionsMap1]),
+
     case Command of
         show_help ->
             updater_hw_devices_cmdlineparse:show_help(IniFile, Board_type, Active);

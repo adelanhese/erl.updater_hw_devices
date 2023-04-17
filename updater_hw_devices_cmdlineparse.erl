@@ -3,10 +3,9 @@
 
 -export([show_help/3,
          valid_options/0,
-         parse_params/3,
-         parse_params_x/3]).
+         parse_params/3]).
 
-         -export_type([options/0]).
+-export_type([options/0]).
 
 -record(options, {
     type                :: atom() | undefined,
@@ -30,7 +29,7 @@ valid_options() ->
      #options{type=opt, short="-a", long="--auto"         ,map_field=auto_update,                map_value=true},
      #options{type=opt, short="-b", long="--backplane"    ,map_field=active,                     map_value="1"},
      #options{type=opt, short="-f", long="--file"         ,map_field=show_filename,              map_value=true},
-     #options{type=opt, short="-s", long="--spk"          ,map_field=spk_updater,                map_value=true},
+     #options{type=opt, short="-s", long="--spk"          ,map_field=spk_updater,                map_value=true,     extra_map_field=hw_image_partition, extra_map_value=?SPK_PARTITION},
      #options{type=opt, short="-i", long="--input"        ,map_field=input_file,                 map_value=sub_parameter},
      #options{type=opt, short="-r", long="--fpga-reload"  ,map_field=fpga_reload_after_update,   map_value=true},
      #options{type=opt, short="-p", long="--power-cycle"  ,map_field=power_cycle_after_update,   map_value=true},
@@ -129,104 +128,19 @@ show_help(IniFile, Board_type, Active) ->
     io:format("          # ~s -g -r -e=lc1_fpgajic/otu2~n", [?MODULE_NAME]),
     io:format(" ~n").
 
-
 %-----------------------------------------------------------------------------
 %
 % 
 %-----------------------------------------------------------------------------
-parse_params_x(Args, Index, OptionsMap) when (Index =< length(Args)) ->
-    {Parameter, SubParameter} = updater_hw_devices_utils:split_paramenter(lists:nth(Index, Args), "="),
+map_value(MapValue, SubParameter) ->
 
-    if
-        % options parameters
-        (Parameter == "-g") or (Parameter == "--background") ->
-            parse_params(Args, Index + 1, maps:put(background, true, OptionsMap));
+    case MapValue of
+        sub_parameter ->
+            SubParameter;
 
-        (Parameter == "-v") or (Parameter == "--verbose") ->
-            parse_params(Args, Index + 1, maps:put(log_level, SubParameter, OptionsMap));
-        
-        (Parameter == "-o") or (Parameter == "--cardid") ->
-            parse_params(Args, Index + 1, maps:put(board_type, SubParameter, OptionsMap));
-        
-        (Parameter == "-q") or (Parameter == "--chassisid") ->
-            parse_params(Args, Index + 1, maps:put(platform_type, SubParameter, OptionsMap));
-        
-        (Parameter == "-t") or (Parameter == "--dtb") ->
-            parse_params(Args, Index + 1, maps:put(dtb_file, SubParameter, OptionsMap));
-        
-        (Parameter == "-a") or (Parameter == "--auto") ->
-            parse_params(Args, Index + 1, maps:put(auto_update, true, OptionsMap));
-        
-        (Parameter == "-b") or (Parameter == "--backplane") ->
-            parse_params(Args, Index + 1, maps:put(active, "1", OptionsMap));
-        
-        (Parameter == "-f") or (Parameter == "--file") ->
-            parse_params(Args, Index + 1, maps:put(show_filename, true, OptionsMap));
-        
-        (Parameter == "-g") or (Parameter == "--background") ->
-            parse_params(Args, Index + 1, maps:put(background, true, OptionsMap));
-        
-        (Parameter == "-s") or (Parameter == "--spk") ->
-            OptionsMapTemp1 = maps:put(spk_updater, true, OptionsMap),
-            parse_params(Args, Index + 1, maps:put(hw_image_partition, ?SPK_PARTITION, OptionsMapTemp1));
-        
-        (Parameter == "-i") or (Parameter == "--input") ->
-            parse_params(Args, Index + 1, maps:put(input_file, SubParameter, OptionsMap));
-        
-        (Parameter == "-r") or (Parameter == "--fpga-reload") ->
-            parse_params(Args, Index + 1, maps:put(fpga_reload_after_update, true, OptionsMap));
-        
-        (Parameter == "-p") or (Parameter == "--power-cycle") ->
-            parse_params(Args, Index + 1, maps:put(power_cycle_after_update, true, OptionsMap));
-        
-        (Parameter == "-l") or (Parameter == "--system-reboot") ->
-            parse_params(Args, Index + 1, maps:put(system_reboot_after_update, true, OptionsMap));
-
-
-
-        % commands paramenters
-        (Parameter == "-h") or (Parameter == "--help") ->
-            parse_params(Args, Index + 1, maps:put(command, show_help, OptionsMap));
-        
-        (Parameter == "-c") or (Parameter == "--check") ->
-            parse_params(Args, Index + 1, maps:put(command, check, OptionsMap));
-        
-        (Parameter == "-u") or (Parameter == "--update") ->
-            OptionsMapTemp = maps:put(device_to_update, SubParameter, OptionsMap),
-            parse_params(Args, Index + 1, maps:put(command, update, OptionsMapTemp));
-        
-        (Parameter == "-d") or (Parameter == "--disable") ->
-            OptionsMapTemp = maps:put(device_to_update, SubParameter, OptionsMap),
-            parse_params(Args, Index + 1, maps:put(command, disable, OptionsMapTemp));
-        
-        (Parameter == "-e") or (Parameter == "--enable") ->
-            OptionsMapTemp = maps:put(device_to_update, SubParameter, OptionsMap),
-            parse_params(Args, Index + 1, maps:put(command, enable, OptionsMapTemp));
-        
-        (Parameter == "-x") or (Parameter == "--examine") ->
-            OptionsMapTemp = maps:put(device_to_update, SubParameter, OptionsMap),
-            parse_params(Args, Index + 1, maps:put(command, examine, OptionsMapTemp));
-                           
-        true ->
-            io:format("Unknown parameter: ~s~n", [Parameter]),
-            {ok, OptionsMap}
-    end;
-parse_params_x(_Args, _Index, OptionsMap) ->
-    {ok, OptionsMap}.
-
-%-----------------------------------------------------------------------------
-%
-% 
-%-----------------------------------------------------------------------------
-%get_map_value(MapValue, SubParameter) ->
-%
-%    case MapValue of
-%        sub_paramenter ->
-%            SubParameter;
-%
-%        _ ->
-%            MapValue
-%    end.
+        _ ->
+            MapValue
+    end.
 
 %-----------------------------------------------------------------------------
 %
@@ -245,30 +159,12 @@ parse_params_next(_Args, _SubParameter, _Index, OptionsMap, false, false) ->
     io:format("Unknown parameter~n"),
     {ok, OptionsMap};
 parse_params_next(Args, SubParameter, Index, OptionsMap, Long, false) when (Long /= false) ->
-    OptionsMapTemp = maps:put(Long#options.extra_map_field, SubParameter, OptionsMap),
-    parse_params(Args, Index + 1, maps:put(Long#options.map_field, Long#options.map_value, OptionsMapTemp));
+    OptionsMapTemp = maps:put(Long#options.extra_map_field, map_value(Long#options.extra_map_value, SubParameter), OptionsMap),
+    parse_params(Args, Index + 1, maps:put(Long#options.map_field, map_value(Long#options.map_value, SubParameter),OptionsMapTemp));
 parse_params_next(Args, SubParameter, Index, OptionsMap, false, Short) when (Short /= false) ->
-    OptionsMapTemp = maps:put(Short#options.extra_map_field, SubParameter, OptionsMap),
-    parse_params(Args, Index + 1, maps:put(Short#options.map_field, Short#options.map_value, OptionsMapTemp));
+    OptionsMapTemp = maps:put(Short#options.extra_map_field, map_value(Short#options.extra_map_value, SubParameter), OptionsMap),
+    parse_params(Args, Index + 1, maps:put(Short#options.map_field, map_value(Short#options.map_value, SubParameter), OptionsMapTemp));
 parse_params_next(Args, SubParameter, Index, OptionsMap, Long, Short) when (Long /= false), (Short /= false) ->
-    OptionsMapTemp = maps:put(Short#options.extra_map_field, SubParameter, OptionsMap),
-    parse_params(Args, Index + 1, maps:put(Short#options.map_field, Short#options.map_value, OptionsMapTemp)).
-
-%    if
-%        (Short /= false) ->
-%            io:format("~p=~p~n", [Short#options.name, Short#options.value]),
-%            parse_params(Args, Index + 1, maps:put(Short#options.name, Short#options.value, OptionsMap));
-%
-%        (Long /= false) ->
-%            io:format("~p=~p~n", [Long#options.name, Long#options.value]),
-%            parse_params(Args, Index + 1, maps:put(Long#options.name, Long#options.value, OptionsMap));
-%
-%        true ->
-%            io:format("Unknown parameter: ~s~n", [Parameter]),
-%            {ok, OptionsMap}
-%    end.
-
-
-
-
+    OptionsMapTemp = maps:put(Short#options.extra_map_field, map_value(Short#options.extra_map_value, SubParameter), OptionsMap),
+    parse_params(Args, Index + 1, maps:put(Short#options.map_field, map_value(Short#options.map_value, SubParameter), OptionsMapTemp)).
 
