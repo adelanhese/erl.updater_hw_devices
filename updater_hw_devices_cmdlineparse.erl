@@ -34,7 +34,7 @@ valid_options() ->
      #options{type=opt, short="-r", long="--fpga-reload"  ,map_field=fpga_reload_after_update,   map_value=true},
      #options{type=opt, short="-p", long="--power-cycle"  ,map_field=power_cycle_after_update,   map_value=true},
      #options{type=opt, short="-l", long="--system-reboot",map_field=system_reboot_after_update, map_value=true},
-     #options{type=cmd, short="-h", long="--help"         ,map_field=command,                    map_value=help},
+     #options{type=cmd, short="-h", long="--help"         ,map_field=command,                    map_value=show_help},
      #options{type=cmd, short="-c", long="--check"        ,map_field=command,                    map_value=check},
      #options{type=cmd, short="-u", long="--update"       ,map_field=command,                    map_value=update,    extra_map_field=device_to_update, extra_map_value=sub_parameter},
      #options{type=cmd, short="-d", long="--disable"      ,map_field=command,                    map_value=disable,   extra_map_field=device_to_update, extra_map_value=sub_parameter},

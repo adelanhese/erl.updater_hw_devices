@@ -1076,7 +1076,6 @@ get_platform_type(PlatFormType) when (PlatFormType == "") ->
     Cmd = unicode:characters_to_list([?EHALCLI, " whoami"]),
     Whoami = remove_char(os:cmd(Cmd), 10),
     extract_platform(Whoami, " rm_");
-
 get_platform_type(PlatFormType) ->
     {ok, PlatFormType}.
 
@@ -1089,7 +1088,6 @@ get_dtb_name(DtbName) when (DtbName == "") ->
     Cmd = unicode:characters_to_list([?EHALCLI, " device-tree"]),
     Dtb_name = remove_char(os:cmd(Cmd), 10),
     {ok, Dtb_name};
-
 get_dtb_name(DtbName) ->
     {ok, DtbName}.
 
@@ -1103,15 +1101,12 @@ get_board_type(BoardType) when (BoardType == "") ->
     Whoami = remove_char(os:cmd(Cmd), 10),
     Index = list_to_integer(Whoami, 10),
     BoardList = boards_list(),
-
-    case (Index < length(BoardList)) of
-        true ->
-            {ok,  lists:nth(Index, BoardList)};
-
-        false ->
-            {error, "Invalid board"}
-    end;
-
+    get_board_type(Index, BoardList);
 get_board_type(BoardType) ->
     {ok, BoardType}.
+get_board_type(Index, BoardList) when (Index < length(BoardList)) ->
+    {ok,  lists:nth(Index, BoardList)};
+get_board_type(_Index, _BoardList) ->
+    {error, "Invalid board"}.
+
 

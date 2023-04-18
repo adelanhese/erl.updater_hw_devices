@@ -172,7 +172,6 @@ check_for_dependencies(Platform) ->
     DependenciesList = call_function(?MODULE_NAME, FuncName, []),
     updater_hw_devices_utils:check_for_files_dependencies(DependenciesList, 1).
 
-
 %-----------------------------------------------------------------------------
 %
 % 
@@ -190,8 +189,7 @@ check_versions({_, NumBoardsStr}, _IniFile, _Platform, _BaseBoard, _Active) ->
     io:format("Error: ~p~n", [NumBoardsStr]),
     error.
 
-
-
+% Next board
 check_versions_next_board(_IniFile, _Platform, _BaseBoard, _Active, Index, MaxBoards)  when (Index > MaxBoards)->
         ok;
 check_versions_next_board(IniFile, Platform, BaseBoard, Active, Index, MaxBoards) ->
@@ -206,8 +204,7 @@ check_versions_next_board({ok, Board}, IniFile, Platform, BaseBoard, Active, Ind
 check_versions_next_board({_, _Board}, _IniFile, _Platform, _BaseBoard, _Active, _Index, _MaxBoards) ->
     error.
 
-
-
+% Next device
 check_versions_next_Device(_IniFile, _Platform, _Board, _BaseBoard, _Active, Index, MaxDevices) when  (Index > MaxDevices)->
     ok;
 check_versions_next_Device(IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices)->
@@ -249,22 +246,15 @@ main(Args) when (length(Args) > 0) ->
                    undefined => ""},
 
     {ok, OptionsMap1} = updater_hw_devices_cmdlineparse:parse_params(Args, 1, OptionsMap),
-
     {ok, Platform_type} = updater_hw_devices_utils:get_platform_type(maps:get(platform_type, OptionsMap1)),
     {ok, Board_type} = updater_hw_devices_utils:get_board_type(maps:get(board_type, OptionsMap1)),
     {ok, Active} = updater_hw_devices_utils:get_active(maps:get(active, OptionsMap1)),
-
     Device_to_update = maps:get(device_to_update, OptionsMap1),
     Hw_image_partition = maps:get(hw_image_partition, OptionsMap1),
     IniFile = unicode:characters_to_list([Hw_image_partition, ?IMAGES_PATH, Platform_type, "/", Platform_type, "_devices.cfg"]),
-    
     Command = maps:get(command, OptionsMap1),
-
-    io:format("map: ~p~n", [OptionsMap1]),
-
+    %io:format("map: ~p~n", [OptionsMap1]),
     command_run(Command, IniFile, Platform_type, Board_type, Active, Device_to_update);
-
-
 main(_Args) ->
     updater_hw_devices_cmdlineparse:show_help("","","").
 
