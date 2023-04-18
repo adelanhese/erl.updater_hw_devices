@@ -841,35 +841,30 @@ show_devices_next_Device(_, _, _, _, _, _) ->
 %-----------------------------------------------------------------------------
 -spec show_boards_tree(string, string, string) -> ok | error.
 show_boards_tree(IniFile, BaseBoard, Active) ->
-    {Result1, NumBoardsStr} = ini_file(IniFile, "boards", "num_boards"),
+    {Result, NumBoardsStr} = ini_file(IniFile, "boards", "num_boards"),
+    show_boards_tree({Result, NumBoardsStr}, IniFile, BaseBoard, Active).
+show_boards_tree({ok, NumBoardsStr}, IniFile, BaseBoard, Active) ->
+    {NumBoards, _} = string:to_integer(NumBoardsStr),
+    show_boards_tree_next_board(IniFile, BaseBoard, Active, 1, NumBoards);
+show_boards_tree({_Result, _NumBoardsStr}, _IniFile, _BaseBoard, _Active) ->
+    error.
 
-    case Result1 of
-        ok ->
-            {NumBoards, _} = string:to_integer(NumBoardsStr),
-            show_boards_tree_next_board(IniFile, BaseBoard, Active, 1, NumBoards);
+show_boards_tree_next_board(_IniFile, _BaseBoard, _Active, Index, MaxBoards) when (Index >MaxBoards) ->
+    ok;
+show_boards_tree_next_board(IniFile, BaseBoard, Active, Index, MaxBoards) ->
+    {Result, Board} = ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+    show_boards_tree_next_board({Result, Board}, IniFile, BaseBoard, Active, Index, MaxBoards).
+show_boards_tree_next_board({ok, Board}, IniFile, BaseBoard, Active, Index, MaxBoards) ->
+    {_, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
+    {NumDevices, _} = string:to_integer(NumDevicesStr),
+    show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, 1, NumDevices, 0),
+    show_boards_tree_next_board(IniFile, BaseBoard, Active, Index + 1, MaxBoards);
+show_boards_tree_next_board({_Result, _Board}, _IniFile, _BaseBoard, _Active, _Index, _MaxBoards) ->
+    error.
 
-        _ ->
-            error
-    end.
-
-show_boards_tree_next_board(IniFile, BaseBoard, Active, Index, MaxBoards) when (Index =< MaxBoards) ->
-    {Result1, Board} = ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
-
-    case Result1 of 
-        ok ->
-            {_, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
-            {NumDevices, _} = string:to_integer(NumDevicesStr),
-            show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, 1, NumDevices, 0),
-            show_boards_tree_next_board(IniFile, BaseBoard, Active, Index + 1, MaxBoards);
-
-        _ ->
-            error
-    end;
-
-show_boards_tree_next_board(_, _, _, _, _) ->
-    ok.
-
-show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index, MaxDevices, Flag) when (Index =< MaxDevices) ->
+show_boards_tree_next_device(_IniFile, _Board, _BaseBoard, _Active, Index, MaxDevices, _Flag) when (Index > MaxDevices) ->
+    ok;
+show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index, MaxDevices, Flag) ->
      {Result1, Device} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
      {Result2, Activecard} = ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
      {Result3, Enabled} = ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
@@ -906,10 +901,9 @@ show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index, MaxDevice
 
          _ ->
              show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices, Flag)
-     end;
+     end.
 
-show_boards_tree_next_device(_, _, _, _, _, _, _) ->
-    ok.
+
 
 
 %-----------------------------------------------------------------------------
@@ -955,51 +949,40 @@ check_for_supported_board_next(IniFile, _Result, Board, Index, MaxBoards) ->
 %-----------------------------------------------------------------------------
 -spec update_cfg_file(string, string) -> {result, string}.
 update_cfg_file(Source, Target) ->
-    {Result1, NumBoardsStr} = ini_file(Source, "boards", "num_boards"),
+    {Result, NumBoardsStr} = ini_file(Source, "boards", "num_boards"),
+    update_cfg_file({Result, NumBoardsStr}, Source, Target).
+update_cfg_file({ok, NumBoardsStr}, Source, Target) ->
+    {NumBoards, _} = string:to_integer(NumBoardsStr),
+    update_cfg_file_next_board(Source, Target, 1, NumBoards);
+update_cfg_file({_, _NumBoardsStr}, _Source, _Target) ->
+    error.
 
-    case Result1 of
-        ok ->
-            {NumBoards, _} = string:to_integer(NumBoardsStr),
-            update_cfg_file_next_board(Source, Target, 1, NumBoards);
+update_cfg_file_next_board(_Source, _Target, Index, MaxBoards) when (Index > MaxBoards) ->
+    ok;
+update_cfg_file_next_board(Source, Target, Index, MaxBoards) ->
+    {Result, BoardRead} = ini_file(Source, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+    update_cfg_file_next_board({Result, BoardRead}, Source, Target, Index, MaxBoards).
+update_cfg_file_next_board({ok, BoardRead}, Source, Target, Index, MaxBoards) ->
+    {_, NumDevicesStr} = ini_file(Source, BoardRead, "num_devices"),
+    {NumDevices, _} = string:to_integer(NumDevicesStr),
+    update_cfg_file_next_Device(Source, Target, BoardRead, 1, NumDevices),
+    update_cfg_file_next_board(Source, Target, Index + 1, MaxBoards);
+update_cfg_file_next_board({_, _BoardRead}, _Source, _Target, _Index, _MaxBoards) ->
+    error.
 
-        _ ->
-            error
-    end.
-
-update_cfg_file_next_board(Source, Target, Index, MaxBoards) when (Index =< MaxBoards), (MaxBoards > 0) ->
-     {Result1, Board} = ini_file(Source, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
-
-     case Result1 of
-         ok ->
-             {_, NumDevicesStr} = ini_file(Source, Board, "num_devices"),
-             {NumDevices, _} = string:to_integer(NumDevicesStr),
-             update_cfg_file_next_Device(Source, Target, Board, 1, NumDevices),
-             update_cfg_file_next_board(Source, Target, Index + 1, MaxBoards);
-
-         _ ->
-             error
-     end;
-
-update_cfg_file_next_board(_, _, _, _) ->
-    ok.
-
-update_cfg_file_next_Device(Source, Target, Board, Index, MaxDevices) when (Index =< MaxDevices) ->
-     {Result1, Device} = ini_file(Source, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
-     {Result2, Enabled} = ini_file(Source, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
-     {Result3, Alias} = ini_file(Source, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
-     
-     case {Result1, Result2, Result3} of
-        {ok, ok, ok} ->
-             {_, IndexTarget} = get_device_index_from_cfg(Target, Board, Device, "alias", Alias),
-             ini_file(Target, Board, unicode:characters_to_list(["enabled", integer_to_list(IndexTarget)]), Enabled, wr),
-             update_cfg_file_next_Device(Source, Target, Board, Index + 1, MaxDevices);
-
-         _ ->
-             error
-     end;
-
-update_cfg_file_next_Device(_, _, _, _, _) ->
-    ok.
+update_cfg_file_next_Device(_Source, _Target, _BoardRead, Index, MaxDevices) when (Index > MaxDevices) ->
+    ok;
+update_cfg_file_next_Device(Source, Target, BoardRead, Index, MaxDevices) ->
+    {Result1, Device} = ini_file(Source, BoardRead, unicode:characters_to_list(["device", integer_to_list(Index)])),
+    {Result2, Enabled} = ini_file(Source, BoardRead, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+    {Result3, Alias} = ini_file(Source, BoardRead, unicode:characters_to_list(["alias", integer_to_list(Index)])),
+    update_cfg_file_next_Device({Result1, Device}, {Result2, Enabled}, {Result3, Alias}, Source, Target, BoardRead, Index, MaxDevices).
+update_cfg_file_next_Device({ok, Device}, {ok, Enabled}, {ok, Alias}, Source, Target, BoardRead, Index, MaxDevices) ->
+    {_, IndexTarget} = get_device_index_from_cfg(Target, BoardRead, Device, "alias", Alias),
+    ini_file(Target, BoardRead, unicode:characters_to_list(["enabled", integer_to_list(IndexTarget)]), Enabled, wr),
+    update_cfg_file_next_Device(Source, Target, BoardRead, Index + 1, MaxDevices);
+update_cfg_file_next_Device({_Result1, _Device}, {_Result2, _Enabled}, {_Result3, _Alias}, _Source, _Target, _BoardRead, _Index, _MaxDevices) ->
+    error.
 
 %-----------------------------------------------------------------------------
 %
