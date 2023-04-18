@@ -1001,26 +1001,21 @@ update_cfg_file_next_Device(Source, Target, Board, Index, MaxDevices) when (Inde
 update_cfg_file_next_Device(_, _, _, _, _) ->
     ok.
 
-
 %-----------------------------------------------------------------------------
 %
 %
 %-----------------------------------------------------------------------------
 -spec check_for_files_dependencies(string, string) -> result.
-check_for_files_dependencies(List, Index) when (Index =< length(List)), (Index > 0) ->
+check_for_files_dependencies(List, Index) when (Index > length(List)) ->
+    ok;
+check_for_files_dependencies(List, Index) ->
     Current = lists:nth(Index, List),
     {Result, _} = check_file_exists(Current),
-
-    case Result of
-        ok ->
-            check_for_files_dependencies(List, Index + 1);
-
-        error ->
-            error
-    end;
-
-check_for_files_dependencies(_, _) ->
-    ok.
+    check_for_files_dependencies(Result, List, Index).
+check_for_files_dependencies(ok, List, Index) ->
+    check_for_files_dependencies(List, Index + 1);
+check_for_files_dependencies(_Result, _List, _Index) ->
+    error.
 
 %-----------------------------------------------------------------------------
 %
@@ -1055,7 +1050,6 @@ get_active(Active) when (Active == "0") ->
     % ToDo: insert here the active pin reading
     ActivePin = "0",
     {ok, ActivePin};
-
 get_active(Active) ->
     {ok, Active}.
 

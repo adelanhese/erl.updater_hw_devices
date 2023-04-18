@@ -150,9 +150,7 @@ parse_params(Args, Index, OptionsMap) ->
     Short = lists:keyfind(Parameter, #options.short, OptionsList),
     parse_params_next(Args, SubParameter, Index, OptionsMap, Long, Short).
 
-parse_params_next(_Args, _SubParameter, _Index, OptionsMap, false, false) ->
-    io:format("Unknown parameter~n"),
-    {ok, OptionsMap};
+
 parse_params_next(Args, SubParameter, Index, OptionsMap, Long, false) when (Long /= false) ->
     OptionsExtraMap = maps:put(Long#options.extra_map_field, map_value(Long#options.extra_map_value, SubParameter), OptionsMap),
     parse_params(Args, Index + 1, maps:put(Long#options.map_field, map_value(Long#options.map_value, SubParameter),OptionsExtraMap));
@@ -161,5 +159,7 @@ parse_params_next(Args, SubParameter, Index, OptionsMap, false, Short) when (Sho
     parse_params(Args, Index + 1, maps:put(Short#options.map_field, map_value(Short#options.map_value, SubParameter), OptionsExtraMap));
 parse_params_next(Args, SubParameter, Index, OptionsMap, Long, Short) when (Long /= false), (Short /= false) ->
     OptionsExtraMap = maps:put(Short#options.extra_map_field, map_value(Short#options.extra_map_value, SubParameter), OptionsMap),
-    parse_params(Args, Index + 1, maps:put(Short#options.map_field, map_value(Short#options.map_value, SubParameter), OptionsExtraMap)).
-
+    parse_params(Args, Index + 1, maps:put(Short#options.map_field, map_value(Short#options.map_value, SubParameter), OptionsExtraMap));
+parse_params_next(_Args, _SubParameter, _Index, OptionsMap, false, false) ->
+    io:format("Unknown parameter~n"),
+    {ok, OptionsMap}.
