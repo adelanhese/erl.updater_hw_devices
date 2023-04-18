@@ -267,65 +267,31 @@ main(Args) when (length(Args) > 0) ->
     
     Command = maps:get(command, OptionsMap1),
 
-    %io:format("map: ~p~n", [OptionsMap1]),
+    io:format("map: ~p~n", [OptionsMap1]),
 
-    case Command of
-        show_help ->
-            updater_hw_devices_cmdlineparse:show_help(IniFile, Board_type, Active);
+    command_run(Command, IniFile, Platform_type, Board_type, Active, Device_to_update);
 
-        check ->
-            check_versions(IniFile, Platform_type, Board_type, Active);
-
-        update ->
-            Board = updater_hw_devices_utils:extract_board(Device_to_update),
-            Device = updater_hw_devices_utils:extract_device(Device_to_update),
-            update(Platform_type, Board, Device);
-          
-        disable ->
-            updater_hw_devices_utils:enable_disable_device(IniFile, Device_to_update, "0", Board_type, Active);
-
-        enable ->
-            updater_hw_devices_utils:enable_disable_device(IniFile, Device_to_update, "1", Board_type, Active);
-
-        examine ->
-            Board = updater_hw_devices_utils:extract_board(Device_to_update),
-            Device = updater_hw_devices_utils:extract_device(Device_to_update),
-            {_, Value} = updater_hw_devices_utils:read_field_from_cfg(Board, Device, "alias"),
-            io:format("~s~n", [Value]);
-
-        _ ->
-            io:format("Invalid command~n"),
-        error
-    end;
 
 main(_Args) ->
     updater_hw_devices_cmdlineparse:show_help("","","").
 
-%main_command(show_help, OptionsMap) ->
-%    show_help(IniFile, Board_type, Active);
-%main_command(check,OptionsMap1) ->
-%    check_versions(IniFile, Platform_type, Board_type, Active);
-%main_command(update, OptionsMap1) ->
-%    Board = updater_hw_devices_utils:extract_board(Device_to_update),
-%    Device = updater_hw_devices_utils:extract_device(Device_to_update),
-%    update(Platform_type, Board, Device);
-%main_command(disable, OptionsMap1) ->
-%    updater_hw_devices_utils:enable_disable_device(IniFile, Device_to_update, "0", Board_type, Active);
-%main_command(enable, OptionsMap1) ->
-%    updater_hw_devices_utils:enable_disable_device(IniFile, Device_to_update, "1", Board_type, Active);
-%main_command(examine, OptionsMap1) ->
-%    Board = updater_hw_devices_utils:extract_board(Device_to_update),
-%    Device = updater_hw_devices_utils:extract_device(Device_to_update),
-%    {_, Value} = updater_hw_devices_utils:read_field_from_cfg(Board, Device, "alias"),
-%    io:format("~s~n", [Value]);
-%main_command(_, _) ->
-%    io:format("Invalid command~n"),
-%    error.
 
-
-
-
-
-
-
+%-----------------------------------------------------------------------------
+% 
+%
+%-----------------------------------------------------------------------------
+command_run(show_help, IniFile, _Platform_type, Board_type, Active, _Device_to_update) ->
+    updater_hw_devices_cmdlineparse:show_help(IniFile, Board_type, Active);
+command_run(check, IniFile, Platform_type, Board_type, Active, _Device_to_update) ->
+    check_versions(IniFile, Platform_type, Board_type, Active);
+command_run(update, _IniFile, Platform_type, _Board_type, _Active, Device_to_update) ->
+    Board = updater_hw_devices_utils:extract_board(Device_to_update),
+    Device = updater_hw_devices_utils:extract_device(Device_to_update),
+    update(Platform_type, Board, Device);
+command_run(disable, IniFile, _Platform_type, Board_type, Active, Device_to_update) ->
+    updater_hw_devices_utils:enable_disable_device(IniFile, Device_to_update, "0", Board_type, Active);
+command_run(enable, IniFile, _Platform_type, Board_type, Active, Device_to_update) ->
+    updater_hw_devices_utils:enable_disable_device(IniFile, Device_to_update, "1", Board_type, Active);
+command_run(_Command, _IniFile, _Platform_type, _Board_type, _Active, _Device_to_update) ->
+    io:format("Invalid command~n").
 

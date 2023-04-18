@@ -29,7 +29,7 @@ valid_options() ->
      #options{type=opt, short="-a", long="--auto"         ,map_field=auto_update,                map_value=true},
      #options{type=opt, short="-b", long="--backplane"    ,map_field=active,                     map_value="1"},
      #options{type=opt, short="-f", long="--file"         ,map_field=show_filename,              map_value=true},
-     #options{type=opt, short="-s", long="--spk"          ,map_field=spk_updater,                map_value=true,     extra_map_field=hw_image_partition, extra_map_value=?SPK_PARTITION},
+     #options{type=opt, short="-s", long="--spk"          ,map_field=spk_updater,                map_value=true,      extra_map_field=hw_image_partition, extra_map_value=?SPK_PARTITION},
      #options{type=opt, short="-i", long="--input"        ,map_field=input_file,                 map_value=sub_parameter},
      #options{type=opt, short="-r", long="--fpga-reload"  ,map_field=fpga_reload_after_update,   map_value=true},
      #options{type=opt, short="-p", long="--power-cycle"  ,map_field=power_cycle_after_update,   map_value=true},
@@ -132,15 +132,10 @@ show_help(IniFile, Board_type, Active) ->
 %
 % 
 %-----------------------------------------------------------------------------
-map_value(MapValue, SubParameter) ->
-
-    case MapValue of
-        sub_parameter ->
-            SubParameter;
-
-        _ ->
-            MapValue
-    end.
+map_value(sub_parameter, SubParameter) ->
+    SubParameter;
+map_value(MapValue, _SubParameter) ->
+    MapValue.
 
 %-----------------------------------------------------------------------------
 %
@@ -159,12 +154,12 @@ parse_params_next(_Args, _SubParameter, _Index, OptionsMap, false, false) ->
     io:format("Unknown parameter~n"),
     {ok, OptionsMap};
 parse_params_next(Args, SubParameter, Index, OptionsMap, Long, false) when (Long /= false) ->
-    OptionsMapTemp = maps:put(Long#options.extra_map_field, map_value(Long#options.extra_map_value, SubParameter), OptionsMap),
-    parse_params(Args, Index + 1, maps:put(Long#options.map_field, map_value(Long#options.map_value, SubParameter),OptionsMapTemp));
+    OptionsExtraMap = maps:put(Long#options.extra_map_field, map_value(Long#options.extra_map_value, SubParameter), OptionsMap),
+    parse_params(Args, Index + 1, maps:put(Long#options.map_field, map_value(Long#options.map_value, SubParameter),OptionsExtraMap));
 parse_params_next(Args, SubParameter, Index, OptionsMap, false, Short) when (Short /= false) ->
-    OptionsMapTemp = maps:put(Short#options.extra_map_field, map_value(Short#options.extra_map_value, SubParameter), OptionsMap),
-    parse_params(Args, Index + 1, maps:put(Short#options.map_field, map_value(Short#options.map_value, SubParameter), OptionsMapTemp));
+    OptionsExtraMap = maps:put(Short#options.extra_map_field, map_value(Short#options.extra_map_value, SubParameter), OptionsMap),
+    parse_params(Args, Index + 1, maps:put(Short#options.map_field, map_value(Short#options.map_value, SubParameter), OptionsExtraMap));
 parse_params_next(Args, SubParameter, Index, OptionsMap, Long, Short) when (Long /= false), (Short /= false) ->
-    OptionsMapTemp = maps:put(Short#options.extra_map_field, map_value(Short#options.extra_map_value, SubParameter), OptionsMap),
-    parse_params(Args, Index + 1, maps:put(Short#options.map_field, map_value(Short#options.map_value, SubParameter), OptionsMapTemp)).
+    OptionsExtraMap = maps:put(Short#options.extra_map_field, map_value(Short#options.extra_map_value, SubParameter), OptionsMap),
+    parse_params(Args, Index + 1, maps:put(Short#options.map_field, map_value(Short#options.map_value, SubParameter), OptionsExtraMap)).
 
