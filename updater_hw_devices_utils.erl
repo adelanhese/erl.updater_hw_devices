@@ -783,57 +783,43 @@ enable_device(_, _, _, _, _, _, _, _) ->
 % 
 %-----------------------------------------------------------------------------
 -spec show_devices(string, string, string) -> {result, string}.
-show_devices(IniFile, BaseBoard, Active) when (IniFile /= ""), (BaseBoard /= ""), (Active /= "") ->
-    {Result1, NumBoardsStr} = ini_file(IniFile, "boards", "num_boards"),
+show_devices(IniFile, BaseBoard, Active) when (IniFile == ""); (BaseBoard == ""); (Active == "") ->
+    io:format("Warning: No board was identified!~n");
+show_devices(IniFile, BaseBoard, Active) ->
+    {Result, NumBoardsStr} = ini_file(IniFile, "boards", "num_boards"),
+    show_devices({Result, NumBoardsStr}, IniFile, BaseBoard, Active).
+show_devices({ok, NumBoardsStr}, IniFile, BaseBoard, Active) ->
+    {NumBoards, _} = string:to_integer(NumBoardsStr),
+    show_devices_next_board(IniFile, BaseBoard, Active, 1, NumBoards);
+show_devices({_Result, _NumBoardsStr}, _IniFile, _BaseBoard, _Active) ->
+    error.
 
-    case Result1 of
-        ok ->
-            {NumBoards, _} = string:to_integer(NumBoardsStr),
-            show_devices_next_board(IniFile, BaseBoard, Active, 1, NumBoards);
+show_devices_next_board(_IniFile, _BaseBoard, _Active, Index, MaxBoards) when (Index > MaxBoards) ->
+    ok;
+show_devices_next_board(IniFile, BaseBoard, Active, Index, MaxBoards) ->
+    {Result, Board} = ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+    show_devices_next_board({Result, Board}, IniFile, BaseBoard, Active, Index, MaxBoards).
+show_devices_next_board({ok, Board}, IniFile, BaseBoard, Active, Index, MaxBoards) ->
+    {_, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
+    {NumDevices, _} = string:to_integer(NumDevicesStr),
+    show_devices_next_Device(IniFile, Board, BaseBoard, Active, 1, NumDevices),
+    show_devices_next_board(IniFile, BaseBoard, Active, Index + 1, MaxBoards);
+show_devices_next_board({_Result, _Board}, _IniFile, _BaseBoard, _Active, _Index, _MaxBoards) ->
+    error.
 
-        _ ->
-            error
-    end;
-
-show_devices(_,_,_) ->
-    io:format("Warning: No board was identified!~n").
-
-show_devices_next_board(IniFile, BaseBoard, Active, Index, MaxBoards) when (Index =< MaxBoards) ->
-    {Result1, Board} = ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
-
-    case Result1 of
-        ok ->
-            {_, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
-            {NumDevices, _} = string:to_integer(NumDevicesStr),
-            show_devices_next_Device(IniFile, Board, BaseBoard, Active, 1, NumDevices),
-            show_devices_next_board(IniFile, BaseBoard, Active, Index + 1, MaxBoards);
-
-        _ ->
-            error
-    end;
-
-show_devices_next_board(_, _, _, _, _) ->
-    ok.
-
-show_devices_next_Device(IniFile, Board, BaseBoard, Active, Index, MaxDevices) when (Index =< MaxDevices) ->
+show_devices_next_Device(_IniFile, _Board, _BaseBoard, _Active, Index, MaxDevices) when (Index > MaxDevices) ->
+    ok;
+show_devices_next_Device(IniFile, Board, BaseBoard, Active, Index, MaxDevices) ->
     {Result1, Device} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
     {Result2, Activecard} = ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
     {Result3, Enabled} = ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
-    
-
-    case {Result1, Result2, Result3} of
-         {ok, ok, ok} when ((BaseBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
-                           (Enabled == "1") ->
-                                io:format("                ~s_~s~n", [Board, Device]),
-                                show_devices_next_Device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices);
-
-        _ ->
-            show_devices_next_Device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices)
-    end;
-
-show_devices_next_Device(_, _, _, _, _, _) ->
-    ok.
-
+    show_devices_next_Device({Result1, Device}, {Result2, Activecard}, {Result3, Enabled}, IniFile, Board, BaseBoard, Active, Index, MaxDevices).
+show_devices_next_Device({ok, Device}, {ok, Activecard}, {ok, Enabled}, IniFile, Board, BaseBoard, Active, Index, MaxDevices) when
+    ((BaseBoard == Board) or ((Activecard == Active) and (Active == "1"))) and (Enabled == "1") ->
+    io:format("                ~s_~s~n", [Board, Device]),
+    show_devices_next_Device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices);
+show_devices_next_Device({_Result1, _Device}, {_Result2, _Activecard}, {_Result3, _Enabled}, IniFile, Board, BaseBoard, Active, Index, MaxDevices) ->
+    show_devices_next_Device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices).
 
 %-----------------------------------------------------------------------------
 %
