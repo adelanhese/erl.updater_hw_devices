@@ -314,11 +314,11 @@ list_replace(List, Index, NewValue) ->
 %-----------------------------------------------------------------------------
 list_delete(List, Index) ->
     [Head | Tail] = List,
-
-    case Index of
-        1 -> Tail;
-        _ -> [Head | list_delete(Tail, Index-1)]
-    end.
+    list_delete(Head, Tail, Index).
+list_delete(_Head, Tail, 1) ->
+    Tail;
+list_delete(Head, Tail, Index) ->
+    [Head | list_delete(Tail, Index-1)].
 
 %-----------------------------------------------------------------------------
 %
