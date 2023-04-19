@@ -414,8 +414,6 @@ md5_check(FileName, ExpectedMD5Sum) ->
             Md5SumBinary = crypto:hash(md5, Binary),
             Md5SumHex = string:lowercase(binary_to_hex(Md5SumBinary)),
 
-            io:format("ExpectedMD5 ~s CalculatedMD5: ~s~n", [ExpectedMD5Sum, Md5SumHex]),
-
             if
                 (Md5SumHex == ExpectedMD5Sum) ->
                     {ok, Md5SumHex};
@@ -597,30 +595,27 @@ read_field_from_cfg_search_for_device(_, _, _, _, _, _) ->
 -spec read_field_from_cfg_anyway(string, string, string, string) -> {result, string}.
 read_field_from_cfg_anyway(IniFile, Board, Device, Field) ->
     {Result, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
+    read_field_from_cfg_anyway({Result, NumDevicesStr}, IniFile, Board, Device, Field).
 
-    case Result of
-        ok ->
-            {NumDevices, _} = string:to_integer(NumDevicesStr),
-            read_field_from_cfg_anyway_search_for_device(IniFile, Board, Device, Field, 1, NumDevices);
+read_field_from_cfg_anyway({ok, NumDevicesStr}, IniFile, Board, Device, Field) ->
+    {NumDevices, _} = string:to_integer(NumDevicesStr),
+    read_field_from_cfg_anyway_search_for_device(IniFile, Board, Device, Field, 1, NumDevices);
+read_field_from_cfg_anyway({_Result, NumDevicesStr}, _IniFile, _Board, _Device, _Field) ->
+    {error, NumDevicesStr}.
 
-        _ ->
-            {error, NumDevicesStr}
-    end.
-
-read_field_from_cfg_anyway_search_for_device(IniFile, Board, Device, Field, Index, MaxDevices) when (Index =< MaxDevices) ->
+read_field_from_cfg_anyway_search_for_device(_IniFile, _Board, _Device, _Field, Index, MaxDevices) when (Index > MaxDevices) ->
+    {error, "field not found"};
+read_field_from_cfg_anyway_search_for_device(IniFile, Board, Device, Field, Index, MaxDevices) ->
     {Result1, DevicesStr} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+    read_field_from_cfg_anyway_search_for_device({Result1, DevicesStr}, IniFile, Board, Device, Field, Index, MaxDevices).
 
-    case {Result1, DevicesStr} of
-         {ok, Device} ->
-            ini_file(IniFile, Board, unicode:characters_to_list([Field, integer_to_list(Index)]));
-
-        _ ->
-            read_field_from_cfg_anyway_search_for_device(IniFile, Board, Device, Field, Index + 1, MaxDevices)
-    end;
+read_field_from_cfg_anyway_search_for_device({ok, DevicesStr}, IniFile, Board, Device, Field, Index, _MaxDevices) when
+    (DevicesStr == Device) ->
+           ini_file(IniFile, Board, unicode:characters_to_list([Field, integer_to_list(Index)]));
+read_field_from_cfg_anyway_search_for_device({_Result1, _DevicesStr}, IniFile, Board, Device, Field, Index, MaxDevices) ->
+    read_field_from_cfg_anyway_search_for_device(IniFile, Board, Device, Field, Index + 1, MaxDevices).
 
 
-read_field_from_cfg_anyway_search_for_device(_, _, _, _, _, _) ->
-    {error, "field not found"}.
 
 %-----------------------------------------------------------------------------
 %
@@ -629,30 +624,28 @@ read_field_from_cfg_anyway_search_for_device(_, _, _, _, _, _) ->
 -spec get_device_index_from_cfg(string, string, string, string, string) -> {result, number}.
 get_device_index_from_cfg(IniFileName, Board, Device, Field, Value) ->
     {Result, NumDevicesStr} = ini_file(IniFileName, Board, "num_devices"),
+    get_device_index_from_cfg({Result, NumDevicesStr}, IniFileName, Board, Device, Field, Value).
 
-    case Result of
-        ok ->
-            {NumDevices, _} = string:to_integer(NumDevicesStr),
-            get_device_index_from_cfg_search_for_device(IniFileName, Board, Device, Field, Value, 1, NumDevices);
+get_device_index_from_cfg({ok, NumDevicesStr}, IniFileName, Board, Device, Field, Value) ->
+    {NumDevices, _} = string:to_integer(NumDevicesStr),
+    get_device_index_from_cfg_search_for_device(IniFileName, Board, Device, Field, Value, 1, NumDevices);
+get_device_index_from_cfg({_Result, _NumDevicesStr}, _IniFileName, _Board, _Device, _Field, _Value) ->
+    {error, -1}.
 
-        _ ->
-            {error, -1}
-    end.
-
-get_device_index_from_cfg_search_for_device(IniFileName, Board, Device, Field, Value, Index, MaxDevices) when (Index =< MaxDevices) ->
+get_device_index_from_cfg_search_for_device(_IniFileName, _Board, _Device, _Field, _Value, Index, MaxDevices) when (Index > MaxDevices) ->
+    {error, -1};
+get_device_index_from_cfg_search_for_device(IniFileName, Board, Device, Field, Value, Index, MaxDevices) ->
     {Result1, DevicesValueStr} = ini_file(IniFileName, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
     {Result2, FieldValueStr} = ini_file(IniFileName, Board, unicode:characters_to_list([Field, integer_to_list(Index)])),
-    
-    case {Result1, Result2, DevicesValueStr, FieldValueStr} of
-         {ok, ok, Device, Value} ->
-            {ok, Index};
+    get_device_index_from_cfg_search_for_device({Result1, DevicesValueStr}, {Result2, FieldValueStr}, IniFileName, Board, Device, Field, Value, Index, MaxDevices).
 
-        _ ->
-            get_device_index_from_cfg_search_for_device(IniFileName, Board, Device, Field, Value, Index + 1, MaxDevices)
-    end;
+get_device_index_from_cfg_search_for_device({ok, DevicesValueStr}, {ok, FieldValueStr}, _IniFileName, _Board, Device, _Field, Value, Index, _MaxDevices) when
+    (DevicesValueStr == Device) and (FieldValueStr == Value) ->
+        {ok, Index};
+get_device_index_from_cfg_search_for_device({_Result1, _DevicesValueStr}, {_Result2, _FieldValueStr}, IniFileName, Board, Device, Field, Value, Index, MaxDevices) ->
+     get_device_index_from_cfg_search_for_device(IniFileName, Board, Device, Field, Value, Index + 1, MaxDevices).
 
-get_device_index_from_cfg_search_for_device(_, _, _, _, _, _, _) ->
-    {error, -1}.
+
 
 %-----------------------------------------------------------------------------
 %
