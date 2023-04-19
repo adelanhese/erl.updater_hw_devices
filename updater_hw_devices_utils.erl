@@ -414,12 +414,14 @@ md5_check(FileName, ExpectedMD5Sum) ->
             Md5SumBinary = crypto:hash(md5, Binary),
             Md5SumHex = string:lowercase(binary_to_hex(Md5SumBinary)),
 
+            io:format("ExpectedMD5 ~s CalculatedMD5: ~s~n", [ExpectedMD5Sum, Md5SumHex]),
+
             if
                 (Md5SumHex == ExpectedMD5Sum) ->
                     {ok, Md5SumHex};
 
                 true ->
-                    {error, Md5SumHex}
+                    {error, "invalid md5"}
             end;
 
         _ ->
@@ -660,26 +662,20 @@ get_device_index_from_cfg_search_for_device(_, _, _, _, _, _, _) ->
 get_file_image_name(IniFile, Board, Device, InputFile) when (InputFile == "") ->
     {Result1, File} = read_field_from_cfg(IniFile, Board, Device, "file"),
     {Result2, Md5} = read_field_from_cfg(IniFile, Board, Device, "md5"),
-
-    case {Result1,Result2} of
-         {ok,ok} ->
-                {Result3, Msg} = md5_check(File, Md5),
-
-                case Result3 of
-                    ok ->
-                        {ok, File};
-
-                    _ ->
-                        {error, Msg}
-                end;
-
-        _ ->
-            {error, "can not read ini cfg file"}
-
-    end;
-
-get_file_image_name(_, _, _, InputFile) ->
+    get_file_image_name({Result1, File}, {Result2, Md5}, IniFile, Board, Device, InputFile);
+get_file_image_name(_IniFile, _Board, _Device, InputFile) ->
     check_file_exists(InputFile).
+
+get_file_image_name({ok, File}, {ok, Md5}, _IniFile, _Board, _Device, _InputFile) ->
+    {Result3, Msg} = md5_check(File, Md5),
+    get_file_image_name({Result3, Msg}, File);
+get_file_image_name({_Result1, _File}, {_Result2, _Md5}, _IniFile, _Board, _Device, _InputFile) ->
+    {error, "can not read ini cfg file"}.
+
+get_file_image_name({ok, _Msg}, File) ->
+    {ok, File};
+get_file_image_name({_Result3, Msg}, _File) ->
+    {error, Msg}.
 
 %-----------------------------------------------------------------------------
 %
