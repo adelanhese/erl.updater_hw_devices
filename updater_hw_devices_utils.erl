@@ -690,31 +690,27 @@ get_file_image_name(_, _, _, InputFile) ->
 -spec check_for_supported_devices(string, string, string, string, string) -> {result, string}.
 check_for_supported_devices(IniFile, Board, Device, BaseBoard, Active) ->
     {Result, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
+    check_for_supported_devices({Result, NumDevicesStr}, IniFile, Board, Device, BaseBoard, Active).
 
-    case Result of
-        ok ->
-            {NumDevices, _} = string:to_integer(NumDevicesStr),
-            check_for_supported_devices_search_for_device(IniFile, Board, Device, BaseBoard, Active, 1, NumDevices);
+check_for_supported_devices({ok, NumDevicesStr}, IniFile, Board, Device, BaseBoard, Active) ->
+    {NumDevices, _} = string:to_integer(NumDevicesStr),
+    check_for_supported_devices_search_for_device(IniFile, Board, Device, BaseBoard, Active, 1, NumDevices);
+check_for_supported_devices({_Result, _NumDevicesStr}, _IniFile, _Board, _Device, _BaseBoard, _Active) ->
+    error.
 
-        _ ->
-            error
-    end.
-
-check_for_supported_devices_search_for_device(IniFile, Board, Device, BaseBoard, Active, Index, MaxDevices) when (Index =< MaxDevices) ->
+check_for_supported_devices_search_for_device(_IniFile, _Board, _Device, _BaseBoard, _Active, Index, MaxDevices) when (Index > MaxDevices) ->
+    error;
+check_for_supported_devices_search_for_device(IniFile, Board, Device, BaseBoard, Active, Index, MaxDevices) ->
     {Result1, DevicesStr} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
     {Result2, ActivecardStr} = ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
+    check_for_supported_devices_search_for_device({Result1, DevicesStr}, {Result2, ActivecardStr}, IniFile, Board, Device, BaseBoard, Active, Index, MaxDevices).
 
-    case {Result1,Result2} of
-         {ok,ok} when ((BaseBoard == Board) or (ActivecardStr == Active)) and
-                      (DevicesStr == Device) ->
-                             ok;
+check_for_supported_devices_search_for_device({ok, DevicesStr}, {ok, ActivecardStr}, _IniFile, Board, Device, BaseBoard, Active, _Index, _MaxDevices) when
+    ((BaseBoard == Board) or (ActivecardStr == Active)) and (DevicesStr == Device) ->
+        ok;
+check_for_supported_devices_search_for_device({_Result1, _DevicesStr}, {_Result2, _ActivecardStr}, IniFile, Board, Device, BaseBoard, Active, Index, MaxDevices) ->
+    check_for_supported_devices_search_for_device(IniFile, Board, Device, BaseBoard, Active, Index + 1, MaxDevices).
 
-        _ ->
-            check_for_supported_devices_search_for_device(IniFile, Board, Device, BaseBoard, Active, Index + 1, MaxDevices)
-    end;
-
-check_for_supported_devices_search_for_device(_, _, _, _, _, _, _) ->
-    error.
 
 %-----------------------------------------------------------------------------
 %
@@ -755,7 +751,6 @@ disable_device({ok, Device1}, IniFile, Board, Device, Device_dependent, Index, M
         disable_device(IniFile, Board, Device, Device_dependent, Index + 1, MaxDevices);
 disable_device({_Result, _Device1}, IniFile, Board, Device, Device_dependent, Index, MaxDevices) ->
     disable_device(IniFile, Board, Device, Device_dependent, Index + 1, MaxDevices).
-
 
 enable_device(_IniFile, _Board, _Device, _Device_dependent, _Alias, _NewState, Index, MaxDevices) when (Index > MaxDevices) ->
     ok;
