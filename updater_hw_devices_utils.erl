@@ -406,26 +406,20 @@ check_file_exists(File) ->
 %-----------------------------------------------------------------------------
 -spec md5_check(string, string) -> {result, string}.
 md5_check(FileName, ExpectedMD5Sum) ->
-    
     {Result, Binary} = file:read_file(FileName),
+    md5_calc({Result, Binary}, ExpectedMD5Sum).
 
-    case Result of
-        ok ->
-            Md5SumBinary = crypto:hash(md5, Binary),
-            Md5SumHex = string:lowercase(binary_to_hex(Md5SumBinary)),
+md5_calc({ok, Binary}, ExpectedMD5Sum) ->
+    Md5SumBinary = crypto:hash(md5, Binary),
+    Md5SumHex = string:lowercase(binary_to_hex(Md5SumBinary)),
+    md5_compare(Md5SumHex, ExpectedMD5Sum);
+md5_calc({_Result, _Binary}, _ExpectedMD5Sum) ->
+    {error, "file not found"}.
 
-            if
-                (Md5SumHex == ExpectedMD5Sum) ->
-                    {ok, Md5SumHex};
-
-                true ->
-                    {error, "invalid md5"}
-            end;
-
-        _ ->
-            {error, "file not found"}
-    end.
-
+md5_compare(Md5SumHex, ExpectedMD5Sum) when (Md5SumHex == ExpectedMD5Sum) ->
+    {ok, ExpectedMD5Sum};
+md5_compare(_Md5SumHex, _ExpectedMD5Sum) ->
+    {error, "invalid md5"}.
 
 %-----------------------------------------------------------------------------
 %
@@ -433,15 +427,14 @@ md5_check(FileName, ExpectedMD5Sum) ->
 %-----------------------------------------------------------------------------
 extract_field(Field) ->
     Index1 = string:str(Field, " = "),
-    
-    case Index1 of 
-        _ when (Index1 > 0 ) ->
-            FieldSize = string:length(Field)-Index1,
-            FieldValue = string:slice(Field, Index1+2, abs(FieldSize-2)),
-            FieldValue;
-        _ ->
-           error
-    end.
+    extract_field(Field, Index1).
+
+extract_field(Field, Index1) when (Index1 > 0 ) ->
+    FieldSize = string:length(Field)-Index1,
+    FieldValue = string:slice(Field, Index1+2, abs(FieldSize-2)),
+    FieldValue;
+extract_field(_Field, _Index1) ->
+    error.
 
 
 %-----------------------------------------------------------------------------
