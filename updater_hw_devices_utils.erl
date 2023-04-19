@@ -392,13 +392,12 @@ bin2hex(BinStr) ->
 %
 %-----------------------------------------------------------------------------
 check_file_exists(File) ->
-    case filelib:is_file(File) of
-        true ->
-            {ok, File};
-
-        false ->
-            {error, "file not found"}
-    end.
+    CheckIfFile = filelib:is_file(File),
+    check_file_exists(CheckIfFile, File).
+check_file_exists(true, File) ->
+    {ok, File};
+check_file_exists(_CheckIfFile, _File) ->
+    {error, "file not found"}.
 
 %-----------------------------------------------------------------------------
 %
