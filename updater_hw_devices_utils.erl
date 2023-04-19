@@ -724,59 +724,54 @@ check_for_supported_devices_search_for_device(_, _, _, _, _, _, _) ->
 enable_disable_device(IniFile, BoardDeviceAlias, NewState, BaseBoard, Active) ->
     Board = extract_board(BoardDeviceAlias),
     Device = extract_device (BoardDeviceAlias),
+    SupportedDevice = check_for_supported_devices(IniFile, Board, Device, BaseBoard, Active),
+    enable_disable_device(SupportedDevice, IniFile, Board, Device, BoardDeviceAlias, NewState).
+
+enable_disable_device(ok, IniFile, Board, Device, BoardDeviceAlias, NewState) ->
+    {Result1, Num_devicesStr} = ini_file(IniFile, Board, "num_devices"),
+    {Result2, Dependencies1} = read_field_from_cfg_anyway(IniFile, Board, Device, "dependencies"),
+    enable_disable_device({Result1, Num_devicesStr}, {Result2, Dependencies1}, IniFile, Board, Device, BoardDeviceAlias, NewState);
+enable_disable_device(_SupportedDevice, _IniFile, _Board, _Device, _BoardDeviceAlias, _NewState) ->
+    error.
+
+enable_disable_device({ok, Num_devicesStr}, {ok, Dependencies1}, IniFile, Board, Device, BoardDeviceAlias, NewState) ->
+    Device_dependent = extract_device(Dependencies1),
     Alias = extract_alias (BoardDeviceAlias),
+    {Num_devices, _} = string:to_integer(Num_devicesStr),
+    disable_device(IniFile, Board, Device, Device_dependent, 1, Num_devices),
+    enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, 1, Num_devices);
+enable_disable_device({_Result1, _Num_devicesStr}, {_Result2, _Dependencies1}, _IniFile, _Board, _Device, _BoardDeviceAlias, _NewState) ->
+    error.
 
-    case check_for_supported_devices(IniFile, Board, Device, BaseBoard, Active) of
-        ok ->
-            {Result1, Num_devicesStr} = ini_file(IniFile, Board, "num_devices"),
-            {Result2, Dependencies1} = read_field_from_cfg_anyway(IniFile, Board, Device, "dependencies"),
-            Device_dependent = extract_device(Dependencies1),
-            {Num_devices, _} = string:to_integer(Num_devicesStr),
+disable_device(_IniFile, _Board, _Device, _Device_dependent, Index, MaxDevices) when (Index > MaxDevices) ->
+    ok;
+disable_device(IniFile, Board, Device, Device_dependent, Index, MaxDevices) ->
+    {Result, Device1} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+    disable_device({Result, Device1}, IniFile, Board, Device, Device_dependent, Index, MaxDevices).
 
-            if
-                (Result1 == ok) and (Result2 == ok) ->
-                    disable_device(IniFile, Board, Device, Device_dependent, 1, Num_devices),
-                    enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, 1, Num_devices);
-                
-                true ->
-                    error
-            end;
+disable_device({ok, Device1}, IniFile, Board, Device, Device_dependent, Index, MaxDevices) when
+    ((Device1 == Device) or (Device1 == Device_dependent)) ->
+        ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), "0", wr),
+        disable_device(IniFile, Board, Device, Device_dependent, Index + 1, MaxDevices);
+disable_device({_Result, _Device1}, IniFile, Board, Device, Device_dependent, Index, MaxDevices) ->
+    disable_device(IniFile, Board, Device, Device_dependent, Index + 1, MaxDevices).
 
-        _ ->
-            error
-    end.
 
-disable_device(IniFile, Board, Device, Device_dependent, Index, MaxDevices) when (Index =< MaxDevices) ->
-    {Result1, Device1} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
-
-    case Result1 of
-        ok when ((Device1 == Device) or (Device1 == Device_dependent)) ->
-                    ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), "0", wr),
-                    disable_device(IniFile, Board, Device, Device_dependent, Index + 1, MaxDevices);
-
-        _ ->
-            disable_device(IniFile, Board, Device, Device_dependent, Index + 1, MaxDevices)
-    end;
-
-disable_device(_, _, _, _, _, _) ->
-        ok.
-
-enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, Index, MaxDevices) when (Index =< MaxDevices) ->
+enable_device(_IniFile, _Board, _Device, _Device_dependent, _Alias, _NewState, Index, MaxDevices) when (Index > MaxDevices) ->
+    ok;
+enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, Index, MaxDevices) ->
     {Result1, Device1} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
     {Result2, Alias1} = ini_file(IniFile, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
+    enable_device({Result1, Device1}, {Result2, Alias1},IniFile, Board, Device, Device_dependent, Alias, NewState, Index, MaxDevices).
 
-    case {Result1,Result2} of
-          {ok,ok} when ((Device1 == Device) or (Device1 == Device_dependent)) and
-                        (Alias == Alias1) ->
-                            ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), NewState, wr),
-                            enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices);
+enable_device({ok, Device1}, {ok, Alias1},IniFile, Board, Device, Device_dependent, Alias, NewState, Index, MaxDevices) when
+    ((Device1 == Device) or (Device1 == Device_dependent)) and (Alias == Alias1) ->
+        ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), NewState, wr),
+        enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices);
+enable_device({_Result1, _Device1}, {_Result2, _Alias1},IniFile, Board, Device, Device_dependent, Alias, NewState, Index, MaxDevices) ->
+    enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices).
 
-        _ ->
-            enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices)
-    end;
 
-enable_device(_, _, _, _, _, _, _, _) ->
-    ok.
 
 %-----------------------------------------------------------------------------
 %
