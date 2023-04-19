@@ -862,6 +862,7 @@ show_boards_tree_next_board({ok, Board}, IniFile, BaseBoard, Active, Index, MaxB
 show_boards_tree_next_board({_Result, _Board}, _IniFile, _BaseBoard, _Active, _Index, _MaxBoards) ->
     error.
 
+
 show_boards_tree_next_device(_IniFile, _Board, _BaseBoard, _Active, Index, MaxDevices, _Flag) when (Index > MaxDevices) ->
     ok;
 show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index, MaxDevices, Flag) ->
@@ -869,41 +870,29 @@ show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index, MaxDevice
      {Result2, Activecard} = ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
      {Result3, Enabled} = ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
      {Result4, Alias} = ini_file(IniFile, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
-
-     case {Result1, Result2 , Result3, Result4} of
-            {ok, ok, ok, ok} when ((BaseBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
-                                   (Enabled == "1") and (Alias == "") and
-                                   (Flag == 0) ->
-                                       io:format("~n"),
-                                       io:format("             ~s~n", [Board]),
-                                       io:format("              +-- ~s~n", [Device]),
-                                       show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices, Flag + 1);
-
-            {ok, ok, ok, ok} when ((BaseBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
-                                    (Enabled == "1") and (Alias == "") and
-                                    (Flag /= 0) ->
-                                        io:format("              +-- ~s~n", [Device]),
-                                        show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices, Flag + 1);
-
-            {ok, ok, ok, ok} when  ((BaseBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
-                                    (Enabled == "1") and (Alias /= "") and
-                                    (Flag == 0) ->
-                                        io:format("~n"),
-                                        io:format("             ~s~n", [Board]),
-                                        io:format("              +-- ~s (~s)~n", [Device, Alias]),
-                                        show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices, Flag + 1);
-
-            {ok, ok, ok, ok} when ((BaseBoard == Board) or ((Activecard == Active) and (Active == "1"))) and
-                                    (Enabled == "1") and (Alias /= "") and
-                                    (Flag /= 0) ->
-                                        io:format("              +-- ~s (~s)~n", [Device, Alias]),
-                                        show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices, Flag + 1);
-
-         _ ->
-             show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices, Flag)
-     end.
-
-
+     show_boards_tree_next_device({Result1, Device}, {Result2, Activecard}, {Result3, Enabled}, {Result4, Alias}, IniFile, Board, BaseBoard, Active, Index, MaxDevices, Flag).
+show_boards_tree_next_device({ok, Device}, {ok, Activecard}, {ok, Enabled}, {ok, Alias}, IniFile, Board, BaseBoard, Active, Index, MaxDevices, Flag) when
+    ((BaseBoard == Board) or ((Activecard == Active) and (Active == "1"))) and (Enabled == "1") and (Alias == "") and (Flag == 0) ->
+    io:format("~n"),
+    io:format("             ~s~n", [Board]),
+    io:format("              +-- ~s~n", [Device]),
+    show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices, Flag + 1);
+show_boards_tree_next_device({ok, Device}, {ok, Activecard}, {ok, Enabled}, {ok, Alias}, IniFile, Board, BaseBoard, Active, Index, MaxDevices, Flag) when
+    ((BaseBoard == Board) or ((Activecard == Active) and (Active == "1"))) and (Enabled == "1") and (Alias == "") and (Flag /= 0) ->
+    io:format("              +-- ~s~n", [Device]),
+    show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices, Flag + 1);
+show_boards_tree_next_device({ok, Device}, {ok, Activecard}, {ok, Enabled}, {ok, Alias}, IniFile, Board, BaseBoard, Active, Index, MaxDevices, Flag) when
+    ((BaseBoard == Board) or ((Activecard == Active) and (Active == "1"))) and (Enabled == "1") and (Alias /= "") and (Flag == 0) ->
+    io:format("~n"),
+    io:format("             ~s~n", [Board]),
+    io:format("              +-- ~s (~s)~n", [Device, Alias]),
+    show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices, Flag + 1);
+show_boards_tree_next_device({ok, Device}, {ok, Activecard}, {ok, Enabled}, {ok, Alias}, IniFile, Board, BaseBoard, Active, Index, MaxDevices, Flag) when
+    ((BaseBoard == Board) or ((Activecard == Active) and (Active == "1"))) and (Enabled == "1") and (Alias /= "") and (Flag /= 0) ->
+    io:format("              +-- ~s (~s)~n", [Device, Alias]),
+    show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices, Flag + 1);
+show_boards_tree_next_device({_Result1, _Device}, {_Result2, _Activecard}, {_Result3, _Enabled}, {_Result4, _Alias}, IniFile, Board, BaseBoard, Active, Index, MaxDevices, Flag) ->
+    show_boards_tree_next_device(IniFile, Board, BaseBoard, Active, Index + 1, MaxDevices, Flag).
 
 
 %-----------------------------------------------------------------------------
