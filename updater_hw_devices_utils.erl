@@ -563,30 +563,27 @@ ini_file_replace_field(_, _, _, _, CurrentFieldValue, _, _) ->
 -spec read_field_from_cfg(string, string, string, string) -> {result, string}.
 read_field_from_cfg(IniFile, Board, Device, Field) ->
     {Result, NumDevicesStr} = ini_file(IniFile, Board, "num_devices"),
+    read_field_from_cfg({Result, NumDevicesStr}, IniFile, Board, Device, Field).
 
-    case Result of
-        ok ->
-            {NumDevices, _} = string:to_integer(NumDevicesStr),
-            read_field_from_cfg_search_for_device(IniFile, Board, Device, Field, 1, NumDevices);
+read_field_from_cfg({ok, NumDevicesStr}, IniFile, Board, Device, Field) ->
+    {NumDevices, _} = string:to_integer(NumDevicesStr),
+    read_field_from_cfg_search_for_device(IniFile, Board, Device, Field, 1, NumDevices);
+read_field_from_cfg({_Result, NumDevicesStr}, _IniFile, _Board, _Device, _Field) ->
+    {error, NumDevicesStr}.
 
-        _ ->
-            {error, NumDevicesStr}
-    end.
-
-read_field_from_cfg_search_for_device(IniFile, Board, Device, Field, Index, MaxDevices) when (Index =< MaxDevices) ->
+read_field_from_cfg_search_for_device(_IniFile, _Board, _Device, _Field, Index, MaxDevices) when (Index > MaxDevices) ->
+    {error, "field not found"};
+read_field_from_cfg_search_for_device(IniFile, Board, Device, Field, Index, MaxDevices) ->
     {Result1, DevicesStr} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
     {Result2, EnabledStr} = ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+    read_field_from_cfg_search_for_device({Result1, DevicesStr}, {Result2, EnabledStr}, IniFile, Board, Device, Field, Index, MaxDevices).
 
-    case {Result1, Result2, DevicesStr, EnabledStr} of
-         {ok, ok, Device, "1"}  ->
-             ini_file(IniFile, Board, unicode:characters_to_list([Field, integer_to_list(Index)]));
+read_field_from_cfg_search_for_device({ok, DevicesStr}, {ok, "1"}, IniFile, Board, Device, Field, Index, _MaxDevices) when
+    (DevicesStr == Device) ->
+        ini_file(IniFile, Board, unicode:characters_to_list([Field, integer_to_list(Index)]));
+read_field_from_cfg_search_for_device({_Result1, _DevicesStr}, {_Result2, _EnabledStr}, IniFile, Board, Device, Field, Index, MaxDevices) ->
+    read_field_from_cfg_search_for_device(IniFile, Board, Device, Field, Index + 1, MaxDevices).
 
-        _ ->
-            read_field_from_cfg_search_for_device(IniFile, Board, Device, Field, Index + 1, MaxDevices)
-    end;
-
-read_field_from_cfg_search_for_device(_, _, _, _, _, _) ->
-    {error, "field not found"}.
 
 %-----------------------------------------------------------------------------
 %
