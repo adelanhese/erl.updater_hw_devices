@@ -70,105 +70,12 @@ boards_list() -> [?NULL,
                   ?LC5,
                   ?NULL].
    
-%-record(person,
-%            {
-%                name,
-%                age,
-%                address
-%            }).
-
-%-record(state, {
-%    slot_id :: non_neg_integer(),
-%    type :: atom()
-%}).
-%
-%-type state() :: #state{}.
-%
-%-type interface_token() :: #{
-%    chassis := integer(),
-%    options := [],
-%    port := integer(),
-%    protocol := string(),
-%    slot := integer(),
-%    subport := undefined | non_neg_integer() | [pos_integer()],
-%    subslot := integer(),
-%    type := iface
-%}.
-
-%Iface = #{
-%        type => iface,
-%        protocol => string:lowercase(Prot),
-%        chassis => l2i(C),
-%        slot => l2i(S),
-%        subslot => l2i(SS),
-%        port => Port,
-%        subport => SubPort,
-%        options => []
-%    },
-
-%-----------------------------------------------------------------------------
-%
-%
-%-----------------------------------------------------------------------------
-%
-% bubble_sort
-%
-bubble_sort(List) ->
-    bubble_sort(List, length(List)).
-
-bubble_sort(List, N) when N > 0 ->
-    SortedList = bubble(List, N),
-    bubble_sort(SortedList, N-1);
-bubble_sort(List, _) ->
-    List.
-
-bubble([A, B | T], N) when A < B ->
-    [B, A | bubble(T, N)];
-bubble([H | T], N) ->
-    [H | bubble(T, N)];
-bubble([], _) ->
-    [].
-
-
-%-----------------------------------------------------------------------------
-%
-%
-%-----------------------------------------------------------------------------
-% função que procura uma string em um arquivo
-procura_string(NomeArquivo, StringProcurada) ->
-    {ok, Arquivo} = file:open(NomeArquivo, [read]),
-    case procura_string_arquivo(Arquivo, StringProcurada) of
-        true ->
-            file:close(Arquivo),
-            {ok, "String encontrada com sucesso"};
-        false ->
-            file:close(Arquivo),
-            {error, "String não encontrada"}
-    end.
-
-% função auxiliar que faz a busca pela string no arquivo
-procura_string_arquivo(Arquivo, StringProcurada) ->
-    case io:get_line(Arquivo, "") of
-        eof ->
-            false;
-        Linha ->
-            case string:str(Linha, StringProcurada) of
-                0 ->
-                    procura_string_arquivo(Arquivo, StringProcurada);
-                _ ->
-                    true
-            end
-    end.
-
-
-
 %-----------------------------------------------------------------------------
 %
 %
 %-----------------------------------------------------------------------------
 extract_substring(String, Pos, Length) ->
     string:substr(Pos, Length, String).
-
 
 %-----------------------------------------------------------------------------
 %
@@ -177,13 +84,6 @@ extract_substring(String, Pos, Length) ->
 find_character(Char, String) ->
             Index = string:str(String, Char),
             Index.
-        
-
-%_____________________________________________________________________________________________
-%
-%                         Utils for updater_hw_devices
-%_____________________________________________________________________________________________
-
 
 %-----------------------------------------------------------------------------
 %
@@ -191,16 +91,14 @@ find_character(Char, String) ->
 %-----------------------------------------------------------------------------
 split_paramenter(Parameter, Char) ->
     Index = string:str(Parameter, Char),
+    split_part1_part2(Parameter, Index).
 
-    case Index of
-        _ when (Index > 0 ) ->
-            Par1 = string:slice(Parameter, 0, Index-1),
-            Par2 = string:slice(Parameter, Index, abs(length(Parameter)-Index)),
-            {Par1, Par2};
-     
-        _ ->
-           {Parameter, []}
-    end.
+split_part1_part2(Parameter, Index) when (Index > 0 ) ->
+    Part1 = string:slice(Parameter, 0, Index-1),
+    Part2 = string:slice(Parameter, Index, abs(length(Parameter)-Index)),
+    {Part1, Part2};
+split_part1_part2(Parameter, _Index) ->
+    {Parameter, []}.
 
 
 %-----------------------------------------------------------------------------
@@ -210,25 +108,21 @@ split_paramenter(Parameter, Char) ->
 extract_board_device(BoardDevice) ->
     Index1 = string:str(BoardDevice, "_"),
     Index2 = string:str(BoardDevice, "/"),
+    extract_board_device(BoardDevice, Index1, Index2).
 
-    case Index1 of
-        _ when (Index1 > 0 ) and (Index2 > 0) ->
-            SizeBoardDevice = string:length(BoardDevice)-Index2,
-            SizeAlias = string:length(BoardDevice)-SizeBoardDevice,
-            Board = string:slice(BoardDevice, 0, Index1-1),
-            Device = string:slice(BoardDevice, Index1, abs(Index2-Index1-1)),
-            Alias = string:slice(BoardDevice, Index2, SizeAlias),
-            {ok, Board, Device, Alias};
-
-        _ when (Index1 > 0 ) and (Index2 == 0) ->
-            Board = string:slice(BoardDevice, 0, Index1-1),
-            Device = string:slice(BoardDevice, Index1, abs(string:length(BoardDevice)-Index1)),
-            {ok, Board, Device, []};
-     
-        _ ->
-           {error, [], [], []}
-    end.
- 
+extract_board_device(BoardDevice, Index1, Index2) when (Index1 > 0 ) and (Index2 > 0) ->
+    SizeBoardDevice = string:length(BoardDevice)-Index2,
+    SizeAlias = string:length(BoardDevice)-SizeBoardDevice,
+    Board = string:slice(BoardDevice, 0, Index1-1),
+    Device = string:slice(BoardDevice, Index1, abs(Index2-Index1-1)),
+    Alias = string:slice(BoardDevice, Index2, SizeAlias),
+    {ok, Board, Device, Alias};
+extract_board_device(BoardDevice, Index1, 0) when (Index1 > 0) ->
+    Board = string:slice(BoardDevice, 0, Index1-1),
+    Device = string:slice(BoardDevice, Index1, abs(string:length(BoardDevice)-Index1)),
+    {ok, Board, Device, []};
+extract_board_device(_BoardDevice, _Index1, _Index2) ->
+    {error, [], [], []}.
 
 %-----------------------------------------------------------------------------
 %
@@ -236,14 +130,12 @@ extract_board_device(BoardDevice) ->
 %-----------------------------------------------------------------------------
 extract_device(BoardDevice) ->
     {Status, _, Device, _} = extract_board_device(BoardDevice),
-    
-    case Status of
-        ok ->
-            Device;
-        error ->
-            ""
-    end.
+    extract_device(Status, Device).
 
+extract_device(ok, Device) ->
+    Device;
+extract_device(_Status, _Device) ->
+    "".
 
 %-----------------------------------------------------------------------------
 %
@@ -251,14 +143,12 @@ extract_device(BoardDevice) ->
 %-----------------------------------------------------------------------------
 extract_board(BoardDevice) ->
     {Status, Board, _, _} = extract_board_device(BoardDevice),
-    
-    case Status of
-        ok ->
-            Board;
-        error ->
-            ""
-    end.
+    extract_board(Status, Board).
 
+extract_board(ok, Board) ->
+    Board;
+extract_board(_Status, _Board) ->
+    "".
 
 %-----------------------------------------------------------------------------
 %
@@ -266,14 +156,12 @@ extract_board(BoardDevice) ->
 %-----------------------------------------------------------------------------
 extract_alias(BoardDevice) ->
     {Status, _, _, Alias} = extract_board_device(BoardDevice),
+    extract_alias(Status, Alias).
 
-
-    case Status of
-        ok ->
-            Alias;
-        error ->
-            ""
-    end.
+extract_alias(ok, Alias) ->
+    Alias;
+extract_alias(_Status, _Alias) ->
+    error.
 
 %-----------------------------------------------------------------------------
 %
@@ -282,15 +170,12 @@ extract_alias(BoardDevice) ->
 -spec extract_platform(string, string) -> {result, string}.
 extract_platform(Input, Prefix) ->
     Index = string:str(Input, Prefix),
+    extract_platform(Input, Prefix, Index).
 
-    case Index of 
-        _ when (Index > 0 ) ->
-            Platform = string:slice(Input, abs(Index + length(Prefix) - 1), 5),
-            {ok, Platform};
-     
-        _ ->
-            {error, []}
-    end.
+extract_platform(Input, Prefix, Index) when (Index > 0) ->
+    {ok, string:slice(Input, abs(Index + length(Prefix) - 1), 5)};
+extract_platform(_Input, _Prefix, _Index) ->
+    {error, []}.
 
 %-----------------------------------------------------------------------------
 %
@@ -633,6 +518,11 @@ get_device_index_from_cfg_search_for_device({ok, DevicesValueStr}, {ok, FieldVal
         {ok, Index};
 get_device_index_from_cfg_search_for_device({_Result1, _DevicesValueStr}, {_Result2, _FieldValueStr}, IniFileName, Board, Device, Field, Value, Index, MaxDevices) ->
      get_device_index_from_cfg_search_for_device(IniFileName, Board, Device, Field, Value, Index + 1, MaxDevices).
+
+%_____________________________________________________________________________________________
+%
+%                         Utils for updater_hw_devices
+%_____________________________________________________________________________________________
 
 
 
