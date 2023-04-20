@@ -101,7 +101,7 @@ show_help(IniFile, Board_type, Active) ->
     io:format("           4) Supported devices for update in this board:~n"),
     io:format(" ~n"),
 
-    updater_hw_devices_utils:show_devices(IniFile, Board_type, Active),
+    updater_hw_devices_cfgfileparse:show_devices(IniFile, Board_type, Active),
 
     io:format(" ~n"),
     io:format(" Examples:~n"),

@@ -52,27 +52,27 @@ power_cycle_plat2_lc4() ->
 
 get_version_plat2_mngt_fpga(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg(IniFile, "mngt", "fpga", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "mngt", "fpga", "version").
 
 get_version_plat2_fan_lpc55(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg(IniFile, "fan", "lpc55", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "fan", "lpc55", "version").
 
 get_version_plat2_fan_cpld(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg(IniFile, "fan", "cpld", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "fan", "cpld", "version").
 
 get_version_plat2_lc4_lpc55(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg(IniFile, "lc4", "lpc55", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc4", "lpc55", "version").
 
 get_version_plat2_lc4_fpga(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg(IniFile, "lc4", "fpga", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc4", "fpga", "version").
 
 get_version_plat2_lc4_cpld(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg(IniFile, "lc4", "cpld", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc4", "cpld", "version").
 
 
 update_plat2_fan_cpld() ->
@@ -93,15 +93,15 @@ power_cycle_plat2_lc5() ->
 
 get_version_plat2_lc5_fpga(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg(IniFile, "lc5", "fpga", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc5", "fpga", "version").
 
 get_version_plat2_lc5_cpld(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg(IniFile, "lc5", "cpld", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc5", "cpld", "version").
 
 get_version_plat2_lc5_pm6010(IniFile) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_utils:read_field_from_cfg(IniFile, "lc5", "pm6010", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc5", "pm6010", "version").
 
 update_plat2_lc5_lpc55() ->
     {error, ?NOT_IMPLEMENTED}.
