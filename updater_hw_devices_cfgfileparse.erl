@@ -62,69 +62,66 @@ ini_file(IniFile, Sector, Field, NewFieldValue, Oper) ->
             
     end.
 
+%------------------------------------------
 -spec ini_file_search_for_sector([list], number, string) -> {status, number}.
 ini_file_search_for_sector(List, Index, Sector) when (Index < length(List)), (Index > 0) ->
-    CurrentSector = lists:nth(Index, List),
-
-    case string:str(CurrentSector, unicode:characters_to_list(["[", Sector, "]"])) of
-        0 ->
-            ini_file_search_for_sector(List, Index + 1, Sector);
-        _ ->
-            {true, Index}
-    end;
-
-ini_file_search_for_sector(_, _, _) ->
+    CurrentSectorPosition = string:str(lists:nth(Index, List), unicode:characters_to_list(["[", Sector, "]"])),
+    ini_file_search_for_sector_next(List, Index, Sector, CurrentSectorPosition);
+ini_file_search_for_sector(_List, _Index, _Sector) ->
     {false, -1}.
 
+ini_file_search_for_sector_next(List, Index, Sector, 0) ->
+    ini_file_search_for_sector(List, Index + 1, Sector);
+ini_file_search_for_sector_next(_List, Index, _Sector, _CurrentSectorPosition) ->
+    {true, Index}.
+
+%---------------------------------------------
 ini_file_search_for_field(IniFile, List, Index, Field, NewFieldValue, Oper) when (Index > length(List)); (Index < 0)->
     ini_file_add_new_field(IniFile, List, Index, Field, NewFieldValue, Oper);
-
 ini_file_search_for_field(IniFile, List, Index, Field, NewFieldValue, Oper) ->
     CurrentField = lists:nth(Index, List),
     EndOfSector = string:str(CurrentField, "["),
+    ini_file_search_for_field(IniFile, List, Index, Field, NewFieldValue, Oper, CurrentField, EndOfSector).
 
-    case EndOfSector of 
-        _ when (EndOfSector > 0) ->
-            ini_file_add_new_field(IniFile, List, Index, Field, NewFieldValue, Oper);
+ini_file_search_for_field(IniFile, List, Index, Field, NewFieldValue, Oper, _CurrentField, EndOfSector) when (EndOfSector > 0) ->
+    ini_file_add_new_field(IniFile, List, Index, Field, NewFieldValue, Oper);
+ini_file_search_for_field(IniFile, List, Index, Field, NewFieldValue, Oper, CurrentField, _EndOfSector) ->
+    FieldSeparator = string:str(CurrentField, unicode:characters_to_list([Field, " = "])),
+    ini_file_search_for_field_next(IniFile, List, Index, Field, NewFieldValue, Oper, CurrentField, FieldSeparator).
 
-        _ ->
-            case string:str(CurrentField, unicode:characters_to_list([Field, " = "])) of
-                0 ->
-                    ini_file_search_for_field(IniFile, List, Index + 1, Field, NewFieldValue, Oper);
-                _ ->
-                    CurrentFieldValue = updater_hw_devices_utils:extract_field(CurrentField),
-                    ini_file_replace_field(IniFile, List, Index, Field, CurrentFieldValue, NewFieldValue, Oper) 
-            end
-    end.
+ini_file_search_for_field_next(IniFile, List, Index, Field, NewFieldValue, Oper, _CurrentField, 0) ->
+    ini_file_search_for_field(IniFile, List, Index + 1, Field, NewFieldValue, Oper);
+ini_file_search_for_field_next(IniFile, List, Index, Field, NewFieldValue, Oper, CurrentField, _FieldSeparator) ->
+    CurrentFieldValue = updater_hw_devices_utils:extract_field(CurrentField),
+    ini_file_replace_field(IniFile, List, Index, Field, CurrentFieldValue, NewFieldValue, Oper).
 
+%--------------------------------------
 ini_file_add_new_field(IniFile, List, Index, Field, FieldValue, Oper) when (Oper == wr) ->
-     case Index of 
-         _ when (Index > length(List)) ->
-             NewField = unicode:characters_to_list([Field, " = ", FieldValue]),
-             List1 = lists:append(List, [NewField]),
-             Text = lists:concat([io_lib:format("~s\n", [Element]) || Element <- List1]),
-             Result = file:write_file(IniFile, Text),
-             {Result, "Creating new field at end of file"};
-
-         _ ->
-             NewField = unicode:characters_to_list([Field, " = ", FieldValue]),
-             List1 = updater_hw_devices_utils:list_insert(List, Index, NewField),
-             Text = lists:concat([io_lib:format("~s\n", [Element]) || Element <- List1]),
-             Result = file:write_file(IniFile, Text),
-             {Result, "Creating new field at end of sector"}
-     end;
-
-ini_file_add_new_field(_, _, _, _, _, _) ->
+    ini_file_add_new_field(IniFile, List, Index, Field, FieldValue);
+ini_file_add_new_field(_IniFile, _List, _Index, _Field, _FieldValue, _Oper) ->
     {error, "Field not found"}.
 
-ini_file_replace_field(IniFile, List, Index, Field, _, NewFieldValue, Oper) when (Oper == wr) ->
+ini_file_add_new_field(IniFile, List, Index, Field, FieldValue) when (Index > length(List)) ->
+    NewField = unicode:characters_to_list([Field, " = ", FieldValue]),
+    List1 = lists:append(List, [NewField]),
+    Text = lists:concat([io_lib:format("~s\n", [Element]) || Element <- List1]),
+    Result = file:write_file(IniFile, Text),
+    {Result, "Creating new field at end of file"};
+ini_file_add_new_field(IniFile, List, Index, Field, FieldValue) ->
+    NewField = unicode:characters_to_list([Field, " = ", FieldValue]),
+    List1 = updater_hw_devices_utils:list_insert(List, Index, NewField),
+    Text = lists:concat([io_lib:format("~s\n", [Element]) || Element <- List1]),
+    Result = file:write_file(IniFile, Text),
+    {Result, "Creating new field at end of sector"}.
+
+%--------------------------------------
+ini_file_replace_field(IniFile, List, Index, Field, _CurrentFieldValue, NewFieldValue, Oper) when (Oper == wr) ->
     NewField = unicode:characters_to_list([Field, " = ", NewFieldValue]),
     List1 = updater_hw_devices_utils:list_replace(List, Index, NewField),
     Text = lists:concat([io_lib:format("~s\n", [Element]) || Element <- List1]),
     Result = file:write_file(IniFile, Text),
     {Result, "Updating the field"};
-
-ini_file_replace_field(_, _, _, _, CurrentFieldValue, _, _) ->
+ini_file_replace_field(_IniFile, _List, _Index, _Field, CurrentFieldValue, _NewFieldValue, _Oper) ->
     {ok, CurrentFieldValue}.
 
 %-----------------------------------------------------------------------------
