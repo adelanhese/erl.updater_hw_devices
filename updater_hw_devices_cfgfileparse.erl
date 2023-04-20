@@ -31,36 +31,30 @@ ini_file(IniFile, Sector, Field) ->
 -spec ini_file(string, string, string, string, [rd|wr]) -> {status, string}.
 ini_file(IniFile, Sector, Field, NewFieldValue, Oper) ->
     {Status, FileData} = file:read_file(IniFile),
+    ini_file_to_list({Status, FileData}, IniFile, Sector, Field, NewFieldValue, Oper).
 
-    case Status of
-        _ when (Status == ok) ->
-            List = string:tokens(binary_to_list(FileData), "\n"),
-            {Result, NextIndex} = ini_file_search_for_sector(List, 1, Sector),
+ini_file_to_list({ok, FileData}, IniFile, Sector, Field, NewFieldValue, Oper) ->
+    List = string:tokens(binary_to_list(FileData), "\n"),
+    {Result, NextIndex} = ini_file_search_for_sector(List, 1, Sector),
+    ini_file_search_for_first_field(IniFile, List, {Result, NextIndex}, Sector, Field, NewFieldValue, Oper);
+ini_file_to_list({_Status, _FileData}, _IniFile, _Sector, _Field, _NewFieldValue, _Oper) ->
+    {error, "Fail to access the configuration file"}.
+    
+ini_file_search_for_first_field(IniFile, List, {true, NextIndex}, _Sector, Field, NewFieldValue, Oper) ->
+    ini_file_search_for_field(IniFile, List, NextIndex + 1, Field, NewFieldValue, Oper);
+ini_file_search_for_first_field(IniFile, List, {_Result, _NextIndex}, Sector, Field, NewFieldValue, Oper) ->
+    ini_file_add_new_sector_and_field(IniFile, List, Sector, Field, NewFieldValue, Oper).
 
-            case Result of
-                true ->
-                    ini_file_search_for_field(IniFile, List, NextIndex + 1, Field, NewFieldValue, Oper);
-                    
-                false ->
-                    case Oper of
-                        wr ->
-                            NewSector = unicode:characters_to_list(["[", Sector, "]"]),
-                            NewField = unicode:characters_to_list([Field, " = ", NewFieldValue]),
-                            List1 = lists:append(List, [NewSector]),
-                            List2 = lists:append(List1, [NewField]),
-                            Text = lists:concat([io_lib:format("~s\n", [Element]) || Element <- List2]),
-                            file:write_file(IniFile, Text),
-                            {ok, "New Sector and field added at end of file"};
-
-                        rd ->
-                            {error, "Sector not found"}
-                    end
-            end;
-
-        _ ->
-            {error, "Fail to access the configuration file"}
-            
-    end.
+ini_file_add_new_sector_and_field(IniFile, List, Sector, Field, NewFieldValue, wr) ->
+     NewSector = unicode:characters_to_list(["[", Sector, "]"]),
+     NewField = unicode:characters_to_list([Field, " = ", NewFieldValue]),
+     List1 = lists:append(List, [NewSector]),
+     List2 = lists:append(List1, [NewField]),
+     Text = lists:concat([io_lib:format("~s\n", [Element]) || Element <- List2]),
+     file:write_file(IniFile, Text),
+     {ok, "New Sector and field added at end of file"};
+ini_file_add_new_sector_and_field(_IniFile, _List, _Sector, _Field, _NewFieldValue, _Oper) ->
+     {error, "Sector not found"}.
 
 %------------------------------------------
 -spec ini_file_search_for_sector([list], number, string) -> {status, number}.
