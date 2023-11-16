@@ -304,7 +304,7 @@ extract_field(Field, Index1) when (Index1 > 0 ) ->
     FieldValue = string:slice(Field, Index1+2, abs(FieldSize-2)),
     FieldValue;
 extract_field(_Field, _Index1) ->
-    error.
+    [].
 
 %-----------------------------------------------------------------------------
 %

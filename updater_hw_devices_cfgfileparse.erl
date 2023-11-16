@@ -80,7 +80,7 @@ ini_file_search_for_field(IniFile, List, Index, Field, NewFieldValue, Oper) ->
 ini_file_search_for_field(IniFile, List, Index, Field, NewFieldValue, Oper, _CurrentField, EndOfSector) when (EndOfSector > 0) ->
     ini_file_add_new_field(IniFile, List, Index, Field, NewFieldValue, Oper);
 ini_file_search_for_field(IniFile, List, Index, Field, NewFieldValue, Oper, CurrentField, _EndOfSector) ->
-    FieldSeparator = string:str(CurrentField, unicode:characters_to_list([Field, " = "])),
+    FieldSeparator = string:str(CurrentField, unicode:characters_to_list([Field, " ="])),
     ini_file_search_for_field_next(IniFile, List, Index, Field, NewFieldValue, Oper, CurrentField, FieldSeparator).
 
 ini_file_search_for_field_next(IniFile, List, Index, Field, NewFieldValue, Oper, _CurrentField, 0) ->

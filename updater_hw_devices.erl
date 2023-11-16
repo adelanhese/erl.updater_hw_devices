@@ -213,8 +213,8 @@ check_versions_next_Device(IniFile, Platform, Board, BaseBoard, Active, Index, M
    {Result3, Enabled} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
    {Result4, Checkversion} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, unicode:characters_to_list(["checkversion", integer_to_list(Index)])),
    check_versions_next_Device({Result1, Device}, {Result2, Activecard}, {Result3, Enabled}, {Result4, Checkversion}, IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices).
-check_versions_next_Device({ok, Device}, {ok, Activecard}, {ok, "1"}, {ok, "1"}, IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices) when ((BaseBoard == Board) or ((Activecard == Active))) and (Active == "1") ->
-    {_, Version} = get_version(IniFile, Platform, Board, Device),
+check_versions_next_Device({ok, Device}, {ok, Activecard}, {ok, "1"}, {ok, "1"}, IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices) when (BaseBoard == Board) or (((Activecard == Active)) and (Active == "1")) ->
+      {_, Version} = get_version(IniFile, Platform, Board, Device),
     io:format("~s_~s => ~s ~n", [Board, Device, Version]),
     check_versions_next_Device(IniFile, Platform, Board, BaseBoard, Active, Index + 1, MaxDevices);
 check_versions_next_Device({ok, _Device}, {ok, _Activecard}, {ok, _}, {ok, _}, IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices) ->

@@ -19,7 +19,7 @@
 
 % ToDo: replace the IMAGES_PATH to the correct path
 %-define(IMAGES_PATH, "/opt/ets/hw/images/").
--define(IMAGES_PATH, "/home/adilson.delanhese/opt/ets/hw/images/").
+-define(IMAGES_PATH, "/home/adilson/opt/ets/hw/images/").
 -define(SPK_PARTITION, "/mnt/update").
 -define(KERNEL_CMDLINE, "/proc/cmdline").
 -define(KERNEL_BZIMAGE, "/boot/bzImage").
