@@ -1,7 +1,7 @@
 #!/usr/bin/env escript
 
 -define(DTB_NAME, "/etc/dtb/device_tree_lc1_etsc1.dtb").
--define(WHOAMI, "lc 7 PM_LC1_ETSc 7 rm_plat1 1").
+-define(WHOAMI, "lc 7 PM_LC1_ETSc 7 rm_etsc1 1").
 
 %_______________________________________________________________
 %

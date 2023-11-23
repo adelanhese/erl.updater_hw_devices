@@ -1,6 +1,9 @@
 %
+% 1) To compile:compile
+%    erlc *.erl
 %
-%   git push -u origin main
+% 2) To push
+%    git push -u origin main
 %
 -module(updater_hw_devices).
 -include("updater_hw_devices_defines.hrl").
@@ -12,9 +15,9 @@
          power_cycle/2,
          get_slot_id/2,
          check_for_dependencies/1,
-         dependencies_list_plat1/0,
-         dependencies_list_plat2/0,
-         dependencies_list_plat6/0,
+         dependencies_list_etsc1/0,
+         dependencies_list_etsc2/0,
+         dependencies_list_etsc6/0,
          dependencies_list_test/0,
 
          call_function/3]).
@@ -51,7 +54,7 @@ dependencies_list_test() -> [?NOHUP,
                         ?NVLC].
 
 
-dependencies_list_plat1() -> [?FPGAIO,
+dependencies_list_etsc1() -> [?FPGAIO,
                                ?I2CGET,
                                ?I2CSET,
                                ?I2CTRANSFER,
@@ -68,7 +71,7 @@ dependencies_list_plat1() -> [?FPGAIO,
                                ?KEXEC,
                                ?EHALCLI].
 
-dependencies_list_plat2() -> [?FPGAIO,
+dependencies_list_etsc2() -> [?FPGAIO,
                                ?I2CGET,
                                ?I2CSET,
                                ?I2CTRANSFER,
@@ -87,7 +90,7 @@ dependencies_list_plat2() -> [?FPGAIO,
                                ?FLASHROM,
                                ?EHALCLI].
 
-dependencies_list_plat6() -> [?FPGAIO,
+dependencies_list_etsc6() -> [?FPGAIO,
                                ?I2CGET,
                                ?I2CSET,
                                ?I2CTRANSFER,
