@@ -39,9 +39,9 @@
          get_board_type/1]).
          
 
-platforms_list() -> [?PLAT1,
-                     ?PLAT2,
-                     ?PLAT6].
+platforms_list() -> [?ETSC1,
+                     ?ETSC2,
+                     ?ETSC6].
 
 boards_list() -> [?NULL,
                   ?NULL,

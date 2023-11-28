@@ -122,43 +122,53 @@ get_version_etsc6_sc2000_cpld(IniFile) ->
     updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "sc2000", "cpld", "version").
 
 update_etsc6_fan_lpc55() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc6_fan_cpld() ->
-    {error, ?NOT_IMPLEMENTED}.
+  io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
+  {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc6_mngt_fpga() ->
-    {error, ?NOT_IMPLEMENTED}.
+  io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
+  {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc6_lc4_lpc55() ->
-    {error, ?NOT_IMPLEMENTED}.
+  io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
+  {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc6_lc4_cpld() ->
-    {error, ?NOT_IMPLEMENTED}.
+  io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
+  {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc6_sc2000_lpc55() ->
-    {error, ?NOT_IMPLEMENTED}.
+  io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
+  {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc6_sc2000_cpld() ->
-    {error, ?NOT_IMPLEMENTED}.
+  io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
+  {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc6_lc4_fpga() ->
-    {error, ?NOT_IMPLEMENTED}.
+  io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
+  {error, ?NOT_IMPLEMENTED}.
 
 
 get_slot_id_etsc6_lc5() ->
-    {error, ?NOT_IMPLEMENTED}.
+  io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
+  {error, ?NOT_IMPLEMENTED}.
 
 
 power_cycle_etsc6_lc5() ->
-    {error, ?NOT_IMPLEMENTED}.
+  io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
+  {error, ?NOT_IMPLEMENTED}.
 
 
 get_version_etsc6_lc5_lpc55(IniFile) ->
@@ -180,13 +190,14 @@ get_version_etsc6_lc5_pm6010(IniFile) ->
     updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc5", "pm6010", "version").
 
 update_etsc6_lc5_cpld() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
-
 
 update_etsc6_lc5_fpga() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
-
 update_etsc6_lc5_pm6010() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 

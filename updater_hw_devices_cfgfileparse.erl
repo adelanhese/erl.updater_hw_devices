@@ -422,7 +422,7 @@ show_boards_tree_next_device({_Result1, _Device}, {_Result2, _Activecard}, {_Res
 %
 % 
 %-----------------------------------------------------------------------------
--spec check_for_supported_board(string, string) -> ok | error | not_found.
+-spec check_for_supported_board(string, string) -> ok | error.
 check_for_supported_board(IniFile, Board) ->
     check_for_supported_board(IniFile, ini_file(IniFile, "boards", "num_boards"), Board).
 
@@ -433,7 +433,7 @@ check_for_supported_board(_IniFile, {error,_}, _Board) ->
     error.
 
 check_for_supported_board(_IniFile, _Board, Index, MaxBoards) when Index > MaxBoards ->
-    not_found;
+    error;
 check_for_supported_board(IniFile, Board, Index, MaxBoards) ->
     {Result, BoardRead} = ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
     check_for_supported_board_next(IniFile, {Result, BoardRead}, Board, Index, MaxBoards).

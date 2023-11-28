@@ -136,12 +136,21 @@ get_version(IniFile, Platform, Board, Device) ->
 %     updater_hw_devices_<platform>:update_<platform>_<board>_<device>
 % 
 %-----------------------------------------------------------------------------
--spec update(string, string, string) -> {result, string}.
-update(Platform, Board, Device) -> 
+-spec update({true, string}, {ok, string}, {ok, string}) -> {result, string}.
+update({true, Platform}, {ok, Board}, {ok, Device}) -> 
     ModuleName = unicode:characters_to_list([?MODULE_NAME,"_", Platform]),
     FuncName = unicode:characters_to_list([atom_to_list(?FUNCTION_NAME),"_", Platform, "_", Board, "_", Device]),
-    call_function(ModuleName, FuncName, []).
-
+    call_function(ModuleName, FuncName, []);
+update({false, Platform}, {_, _Board}, {_, _Device}) -> 
+    io:format("Platform not supported: ~p~n", [Platform]),
+    "Platform not supported";
+update({_, _Platform}, {error, Board}, {_, _Device}) -> 
+    io:format("Board not supported: ~p~n", [Board]),
+    "Board not supported";
+update({_, _Platform}, {_, _Board}, {error, Device}) -> 
+    io:format("Device not supported: ~p~n", [Device]),
+    "Device not supported".  
+  
 
 %-----------------------------------------------------------------------------
 % Call the function following the rule:
@@ -217,11 +226,19 @@ check_versions_next_Device(IniFile, Platform, Board, BaseBoard, Active, Index, M
    {Result4, Checkversion} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, unicode:characters_to_list(["checkversion", integer_to_list(Index)])),
    check_versions_next_Device({Result1, Device}, {Result2, Activecard}, {Result3, Enabled}, {Result4, Checkversion}, IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices).
 check_versions_next_Device({ok, Device}, {ok, Activecard}, {ok, "1"}, {ok, "1"}, IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices) when (BaseBoard == Board) or (((Activecard == Active)) and (Active == "1")) ->
-      {_, Version} = get_version(IniFile, Platform, Board, Device),
-    io:format("~s_~s => ~s ~n", [Board, Device, Version]),
+    {_, VersionFromDevice} = get_version(IniFile, Platform, Board, Device),
+    {_, VersionFromIniFile} = updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, Board, Device, "version"),
+    {_, ResultCompare} = check_versions_compare(VersionFromDevice, VersionFromIniFile),  
+    io:format("[~s_~s] = ~s => ~s ~n", [Board, Device, VersionFromDevice, ResultCompare]),
     check_versions_next_Device(IniFile, Platform, Board, BaseBoard, Active, Index + 1, MaxDevices);
 check_versions_next_Device({ok, _Device}, {ok, _Activecard}, {ok, _}, {ok, _}, IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices) ->
     check_versions_next_Device(IniFile, Platform, Board, BaseBoard, Active, Index + 1, MaxDevices).
+
+% compare the versions
+check_versions_compare(FromDevice, FromIniFile) when (FromDevice =/= "") and (FromIniFile =/= "") and (FromDevice == FromIniFile) ->
+    {ok, "updated"};
+check_versions_compare(_FromDevice, _FromIniFile)->
+    {error, "outdated"}.
 
 %-----------------------------------------------------------------------------
 % 
@@ -270,10 +287,13 @@ command_run(show_help, IniFile, _Platform_type, Board_type, Active, _Device_to_u
     updater_hw_devices_cmdlineparse:show_help(IniFile, Board_type, Active);
 command_run(check, IniFile, Platform_type, Board_type, Active, _Device_to_update) ->
     check_versions(IniFile, Platform_type, Board_type, Active);
-command_run(update, _IniFile, Platform_type, _Board_type, _Active, Device_to_update) ->
+command_run(update, IniFile, Platform_type, _Board_type, Active, Device_to_update) ->
     Board = updater_hw_devices_utils:extract_board(Device_to_update),
     Device = updater_hw_devices_utils:extract_device(Device_to_update),
-    update(Platform_type, Board, Device);
+    CheckDevice = updater_hw_devices_cfgfileparse:check_for_supported_devices(IniFile, Board, Device, Board, Active),
+    CheckdBoard = updater_hw_devices_cfgfileparse:check_for_supported_board(IniFile, Board),
+    CheckPlatform = updater_hw_devices_utils:check_for_supported_platform(Platform_type),
+    update({CheckPlatform, Platform_type}, {CheckdBoard, Board}, {CheckDevice, Device});
 command_run(disable, IniFile, _Platform_type, Board_type, Active, Device_to_update) ->
     updater_hw_devices_cfgfileparse:enable_disable_device(IniFile, Device_to_update, "0", Board_type, Active);
 command_run(enable, IniFile, _Platform_type, Board_type, Active, Device_to_update) ->

@@ -87,32 +87,40 @@ get_version_etsc2_lc5_pm6010(IniFile) ->
       updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc5", "pm6010", "version").
   
 update_etsc2_fan_cpld() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc2_lc4_lpc55() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc2_lc4_fpga() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 power_cycle_etsc2_lc5() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 update_etsc2_lc5_lpc55() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc2_lc5_cpld() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc2_lc5_fpga() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
 
 update_etsc2_lc5_pm6010() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
