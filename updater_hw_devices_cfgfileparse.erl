@@ -275,7 +275,7 @@ enable_disable_device(ok, IniFile, Board, Device, BoardDeviceAlias, NewState) ->
     {Result2, Dependencies1} = read_field_from_cfg_anyway(IniFile, Board, Device, "dependencies"),
     enable_disable_device({Result1, Num_devicesStr}, {Result2, Dependencies1}, IniFile, Board, Device, BoardDeviceAlias, NewState);
 enable_disable_device(_SupportedDevice, _IniFile, _Board, _Device, _BoardDeviceAlias, _NewState) ->
-    error.
+    {error, ""}.
 
 enable_disable_device({ok, Num_devicesStr}, {ok, Dependencies1}, IniFile, Board, Device, BoardDeviceAlias, NewState) ->
     Device_dependent = updater_hw_devices_utils:extract_device(Dependencies1),
@@ -284,10 +284,10 @@ enable_disable_device({ok, Num_devicesStr}, {ok, Dependencies1}, IniFile, Board,
     disable_device(IniFile, Board, Device, Device_dependent, 1, Num_devices),
     enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, 1, Num_devices);
 enable_disable_device({_Result1, _Num_devicesStr}, {_Result2, _Dependencies1}, _IniFile, _Board, _Device, _BoardDeviceAlias, _NewState) ->
-    error.
+    {error, ""}.
 
 disable_device(_IniFile, _Board, _Device, _Device_dependent, Index, MaxDevices) when (Index > MaxDevices) ->
-    ok;
+    {ok, ""};
 disable_device(IniFile, Board, Device, Device_dependent, Index, MaxDevices) ->
     {Result, Device1} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
     disable_device({Result, Device1}, IniFile, Board, Device, Device_dependent, Index, MaxDevices).
@@ -300,7 +300,7 @@ disable_device({_Result, _Device1}, IniFile, Board, Device, Device_dependent, In
     disable_device(IniFile, Board, Device, Device_dependent, Index + 1, MaxDevices).
 
 enable_device(_IniFile, _Board, _Device, _Device_dependent, _Alias, _NewState, Index, MaxDevices) when (Index > MaxDevices) ->
-    ok;
+    {ok, ""};
 enable_device(IniFile, Board, Device, Device_dependent, Alias, NewState, Index, MaxDevices) ->
     {Result1, Device1} = ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
     {Result2, Alias1} = ini_file(IniFile, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),

@@ -19,6 +19,7 @@
          dependencies_list_etsc2/0,
          dependencies_list_etsc6/0,
          dependencies_list_test/0,
+         check_parameters/6,
 
          call_function/3]).
 
@@ -130,26 +131,45 @@ get_version(IniFile, Platform, Board, Device) ->
     FuncName = unicode:characters_to_list([atom_to_list(?FUNCTION_NAME),"_", Platform, "_", Board, "_", Device]),
     call_function(ModuleName, FuncName, [IniFile]).
 
-
+%-----------------------------------------------------------------------------
+% Checcks for the parameters:
+%     Platform
+%     Board
+%     Device
+% 
+%-----------------------------------------------------------------------------
+-spec check_parameters(string, string, string, string, string, string) -> {result, string}.
+check_parameters(Command, IniFile, Platform, BaseBoard, Device_to_update, Active) -> 
+    Board = updater_hw_devices_utils:extract_board(Device_to_update),
+    Device = updater_hw_devices_utils:extract_device(Device_to_update),
+    CheckDevice = updater_hw_devices_cfgfileparse:check_for_supported_devices(IniFile, Board, Device, Board, Active),
+    CheckdBoard = updater_hw_devices_cfgfileparse:check_for_supported_board(IniFile, Board),
+    CheckdBaseBoard = updater_hw_devices_cfgfileparse:check_for_supported_board(IniFile, BaseBoard),
+    CheckPlatform = updater_hw_devices_utils:check_for_supported_platform(Platform),
+    check_parameters(Command, {CheckPlatform, Platform}, {CheckdBaseBoard, BaseBoard}, {CheckdBoard, Board}, {CheckDevice, Device}).
+check_parameters(_Command, {true,_Platform}, {ok, _BaseBoard}, {ok, _Board}, {ok, _Device}) -> 
+    {ok, "Valid"};
+check_parameters(_Command,{false, Platform}, {_, _BaseBoard}, {_, _Board}, {_, _Device}) ->
+    {error, unicode:characters_to_list(["ERROR: Platform not supported: ", Platform])};
+check_parameters(_Command,{_, _Platform}, {error, BaseBoard}, {_, _Board}, {_, _Device}) -> 
+    {error, unicode:characters_to_list(["ERROR: Base board not supported: ", BaseBoard])};
+check_parameters(Command,{_, _Platform}, {_, _BaseBoard}, {error, Board}, {_, _Device}) when (Command =/= check) and (Command =/= showhelp) ->
+    {error, unicode:characters_to_list(["ERROR: Board not supported: ", Board])};
+check_parameters(Command,{_, _Platform}, {_, _BaseBoard}, {_, _Board}, {error, Device}) when (Command =/= check) and (Command =/= showhelp) ->
+    {error, unicode:characters_to_list(["ERROR: Device not supported: ", Device])};
+check_parameters(Command, {true,_Platform}, {ok, _BaseBoard}, {_, _Board}, {_, _Device}) when (Command == check) or (Command == showhelp) ->
+     {ok, "Valid"}.
+        
 %-----------------------------------------------------------------------------
 % Call the function following the rule:
 %     updater_hw_devices_<platform>:update_<platform>_<board>_<device>
 % 
 %-----------------------------------------------------------------------------
--spec update({true, string}, {ok, string}, {ok, string}) -> {result, string}.
-update({true, Platform}, {ok, Board}, {ok, Device}) -> 
+-spec update(string, string, string) -> {result, string}.
+update(Platform, Board, Device) -> 
     ModuleName = unicode:characters_to_list([?MODULE_NAME,"_", Platform]),
     FuncName = unicode:characters_to_list([atom_to_list(?FUNCTION_NAME),"_", Platform, "_", Board, "_", Device]),
-    call_function(ModuleName, FuncName, []);
-update({false, Platform}, {_, _Board}, {_, _Device}) -> 
-    io:format("Platform not supported: ~p~n", [Platform]),
-    "Platform not supported";
-update({_, _Platform}, {error, Board}, {_, _Device}) -> 
-    io:format("Board not supported: ~p~n", [Board]),
-    "Board not supported";
-update({_, _Platform}, {_, _Board}, {error, Device}) -> 
-    io:format("Device not supported: ~p~n", [Device]),
-    "Device not supported".  
+    call_function(ModuleName, FuncName, []).
   
 
 %-----------------------------------------------------------------------------
@@ -199,11 +219,11 @@ check_versions({ok, NumBoardsStr}, IniFile, Platform, BaseBoard, Active) ->
     check_versions_next_board(IniFile, Platform, BaseBoard, Active, 1, NumBoards);
 check_versions({_, NumBoardsStr}, _IniFile, _Platform, _BaseBoard, _Active) ->
     io:format("Error: ~p~n", [NumBoardsStr]),
-    error.
+    {error,  unicode:characters_to_list(["ERROR: Invalid board index: ", NumBoardsStr])}.
 
 % Next board
 check_versions_next_board(_IniFile, _Platform, _BaseBoard, _Active, Index, MaxBoards)  when (Index > MaxBoards)->
-        ok;
+    {ok, "All boards was checked"};
 check_versions_next_board(IniFile, Platform, BaseBoard, Active, Index, MaxBoards) ->
     {Result, Board} = updater_hw_devices_cfgfileparse:ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
     check_versions_next_board({Result, Board}, IniFile, Platform, BaseBoard, Active, Index, MaxBoards).
@@ -214,11 +234,11 @@ check_versions_next_board({ok, Board}, IniFile, Platform, BaseBoard, Active, Ind
     check_versions_next_Device(IniFile, Platform, Board, BaseBoard, Active, 1, NumDevices),
     check_versions_next_board(IniFile, Platform, BaseBoard, Active, Index + 1, MaxBoards);
 check_versions_next_board({_, _Board}, _IniFile, _Platform, _BaseBoard, _Active, _Index, _MaxBoards) ->
-    error.
+    {error, "No board found"}.
 
 % Next device
 check_versions_next_Device(_IniFile, _Platform, _Board, _BaseBoard, _Active, Index, MaxDevices) when  (Index > MaxDevices)->
-    ok;
+    {ok, "All devices was checked"};
 check_versions_next_Device(IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices)->
    {Result1, Device} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
    {Result2, Activecard} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
@@ -273,31 +293,42 @@ main(Args) when (length(Args) > 0) ->
     Hw_image_partition = maps:get(hw_image_partition, OptionsMap1),
     IniFile = unicode:characters_to_list([Hw_image_partition, ?IMAGES_PATH, Platform_type, "/", Platform_type, "_devices.cfg"]),
     Command = maps:get(command, OptionsMap1),
-    %io:format("map: ~p~n", [OptionsMap1]),
-    command_run(Command, IniFile, Platform_type, Board_type, Active, Device_to_update);
+    %io:format("map:   ~p~n", [OptionsMap1]),
+    io:format("Current platform:   ~p~n", [Platform_type]),
+    io:format("Current base board: ~p~n", [Board_type]),
+    {Result, Detail} = check_parameters(Command, IniFile, Platform_type, Board_type, Device_to_update, Active),
+    main({Result, Detail}, Command, IniFile, Platform_type, Board_type, Active, Device_to_update);
 main(_Args) ->
     updater_hw_devices_cmdlineparse:show_help("","","").
-
+  
+main({ok, _Detail}, Command, IniFile, Platform_type, Board_type, Active, Device_to_update) ->
+    {Result, Detail} = command_run(Command, IniFile, Platform_type, Board_type, Active, Device_to_update),
+    io:format("~p: ~p~n", [Result, Detail]);
+main({_, Detail}, _Command, _IniFile, _Platform_type, _Board_type, _Active, _Device_to_update) ->
+    io:format("~p~n", [Detail]).
 
 %-----------------------------------------------------------------------------
-% 
 %
+% 
 %-----------------------------------------------------------------------------
+-spec command_run(string, string, string, string, string, string) -> {result, string}.
 command_run(show_help, IniFile, _Platform_type, Board_type, Active, _Device_to_update) ->
-    updater_hw_devices_cmdlineparse:show_help(IniFile, Board_type, Active);
+    updater_hw_devices_cmdlineparse:show_help(IniFile, Board_type, Active),
+    {ok, ""};
 command_run(check, IniFile, Platform_type, Board_type, Active, _Device_to_update) ->
     check_versions(IniFile, Platform_type, Board_type, Active);
-command_run(update, IniFile, Platform_type, _Board_type, Active, Device_to_update) ->
+command_run(update, _IniFile, Platform_type, _Board_type, _Active, Device_to_update) ->
     Board = updater_hw_devices_utils:extract_board(Device_to_update),
     Device = updater_hw_devices_utils:extract_device(Device_to_update),
-    CheckDevice = updater_hw_devices_cfgfileparse:check_for_supported_devices(IniFile, Board, Device, Board, Active),
-    CheckdBoard = updater_hw_devices_cfgfileparse:check_for_supported_board(IniFile, Board),
-    CheckPlatform = updater_hw_devices_utils:check_for_supported_platform(Platform_type),
-    update({CheckPlatform, Platform_type}, {CheckdBoard, Board}, {CheckDevice, Device});
+    update(Platform_type, Board, Device);
 command_run(disable, IniFile, _Platform_type, Board_type, Active, Device_to_update) ->
     updater_hw_devices_cfgfileparse:enable_disable_device(IniFile, Device_to_update, "0", Board_type, Active);
 command_run(enable, IniFile, _Platform_type, Board_type, Active, Device_to_update) ->
     updater_hw_devices_cfgfileparse:enable_disable_device(IniFile, Device_to_update, "1", Board_type, Active);
+command_run(examine, IniFile, _Platform_type, _Board_type, _Active, Device_to_update) ->
+    Board = updater_hw_devices_utils:extract_board(Device_to_update),
+    Device = updater_hw_devices_utils:extract_device(Device_to_update),
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, Board, Device, "alias");
 command_run(_Command, _IniFile, _Platform_type, _Board_type, _Active, _Device_to_update) ->
-    io:format("Invalid command~n").
+    {error, "Invalid command"}.
 
