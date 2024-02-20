@@ -11,11 +11,13 @@
 -export([get_version_etsc1_lc1_fpgajic/1,
          get_version_etsc1_fan_cpld/1,
          get_version_etsc1_lc1_lpc55/1,
+         get_version_etsc1_lc1_cy7c65211a/1,
          get_version_etsc1_fan_lpc55/1]).
 
 -export([update_etsc1_lc1_fpgajic/0,
          update_etsc1_lc1_fpgacvp/0,
          update_etsc1_lc1_lpc55/0,
+         update_etsc1_lc1_cy7c65211a/0,
          update_etsc1_fan_lpc55/0,
          update_etsc1_fan_cpld/0]).
 
@@ -48,6 +50,10 @@ get_version_etsc1_lc1_lpc55(IniFile) ->
     % this is a stub. Must be replace with the correct code.
     updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc1", "lpc55", "version").
 
+get_version_etsc1_lc1_cy7c65211a(IniFile) ->
+    % this is a stub. Must be replace with the correct code.
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc1", "cy7c65211a", "version").
+
 get_version_etsc1_fan_lpc55(IniFile) ->
     % this is a stub. Must be replace with the correct code.
     updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "fan", "lpc55", "version").
@@ -64,10 +70,14 @@ update_etsc1_lc1_lpc55() ->
     io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
-update_etsc1_fan_lpc55() ->
+update_etsc1_lc1_cy7c65211a() ->
     io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
+update_etsc1_fan_lpc55() ->
+    io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
+    {error, ?NOT_IMPLEMENTED}.
+  
 update_etsc1_fan_cpld() ->
     io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.

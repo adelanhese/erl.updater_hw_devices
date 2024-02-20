@@ -206,7 +206,7 @@ check_for_dependencies(Platform) ->
 
 %-----------------------------------------------------------------------------
 %
-% 
+%  ToDo: to indlude 2ek
 %-----------------------------------------------------------------------------
 -spec check_versions(string, string, string, string) -> {result, string}.
 check_versions(IniFile, Platform, BaseBoard, Active) ->

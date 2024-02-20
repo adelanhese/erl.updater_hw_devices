@@ -120,7 +120,7 @@ ini_file_replace_field(_IniFile, _List, _Index, _Field, CurrentFieldValue, _NewF
 
 %-----------------------------------------------------------------------------
 %
-%
+% ToDo: to include 2ek
 %-----------------------------------------------------------------------------
 -spec read_field_from_cfg(string, string, string, string) -> {result, string}.
 read_field_from_cfg(IniFile, Board, Device, Field) ->
@@ -149,7 +149,7 @@ read_field_from_cfg_search_for_device({_Result1, _DevicesStr}, {_Result2, _Enabl
 
 %-----------------------------------------------------------------------------
 %
-%
+% ToDo: to include 2ek
 %-----------------------------------------------------------------------------
 -spec read_field_from_cfg_anyway(string, string, string, string) -> {result, string}.
 read_field_from_cfg_anyway(IniFile, Board, Device, Field) ->
@@ -178,7 +178,7 @@ read_field_from_cfg_anyway_search_for_device({_Result1, _DevicesStr}, IniFile, B
 
 %-----------------------------------------------------------------------------
 %
-%
+% ToDo: to include 2ek
 %-----------------------------------------------------------------------------
 -spec get_device_index_from_cfg(string, string, string, string, string) -> {result, number}.
 get_device_index_from_cfg(IniFileName, Board, Device, Field, Value) ->
@@ -232,7 +232,7 @@ get_file_image_name({_Result3, Msg}, _File) ->
 %
 %
 %   io:format("~p ~p ~p ~n", [DevicesStr, EnabledStr, CheckversionStr]),
-%
+% ToDo: to include 2ek
 %-----------------------------------------------------------------------------
 -spec check_for_supported_devices(string, string, string, string, string) -> {result, string}.
 check_for_supported_devices(IniFile, Board, Device, BaseBoard, Active) ->
@@ -261,7 +261,7 @@ check_for_supported_devices_search_for_device({_Result1, _DevicesStr}, {_Result2
 
 %-----------------------------------------------------------------------------
 %
-%
+% ToDo: to include 2ek
 %-----------------------------------------------------------------------------
 -spec enable_disable_device(string, string, string, string, string) -> ok | error.
 enable_disable_device(IniFile, BoardDeviceAlias, NewState, BaseBoard, Active) ->
@@ -317,7 +317,7 @@ enable_device({_Result1, _Device1}, {_Result2, _Alias1},IniFile, Board, Device, 
 
 %-----------------------------------------------------------------------------
 %
-% 
+% ToDo: to include 2ek
 %-----------------------------------------------------------------------------
 -spec show_devices(string, string, string) -> {result, string}.
 show_devices(IniFile, BaseBoard, Active) when (IniFile == ""); (BaseBoard == ""); (Active == "") ->
@@ -360,7 +360,7 @@ show_devices_next_Device({_Result1, _Device}, {_Result2, _Activecard}, {_Result3
 
 %-----------------------------------------------------------------------------
 %
-% 
+%  ToDo: to include 2ek
 %-----------------------------------------------------------------------------
 -spec show_boards_tree(string, string, string) -> ok | error.
 show_boards_tree(IniFile, BaseBoard, Active) ->
@@ -447,7 +447,7 @@ check_for_supported_board_next(IniFile, _Result, Board, Index, MaxBoards) ->
 
 %-----------------------------------------------------------------------------
 %
-% 
+% ToDo: to include 2ek
 %-----------------------------------------------------------------------------
 -spec update_cfg_file(string, string) -> {result, string}.
 update_cfg_file(Source, Target) ->

@@ -27,6 +27,7 @@
          extract_platform/2,
          remove_substring/2,
          boards_list/0,
+         split_partnumber/1,
          extract_field/1]).
 
 
@@ -36,6 +37,7 @@
          get_active/1,
          get_platform_type/1,
          get_dtb_name/1,
+         get_part_number/1,
          get_board_type/1]).
          
 
@@ -61,7 +63,7 @@ boards_list() -> [?NULL,
 %
 %-----------------------------------------------------------------------------
 extract_substring(String, Pos, Length) ->
-    string:substr(Pos, Length, String).
+    string:substr(String, Pos, Length).
 
 %-----------------------------------------------------------------------------
 %
@@ -332,6 +334,18 @@ check_for_files_dependencies(_Result, _List, _Index) ->
     error.
 
 %-----------------------------------------------------------------------------
+% 12345678901234
+% 2EK00379AAAC01
+%-----------------------------------------------------------------------------
+-spec split_partnumber(string) -> {string1, string2}.
+split_partnumber(PartNumber) when (length(PartNumber) == 14) ->
+    Chrono_2ek = string:substr(PartNumber, 1, 8),
+    Vf_vr_ics_2ek = string:substr(PartNumber, 9, 6),
+    {ok, Chrono_2ek, Vf_vr_ics_2ek};
+split_partnumber(_PartNumber) ->
+    {error, [], []}.
+
+%-----------------------------------------------------------------------------
 %
 %                             T o D o
 % 
@@ -366,6 +380,17 @@ get_active(Active) when (Active == "0") ->
     {ok, ActivePin};
 get_active(Active) ->
     {ok, Active}.
+
+%-----------------------------------------------------------------------------
+%
+%-----------------------------------------------------------------------------
+-spec get_part_number(string) -> ok.
+get_part_number(PartNumber) when (PartNumber == "") ->
+    Cmd = unicode:characters_to_list([?EHALCLI, " whoami", " | awk '{ print $7 }'"]),
+    Whoami = remove_char(os:cmd(Cmd), 10),
+    {ok, Whoami};
+get_part_number(PartNumber) ->
+    {ok, PartNumber}.
 
 %-----------------------------------------------------------------------------
 %
