@@ -11,7 +11,10 @@
 -export([main/1,
          get_version/4,
          update/3,
+
+         check_versions_new/5,
          check_versions/4,
+
          power_cycle/2,
          get_slot_id/2,
          check_for_dependencies/1,
@@ -203,6 +206,65 @@ check_for_dependencies(Platform) ->
     FuncName = unicode:characters_to_list(["dependencies_list_", Platform]),
     DependenciesList = call_function(?MODULE_NAME, FuncName, []),
     updater_hw_devices_utils:check_for_files_dependencies(DependenciesList, 1).
+
+%-----------------------------------------------------------------------------
+%
+%  ToDo: to indlude 2ek
+%-----------------------------------------------------------------------------
+-spec check_versions_new(string, string, string, string, string) -> {result, string}.
+check_versions_new(IniFile, Platform, BaseBoard, Active, LocalPartNumber) ->
+    {Result, NumBoardsStr} = updater_hw_devices_cfgfileparse:ini_file(IniFile, "boards", "num_boards"),
+    check_versions_new({Result, NumBoardsStr}, IniFile, Platform, BaseBoard, Active, LocalPartNumber).
+check_versions_new({ok, NumBoardsStr}, IniFile, Platform, BaseBoard, Active, LocalPartNumber) ->
+    updater_hw_devices_cfgfileparse:show_boards_tree_new(IniFile, BaseBoard, Active, LocalPartNumber),
+    io:format("~n"),
+    {NumBoards, _} = string:to_integer(NumBoardsStr),
+    check_versions_next_board_new(IniFile, Platform, BaseBoard, Active, 1, NumBoards, LocalPartNumber);
+check_versions_new({_, NumBoardsStr}, _IniFile, _Platform, _BaseBoard, _Activ, _LocalPartNumbere) ->
+    io:format("Error: ~p~n", [NumBoardsStr]),
+    {error,  unicode:characters_to_list(["ERROR: Invalid board index: ", NumBoardsStr])}.
+
+% Next board
+check_versions_next_board_new(_IniFile, _Platform, _BaseBoard, _Active, Index, MaxBoards, _LocalPartNumber)  when (Index > MaxBoards)->
+    {ok, "All boards was checked"};
+check_versions_next_board_new(IniFile, Platform, BaseBoard, Active, Index, MaxBoards, LocalPartNumber) ->
+    {Result1, Board} = updater_hw_devices_cfgfileparse:ini_file(IniFile, "boards", unicode:characters_to_list(["board", integer_to_list(Index)])),
+    {Result2, Chrono2ekStr} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, "chrono_2ek"),
+    check_versions_next_board_new({Result1, Board}, {Result2, Chrono2ekStr}, IniFile, Platform, BaseBoard, Active, Index, MaxBoards, LocalPartNumber).
+
+check_versions_next_board_new({ok, Board}, {ok, Chrono2ekStr}, IniFile, Platform, BaseBoard, Active, Index, MaxBoards, LocalPartNumber) ->
+    {_, NumDevicesStr} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, "num_devices"),
+    {NumDevices, _} = string:to_integer(NumDevicesStr),
+    check_versions_next_device_new(IniFile, Platform, Board, BaseBoard, Active, 1, NumDevices, Chrono2ekStr, LocalPartNumber),
+    check_versions_next_board_new(IniFile, Platform, BaseBoard, Active, Index + 1, MaxBoards, LocalPartNumber);
+check_versions_next_board_new({_Result1, _Board}, {_Result2, _Chrono2ekStr}, _IniFile, _Platform, _BaseBoard, _Active, _Index, _MaxBoards, _LocalPartNumber) ->
+    {error, "No board found"}.
+
+% Next device
+check_versions_next_device_new(_IniFile, _Platform, _Board, _BaseBoard, _Active, Index, MaxDevices, _Chrono2ekStr, _LocalPartNumber) when  (Index > MaxDevices)->
+    {ok, "All devices was checked"};
+check_versions_next_device_new(IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices, Chrono2ekStr, LocalPartNumber)->
+   {Result1, Device} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
+   {Result2, Activecard} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, unicode:characters_to_list(["activecard", integer_to_list(Index)])),
+   {Result3, Enabled} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)])),
+   {Result4, Checkversion} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, unicode:characters_to_list(["checkversion", integer_to_list(Index)])),
+   {Result5, VfVrIcs2ekStr} = updater_hw_devices_cfgfileparse:ini_file(IniFile, Board, unicode:characters_to_list(["vf_vr_ics_2ek", integer_to_list(Index)])),
+   Board2ekMatch = updater_hw_devices_cfgfileparse:board_2ek_match(Chrono2ekStr, VfVrIcs2ekStr, LocalPartNumber),
+  check_versions_next_device_new({Result1, Device}, {Result2, Activecard}, {Result3, Enabled}, {Result4, Checkversion}, {Result5, Board2ekMatch}, IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices, Chrono2ekStr, LocalPartNumber).
+check_versions_next_device_new({ok, Device}, {ok, Activecard}, {ok, "1"}, {ok, "1"}, {ok, match}, IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices, Chrono2ekStr, LocalPartNumber) when (BaseBoard == Board) or (((Activecard == Active)) and (Active == "1")) ->
+    {_, VersionFromDevice} = get_version(IniFile, Platform, Board, Device),
+    {_, VersionFromIniFile} = updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, Board, Device, "version"),
+    {_, ResultCompare} = check_versions_compare_new(VersionFromDevice, VersionFromIniFile),  
+    io:format("[~s_~s] = ~s => ~s ~n", [Board, Device, VersionFromDevice, ResultCompare]),
+    check_versions_next_device_new(IniFile, Platform, Board, BaseBoard, Active, Index + 1, MaxDevices, Chrono2ekStr, LocalPartNumber);
+check_versions_next_device_new({ok, _Device}, {ok, _Activecard}, {ok, _Enabled}, {ok, _Checkversion}, {ok, _Board2ekMatch}, IniFile, Platform, Board, BaseBoard, Active, Index, MaxDevices, Chrono2ekStr, LocalPartNumber) ->
+    check_versions_next_device_new(IniFile, Platform, Board, BaseBoard, Active, Index + 1, MaxDevices, Chrono2ekStr, LocalPartNumber).
+
+% compare the versions
+check_versions_compare_new(FromDevice, FromIniFile) when (FromDevice =/= "") and (FromIniFile =/= "") and (FromDevice == FromIniFile) ->
+    {ok, "updated"};
+check_versions_compare_new(_FromDevice, _FromIniFile)->
+    {error, "outdated"}.
 
 %-----------------------------------------------------------------------------
 %

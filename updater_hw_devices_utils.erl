@@ -12,6 +12,7 @@
          list_replace/3,
          list_insert/3,
          list_delete/2,
+         string_to_list/1,
          remove_char/2,
          md5_check/2,
          binary_to_hex/1,
@@ -28,6 +29,8 @@
          remove_substring/2,
          boards_list/0,
          split_partnumber/1,
+         substring_exists/2,
+         substring_exists2/2,
          extract_field/1]).
 
 
@@ -199,6 +202,44 @@ list_delete(Head, Tail, Index) ->
 %-----------------------------------------------------------------------------
 list_insert(List, Position, Element) ->
     lists:sublist(List, Position - 1) ++ [Element] ++ lists:nthtail(Position - 1, List).
+
+%-----------------------------------------------------------------------------
+%
+%
+%-----------------------------------------------------------------------------
+string_to_list(String) ->
+  Tokens = string:tokens(String, " "),
+  % lists:map(fun(Token) -> list_to_atom(Token) end, Tokens).
+  lists:map(fun(Token) -> Token end, Tokens).
+
+%-----------------------------------------------------------------------------
+%
+% This function uses the llists:prefix as base as base to find a substring inside of a string
+%-----------------------------------------------------------------------------
+substring_exists2(_, []) ->
+    false;
+substring_exists2(Sub, Str) ->
+    substring_exists2(Sub, Str, Str).
+
+substring_exists2(_, _, []) ->
+    false;
+substring_exists2(Sub, Str, [_|T]) ->
+    lists:prefix(Sub, Str) orelse substring_exists2(Sub, T).
+
+%-----------------------------------------------------------------------------
+%
+% This function uses string:find as base to find a substring inside of a string
+%-----------------------------------------------------------------------------
+substring_exists(Sub, Str) ->
+    Result = string:find(Str, Sub),
+    substring_exists(Result).
+
+substring_exists(Result) when (Result == "") ->
+    false;
+substring_exists(nomatch) ->
+    false;
+substring_exists(_Result) ->
+    true.
 
 %-----------------------------------------------------------------------------
 %

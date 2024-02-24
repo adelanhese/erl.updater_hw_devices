@@ -1,0 +1,28 @@
+<?xml version="1.0"  encoding="UTF-8"?> <package xmlns="http://www.idpf.org/2007/opf" version="2.0" unique-identifier="uuid_id">
+    <metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opf="http://www.idpf.org/2007/opf" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:calibre="http://calibre.kovidgoyal.net/2009/metadata" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:creator opf:role="aut" opf:file-as="Ahern, Cecelia">Cecelia Ahern</dc:creator>
+    <dc:publisher>J'ai Lu</dc:publisher>
+    <meta name="calibre:title_sort" content="Si tu me voyais maintenant"/>
+    <dc:description>description blah blah</dc:description>
+    <meta name="calibre:timestamp" content="2012-03-18T18:04:20+00:00"/>
+    <dc:title>Si tu me voyais maintenant</dc:title>
+    <meta name="cover" content="cover"/>
+    <dc:date>2012-03-18T18:04:23+00:00</dc:date>
+    <dc:contributor opf:role="bkp">calibre (0.8.42) [http://calibre-ebook.com]</dc:contributor>
+    <dc:identifier opf:scheme="ISBN">9782290006504</dc:identifier>
+    <dc:identifier id="uuid_id" opf:scheme="uuid">7d062b17-258e-4268-9d46-a753c063c969</dc:identifier>
+    <dc:subject>Chick-lit</dc:subject>
+    <meta name="calibre:user_categories" content="{}"/>
+    <meta name="calibre:author_link_map" content="{&quot;Cecelia Ahern&quot;: &quot;&quot;}"/>
+    <dc:language>fr</dc:language>
+    </metadata>
+    <manifest>
+        <item href="cover.jpeg" id="cover" media-type="image/jpeg"/>
+    </manifest>
+    <spine toc="ncx">
+        <itemref idref="titlepage"/>
+    </spine>
+    <guide>
+        <reference href="titlepage.xhtml" type="cover" title="Cover"/>
+    </guide> </package>
+
