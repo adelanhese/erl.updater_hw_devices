@@ -70,11 +70,19 @@ xml_rd_file(XmlFileName, Sector, FieldIndex) ->
 
 xml_rd_file(XmlFileName, Sector, Field, Index) when (Index > 0) ->
     Xpath = unicode:characters_to_list(["/config/board[name='", Sector,"']/device[id='",integer_to_list(Index),"']/",Field,"/text()"]),
-    {ok, hd(read_xml_xpath(XmlFileName, Xpath))};
+    Result = read_xml_xpath(XmlFileName, Xpath),
+    xml_rd_file(Result);
 xml_rd_file(XmlFileName, Sector, Field, _Index) ->
     Xpath = unicode:characters_to_list(["/config/board[name='", Sector,"']/",Field,"/text()"]),
-    {ok, hd(read_xml_xpath(XmlFileName, Xpath))}.
+    Result = read_xml_xpath(XmlFileName, Xpath),
+    xml_rd_file(Result).
+  
+xml_rd_file([]) ->
+    {ok, ""};
+xml_rd_file(Result) ->
+    {ok, hd(Result)}.
 
+ 
 %-----------------------------------------------------------------------------
 %
 %
