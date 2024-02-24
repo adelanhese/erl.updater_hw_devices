@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config xmlns="http://ekinops.com/etsc/hardware/device/softpacks/v1">
-  
+
+  <board>
+     <name>boards</name>
+     <num_boards>2</num_boards>
+     <device>
+         <id>1</id>
+         <board>lc1</board>
+     </device>
+     <device>
+         <id>2</id>
+         <board>fan</board>
+     </device>
+  </board>
+
   <board>
     <name>lc1</name>
+    <num_devices>8</num_devices>
     <mnemonic>PM_LC1_MP1_C</mnemonic>
     <chrono_2ek>2EK00379</chrono_2ek>
     <device>
@@ -111,7 +125,7 @@
       <id>7</id>
       <device>lpc55</device>
       <model>s66jev98</model>
-      <alias/>
+      <alias></alias>
       <version>1.0.202308091135</version>
       <file>./lc1/lpc55s6x/lpc55s66jev98_etsc1_lc.1.0.202308091135.hex</file>
       <md5>859419778b24da13b5868932b99c6dea</md5>
@@ -165,6 +179,7 @@
   </board>
   <board>
     <name>fan</name>
+    <num_devices>2</num_devices>
     <mnemonic>PM_FAN_ETSc1</mnemonic>
     <chrono_2ek>2EK00378</chrono_2ek>
     <device>

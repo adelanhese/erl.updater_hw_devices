@@ -45,7 +45,7 @@ valid_options() ->
 %
 % 
 %-----------------------------------------------------------------------------
-show_help(IniFile, Board_type, Active) ->
+show_help(CfgFileName, Board_type, Active) ->
     io:format("~s: This tool provides the user interface to check and update the hw devices.~n", [?MODULE_NAME]),
     io:format(" ~n"),
     io:format("Tool usage:~n"),
@@ -101,7 +101,7 @@ show_help(IniFile, Board_type, Active) ->
     io:format("           4) Supported devices for update in this board:~n"),
     io:format(" ~n"),
 
-    updater_hw_devices_cfgfileparse:show_devices(IniFile, Board_type, Active),
+    updater_hw_devices_cfgfileparse:show_devices(CfgFileName, Board_type, Active),
 
     io:format(" ~n"),
     io:format(" Examples:~n"),

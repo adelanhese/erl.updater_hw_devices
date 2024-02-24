@@ -89,37 +89,37 @@ power_cycle_etsc6_sc2000() ->
     {error, ?NOT_IMPLEMENTED}.
 
 
-get_version_etsc6_mngt_fpga(IniFile) ->
+get_version_etsc6_mngt_fpga(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "mngt", "fpga", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "mngt", "fpga", "version").
 
-get_version_etsc6_fan_lpc55(IniFile) ->
+get_version_etsc6_fan_lpc55(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "fan", "lpc55", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "fan", "lpc55", "version").
 
-get_version_etsc6_fan_cpld(IniFile) ->
+get_version_etsc6_fan_cpld(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "fan", "cpld", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "fan", "cpld", "version").
 
-get_version_etsc6_lc4_lpc55(IniFile) ->
+get_version_etsc6_lc4_lpc55(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc4", "lpc55", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "lc4", "lpc55", "version").
 
-get_version_etsc6_lc4_fpga(IniFile) ->
+get_version_etsc6_lc4_fpga(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc4", "fpga", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "lc4", "fpga", "version").
 
-get_version_etsc6_lc4_cpld(IniFile) ->
+get_version_etsc6_lc4_cpld(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc4", "cpld", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "lc4", "cpld", "version").
 
-get_version_etsc6_sc2000_lpc55(IniFile) ->
+get_version_etsc6_sc2000_lpc55(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "sc2000", "lpc55", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "sc2000", "lpc55", "version").
 
-get_version_etsc6_sc2000_cpld(IniFile) ->
+get_version_etsc6_sc2000_cpld(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "sc2000", "cpld", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "sc2000", "cpld", "version").
 
 update_etsc6_fan_lpc55() ->
     io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
@@ -171,23 +171,23 @@ power_cycle_etsc6_lc5() ->
   {error, ?NOT_IMPLEMENTED}.
 
 
-get_version_etsc6_lc5_lpc55(IniFile) ->
+get_version_etsc6_lc5_lpc55(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc5", "lpc55", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "lc5", "lpc55", "version").
 
-get_version_etsc6_lc5_fpga(IniFile) ->
+get_version_etsc6_lc5_fpga(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc5", "fpga", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "lc5", "fpga", "version").
 
 
-get_version_etsc6_lc5_cpld(IniFile) ->
+get_version_etsc6_lc5_cpld(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc5", "cpld", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "lc5", "cpld", "version").
 
 
-get_version_etsc6_lc5_pm6010(IniFile) ->
+get_version_etsc6_lc5_pm6010(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc5", "pm6010", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "lc5", "pm6010", "version").
 
 update_etsc6_lc5_cpld() ->
     io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),

@@ -38,25 +38,25 @@ get_slot_id_etsc1_lc1() ->
     io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
     {error, ?NOT_IMPLEMENTED}.
 
-get_version_etsc1_lc1_fpgajic(IniFile) ->
+get_version_etsc1_lc1_fpgajic(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc1", "fpgajic", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "lc1", "fpgajic", "version").
 
-get_version_etsc1_fan_cpld(IniFile) ->
+get_version_etsc1_fan_cpld(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "fan", "cpld", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "fan", "cpld", "version").
 
-get_version_etsc1_lc1_lpc55(IniFile) ->
+get_version_etsc1_lc1_lpc55(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc1", "lpc55", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "lc1", "lpc55", "version").
 
-get_version_etsc1_lc1_cy7c65211a(IniFile) ->
+get_version_etsc1_lc1_cy7c65211a(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "lc1", "cy7c65211a", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "lc1", "cy7c65211a", "version").
 
-get_version_etsc1_fan_lpc55(IniFile) ->
+get_version_etsc1_fan_lpc55(CfgFileName) ->
     % this is a stub. Must be replace with the correct code.
-    updater_hw_devices_cfgfileparse:read_field_from_cfg(IniFile, "fan", "lpc55", "version").
+    updater_hw_devices_cfgfileparse:read_field_from_cfg(CfgFileName, "fan", "lpc55", "version").
 
 update_etsc1_lc1_fpgajic() ->
     io:format("~p~n", [atom_to_list(?FUNCTION_NAME)]),
