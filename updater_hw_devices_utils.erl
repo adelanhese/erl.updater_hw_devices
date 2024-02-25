@@ -9,6 +9,7 @@
          extract_alias/1,
          extract_substring/3,
          concatena_strings/1,
+         list_to_string/2,
          list_replace/3,
          list_insert/3,
          list_delete/2,
@@ -60,6 +61,13 @@ boards_list() -> [?NULL,
                   ?NULL,
                   ?LC5,
                   ?NULL].
+
+%-----------------------------------------------------------------------------
+%
+%
+%-----------------------------------------------------------------------------
+list_to_string(List, Separator) ->
+  lists:flatten(string:join(List, Separator)).
    
 %-----------------------------------------------------------------------------
 %

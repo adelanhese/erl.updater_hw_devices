@@ -6,6 +6,8 @@
          write_xml_file/2,
          read_xml_xpath/2,
 
+         %extrair_elementos/1,
+
          xml_file/5,
          xml_rd_file/3,
          xml_wr_file/4]).
@@ -25,6 +27,8 @@ write_xml_file(FilePath, NewValue) ->
 update_xml(XmlDoc, NewValue) ->
     NewXmlDoc = xmerl_xpath:set_xp("//version", fun(_) -> NewValue end, XmlDoc),
     NewXmlDoc.
+
+
 %
 % To read a device from indice:
 %                                                                                             [Sector]             Field
@@ -36,6 +40,8 @@ update_xml(XmlDoc, NewValue) ->
 %      updater_hw_devices_xmlfilesupport:xml_file("etsc1_devices.xml", "fan", "file1").
 %
 %      updater_hw_devices_xmlfilesupport:read_cfg_file("etsc1_devices.xml", "fan", "file1").
+%
+%      updater_hw_devices_xmlfilesupport:read_xml_xpath("etsc1_devices.xml","/config/board[name='lc1']/device[id='8']/vf_vr_ics_2ek_supported/id/text()").
 %
 %-----------------------------------------------------------------------------
 %
@@ -76,11 +82,11 @@ xml_rd_file(XmlFileName, Sector, Field, _Index) ->
     Xpath = unicode:characters_to_list(["/config/board[name='", Sector,"']/",Field,"/text()"]),
     Result = read_xml_xpath(XmlFileName, Xpath),
     xml_rd_file(Result).
-  
+
 xml_rd_file([]) ->
     {ok, ""};
 xml_rd_file(Result) ->
-    {ok, hd(Result)}.
+    {ok, updater_hw_devices_utils:list_to_string(Result, ",")}.
 
  
 %-----------------------------------------------------------------------------

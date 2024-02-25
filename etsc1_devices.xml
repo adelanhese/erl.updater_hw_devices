@@ -154,27 +154,27 @@
       <dependencies/>
       <restart_type>system-reboot</restart_type>
       <estimated_time>1</estimated_time>
-      <vf_vr_ics_2ek_supported><id>AAAG01</id></vf_vr_ics_2ek_supported><!-- New Front Panel, new PCB, new thermal pads for Kontron and FPGA -->
-      <vf_vr_ics_2ek_supported><id>AAAG02</id></vf_vr_ics_2ek_supported><!-- CO-23-0004 -->
-      <vf_vr_ics_2ek_supported><id>AAAG03</id></vf_vr_ics_2ek_supported><!-- CO-23-0005 -->
-      <vf_vr_ics_2ek_supported><id>AAAG04</id></vf_vr_ics_2ek_supported><!-- CO-23-0002 -->
-      <vf_vr_ics_2ek_supported><id>AAAH01</id></vf_vr_ics_2ek_supported><!-- CO-23-0003 -->
-      <vf_vr_ics_2ek_supported><id>AAAH02</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAH03</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAH04</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAI01</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAI02</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAI03</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAI04</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAJ03</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAJ04</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAK02</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAK04</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAL03</id></vf_vr_ics_2ek_supported><!-- New Front Panel, new thermal pads for Kontron and FPGA and capacitor protection -->
-      <vf_vr_ics_2ek_supported><id>AAAL04</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAM03</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAM04</id></vf_vr_ics_2ek_supported><!-- -->
-      <vf_vr_ics_2ek_supported><id>AAAN04</id></vf_vr_ics_2ek_supported><!-- Rework of LPC55 power supply to avoid uPc turn0ff during power-cycle command -->
+      <vf_vr_ics_2ek>AAAG01</vf_vr_ics_2ek><!-- New Front Panel, new PCB, new thermal pads for Kontron and FPGA -->
+      <vf_vr_ics_2ek>AAAG02</vf_vr_ics_2ek><!-- CO-23-0004 -->
+      <vf_vr_ics_2ek>AAAG03</vf_vr_ics_2ek><!-- CO-23-0005 -->
+      <vf_vr_ics_2ek>AAAG04</vf_vr_ics_2ek><!-- CO-23-0002 -->
+      <vf_vr_ics_2ek>AAAH01</vf_vr_ics_2ek><!-- CO-23-0003 -->
+      <vf_vr_ics_2ek>AAAH02</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAH03</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAH04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAI01</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAI02</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAI03</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAI04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAJ03</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAJ04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAK02</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAK04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAL03</vf_vr_ics_2ek><!-- New Front Panel, new thermal pads for Kontron and FPGA and capacitor protection -->
+      <vf_vr_ics_2ek>AAAL04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAM03</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAM04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAN04</vf_vr_ics_2ek><!-- Rework of LPC55 power supply to avoid uPc turn0ff during power-cycle command -->
     </device>
   </board>
   <board>
