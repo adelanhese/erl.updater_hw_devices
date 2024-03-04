@@ -22,15 +22,15 @@
 %
 %-----------------------------------------------------------------------------
 -spec read_cfg_file(string, string, string) -> {error|ok, string}.
-read_cfg_file(CfgFile, Sector, FieldIndex) ->
+read_cfg_file(CfgFile, Sector, FieldName) ->
     Xml = updater_hw_devices_utils:substring_exists(".xml", CfgFile),
     Ini = updater_hw_devices_utils:substring_exists(".cfg", CfgFile),
-    read_cfg_file(CfgFile, Sector, FieldIndex, Xml, Ini).
-read_cfg_file(CfgFile, Sector, FieldIndex, true, _Ini) ->
-    updater_hw_devices_xmlfilesupport:xml_rd_file(CfgFile, Sector, FieldIndex);
-read_cfg_file(CfgFile, Sector, FieldIndex, _Xml, true) ->
-    updater_hw_devices_inifilesupport:ini_file(CfgFile, Sector, FieldIndex);
-read_cfg_file(_CfgFile, _Sector, _FieldIndex, _Xml, _Ini) ->
+    read_cfg_file(CfgFile, Sector, FieldName, Xml, Ini).
+read_cfg_file(CfgFile, Sector, FieldName, true, _Ini) ->
+    updater_hw_devices_xmlfilesupport:xml_file(CfgFile, Sector, FieldName, "", rd);
+read_cfg_file(CfgFile, Sector, FieldName, _Xml, true) ->
+    updater_hw_devices_inifilesupport:ini_file(CfgFile, Sector, FieldName, "", rd);
+read_cfg_file(_CfgFile, _Sector, _FieldName, _Xml, _Ini) ->
     {error, "Invalid cfg file type"}. 
 
 %-----------------------------------------------------------------------------
@@ -38,8 +38,16 @@ read_cfg_file(_CfgFile, _Sector, _FieldIndex, _Xml, _Ini) ->
 %
 %-----------------------------------------------------------------------------
 -spec write_cfg_file(string, string, string, sring) -> ok | error.
-write_cfg_file(CfgFile, Sector, FieldIndex, NewFieldValue) ->
-  updater_hw_devices_xmlfilesupport:xml_wr_file(CfgFile, Sector, FieldIndex, NewFieldValue).
+write_cfg_file(CfgFile, Sector, FieldName, NewFieldValue) ->
+    Xml = updater_hw_devices_utils:substring_exists(".xml", CfgFile),
+    Ini = updater_hw_devices_utils:substring_exists(".cfg", CfgFile),
+    write_cfg_file(CfgFile, Sector, FieldName, NewFieldValue, Xml, Ini).
+write_cfg_file(CfgFile, Sector, FieldName, NewFieldValue, true, _Ini) ->
+    updater_hw_devices_xmlfilesupport:xml_file(CfgFile, Sector, FieldName, NewFieldValue, wr);
+write_cfg_file(CfgFile, Sector, FieldName, NewFieldValue, _Xml, true) ->
+    updater_hw_devices_inifilesupport:ini_file(CfgFile, Sector, FieldName, NewFieldValue, wr);
+write_cfg_file(_CfgFile, _Sector, _FieldName, _NewFieldValue, _Xml, _Ini) ->
+    {error, "Invalid cfg file type"}. 
 
 
 %-----------------------------------------------------------------------------

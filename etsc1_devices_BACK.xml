@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config xmlns="http://ekinops.com/etsc/hardware/device/softpacks/v1">
+
   <board>
      <name>boards</name>
      <num_boards>2</num_boards>
@@ -12,6 +13,7 @@
          <board>fan</board>
      </device>
   </board>
+
   <board>
     <name>lc1</name>
     <num_devices>8</num_devices>
@@ -191,7 +193,7 @@
       <devport>/dev/i2c-34</devport>
       <adapter>34</adapter>
       <activecard>1</activecard>
-<enabled>1</enabled>
+      <enabled>1</enabled>
       <checkversion>1</checkversion>
       <dependencies/>
       <restart_type>system-reboot</restart_type>
@@ -208,7 +210,7 @@
       <devport>/dev/i2c-34</devport>
       <adapter>34</adapter>
       <activecard>1</activecard>
-<enabled>1</enabled>
+      <enabled>1</enabled>
       <checkversion>1</checkversion>
       <dependencies/>
       <restart_type>system-reboot</restart_type>
@@ -216,3 +218,4 @@
     </device>
   </board>
 </config>
+

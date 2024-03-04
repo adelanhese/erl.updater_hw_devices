@@ -1,0 +1,22 @@
+#!/usr/bin/env escript
+%% -*- erlang -*-
+%%! -sname xml2simplexml
+main([In]) ->
+    try
+        Result = simplexml_from_file(In),
+        io:format("~p\n",[Result])
+    catch
+        _:_ ->
+            usage()
+    end;
+main(_) ->
+    usage().
+
+usage() ->
+    io:format("usage: xml2simplexml in.xml\n"),
+    halt(1).
+
+simplexml_from_file(Filename) ->
+    {Element, _} = xmerl_scan:file(Filename, [{space, normalize}]),
+    [Clean] = xmerl_lib:remove_whitespace([Element]),
+    xmerl_lib:simplify_element(Clean).

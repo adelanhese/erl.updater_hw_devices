@@ -1,0 +1,20 @@
+#!/usr/bin/env escript
+%% -*- erlang -*-
+%%! -sname module2xml
+main([In,Out]) ->
+    try
+        {_ModuleName, XmlElement} = edoc:get_doc(In),
+        Simple = xmerl_lib:simplify_element(XmlElement),
+        XmlChunk = xmerl:export_simple([Simple], xmerl_xml),
+        file:write_file(Out,io_lib:fwrite("~s\n",[lists:flatten(XmlChunk)]))
+    catch
+        _:_ ->
+            usage()
+    end;
+main(_) ->
+    usage().
+
+usage() ->
+    io:format("usage: module2xml in.erl out.xml\n"),
+    halt(1).
+

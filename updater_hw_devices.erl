@@ -306,7 +306,7 @@ main(Args) when (length(Args) > 0) ->
     {Result, Detail} = check_parameters(Command, CfgFileName, Platform_type, Board_type, Device_to_update, Active),
     main({Result, Detail}, Command, CfgFileName, Platform_type, Board_type, Active, Device_to_update, LocalPartNumber);
 main(_Args) ->
-    updater_hw_devices_cmdlineparse:show_help("","","").
+    updater_hw_devices_cmdlineparse:show_help("","","", "").
   
 main({ok, _Detail}, Command, CfgFileName, Platform_type, Board_type, Active, Device_to_update, LocalPartNumber) ->
     {Result, Detail} = command_run(Command, CfgFileName, Platform_type, Board_type, Active, Device_to_update, LocalPartNumber),
@@ -319,8 +319,8 @@ main({_, Detail}, _Command, _IniFile, _Platform_type, _Board_type, _Active, _Dev
 % 
 %-----------------------------------------------------------------------------
 -spec command_run(string, string, string, string, string, string, string) -> {result, string}.
-command_run(show_help, CfgFileName, _Platform_type, Board_type, Active, _Device_to_update, _LocalPartNumber) ->
-    updater_hw_devices_cmdlineparse:show_help(CfgFileName, Board_type, Active),
+command_run(show_help, CfgFileName, _Platform_type, Board_type, Active, _Device_to_update, LocalPartNumber) ->
+    updater_hw_devices_cmdlineparse:show_help(CfgFileName, Board_type, Active, LocalPartNumber),
     {ok, ""};
 command_run(check, CfgFileName, Platform_type, Board_type, Active, _Device_to_update, LocalPartNumber) ->
     check_versions(CfgFileName, Platform_type, Board_type, Active, LocalPartNumber);

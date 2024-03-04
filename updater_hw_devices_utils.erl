@@ -9,6 +9,7 @@
          extract_alias/1,
          extract_substring/3,
          concatena_strings/1,
+         list_to_string/1,
          list_to_string/2,
          list_replace/3,
          list_insert/3,
@@ -68,6 +69,9 @@ boards_list() -> [?NULL,
 %-----------------------------------------------------------------------------
 list_to_string(List, Separator) ->
   lists:flatten(string:join(List, Separator)).
+
+list_to_string(List) ->
+  lists:flatten(io_lib:format("~p", List)).
    
 %-----------------------------------------------------------------------------
 %
