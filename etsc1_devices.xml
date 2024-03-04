@@ -191,7 +191,7 @@
       <devport>/dev/i2c-34</devport>
       <adapter>34</adapter>
       <activecard>1</activecard>
-<enabled>1</enabled>
+      <enabled>1</enabled>
       <checkversion>1</checkversion>
       <dependencies/>
       <restart_type>system-reboot</restart_type>
@@ -208,7 +208,7 @@
       <devport>/dev/i2c-34</devport>
       <adapter>34</adapter>
       <activecard>1</activecard>
-<enabled>1</enabled>
+      <enabled>1</enabled>
       <checkversion>1</checkversion>
       <dependencies/>
       <restart_type>system-reboot</restart_type>

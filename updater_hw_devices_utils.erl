@@ -8,6 +8,8 @@
          extract_board/1,
          extract_alias/1,
          extract_substring/3,
+         replace_xml_field_value/2,
+         extract_xml_field_value/1,
          concatena_strings/1,
          list_to_string/1,
          list_to_string/2,
@@ -103,6 +105,32 @@ split_part1_part2(Parameter, Index) when (Index > 0 ) ->
 split_part1_part2(Parameter, _Index) ->
     {Parameter, []}.
 
+
+%-----------------------------------------------------------------------------
+%
+%
+%-----------------------------------------------------------------------------
+extract_xml_field_value(XmlField) ->
+    Index1 = string:str(XmlField, ">"),
+    Index2 = string:str(XmlField, "</"),
+    string:slice(XmlField, Index1, Index2-Index1-1).
+
+%-----------------------------------------------------------------------------
+% Example:
+%
+%  Input:
+%         OldFieldWithValue = <enabled>1</enabled>
+%         NewValue          = 0
+%
+%   Output:
+%         <enabled>0</enabled>
+%
+%-----------------------------------------------------------------------------
+replace_xml_field_value(OldFieldWithValue, NewValue) ->
+    OldValue = extract_xml_field_value(OldFieldWithValue),
+    NewValueTemp =  unicode:characters_to_list([">",NewValue,"</"]),
+    OldValueTemp =  unicode:characters_to_list([">",OldValue,"</"]),
+    string:replace(OldFieldWithValue, OldValueTemp, NewValueTemp).
 
 %-----------------------------------------------------------------------------
 %

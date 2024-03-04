@@ -59,46 +59,48 @@ xml_rd_file(Result) ->
 %
 %-----------------------------------------------------------------------------
 -spec xml_wr_file(string, string, string, string) -> {result, string}.
-xml_wr_file(XmlFileName, Sector, Field, NewFieldValue) ->
+xml_wr_file(XmlFileName, Sector, Field, NewValue) ->
     {Result, XmlData} = file:read_file(XmlFileName),
-    xml_update_start_search({Result, XmlData}, XmlFileName, Sector, Field, NewFieldValue).
+    xml_update_start_search({Result, XmlData}, XmlFileName, Sector, Field, NewValue).
 
-xml_update_start_search({ok, XmlData}, XmlFileName, Sector, Field, NewFieldValue) ->
+xml_update_start_search({ok, XmlData}, XmlFileName, Sector, Field, NewValue) ->
     List = string:tokens(binary_to_list(XmlData), "\n"),
     {_, OldFieldValue} = xml_rd_file(XmlFileName, Sector, Field),
     {FieldStr, Id} = split_field(Field),
     SectorStr = unicode:characters_to_list(["<name>", Sector, "</name>"]),
     IdStr = unicode:characters_to_list(["<id>",integer_to_list(Id),"</id>"]),
     OldFieldStr = unicode:characters_to_list(["<",FieldStr,">",OldFieldValue,"</",FieldStr,">"]),
-    NewFieldStr = unicode:characters_to_list(["<",FieldStr,">",NewFieldValue,"</",FieldStr,">"]),
     {ResultSector, IndexSector} = xml_update_search_for_parameter(List, 1, SectorStr),
     {ResultId, IndexId} = xml_update_search_for_parameter(List, IndexSector, IdStr),
     {ResultField, IndexField} = xml_update_search_for_parameter(List, IndexId, OldFieldStr),
-    xml_update_replace(ResultSector, ResultId, ResultField, List, IndexField, NewFieldStr, XmlFileName);
+    xml_update_replace(ResultSector, ResultId, ResultField, List, IndexField, NewValue, XmlFileName);
 
 xml_update_start_search({_Result, _XmlData}, _XmlFileName, _Sector, _Field, _NewFieldValue) ->
     {error, "Fail to access the xml file"}.
 
-xml_update_replace(ok, ok, ok, List, Index, NewField, XmlFileName) -> 
+xml_update_replace(ok, ok, ok, List, Index, NewValue, XmlFileName) ->
+    OldField = lists:nth(Index, List),
+    NewField = updater_hw_devices_utils:replace_xml_field_value(OldField, NewValue),
     List1 = updater_hw_devices_utils:list_replace(List, Index, NewField),
     Text = lists:concat([io_lib:format("~s\n", [Element]) || Element <- List1]),
     Result = file:write_file(XmlFileName, Text),
     {Result, "Updating the field"};
-xml_update_replace(_ResultSector, _ResultId, _ResultField, _List, _Index, _NewField, _XmlFileName) ->
+xml_update_replace(_ResultSector, _ResultId, _ResultField, _List, _Index, _NewValue, _XmlFileName) ->
     {error, "Fail to replace the field"}.
 
 %------------------------------------------------------------------------
 %
-% Loop for search the "parameter"
+% Loop to look for the "parameter" 
+%
 %------------------------------------------------------------------------
-xml_update_search_for_parameter(List, Index, Sector) when (Index < length(List)), (Index > 0) ->
-    CurrentSectorPosition = string:str(lists:nth(Index, List), Sector),
-    xml_update_search_for_parameter_next(List, Index, Sector, CurrentSectorPosition);
-xml_update_search_for_parameter(_List, _Index, _Sector) ->
+xml_update_search_for_parameter(List, Index, Parameter) when (Index < length(List)), (Index > 0) ->
+    CurrentParameterPosition = string:str(lists:nth(Index, List), Parameter),
+    xml_update_search_for_parameter_next(List, Index, Parameter, CurrentParameterPosition);
+xml_update_search_for_parameter(_List, _Index, _Parameter) ->
     {error, -1}.
-xml_update_search_for_parameter_next(List, Index, Sector, 0) ->
-    xml_update_search_for_parameter(List, Index + 1, Sector);
-xml_update_search_for_parameter_next(_List, Index, _Sector, _CurrentSectorPosition) ->
+xml_update_search_for_parameter_next(List, Index, Parameter, 0) ->
+    xml_update_search_for_parameter(List, Index + 1, Parameter);
+xml_update_search_for_parameter_next(_List, Index, _Parameter, _CurrentParameterPosition) ->
     {ok, Index}.
 
 

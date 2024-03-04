@@ -236,7 +236,7 @@ enable_disable_device(ok, CfgFileName, Board, Device, BoardDeviceAlias, NewState
     {Result3, Chrono2ekStr} = read_cfg_file(CfgFileName, Board, "chrono_2ek"),
     enable_disable_device({Result1, Num_devicesStr}, {Result2, Dependencies1}, {Result3, Chrono2ekStr}, CfgFileName, Board, Device, BoardDeviceAlias, NewState, LocalPartNumber);
 enable_disable_device(_SupportedDevice, _IniFile, _Board, _Device, _BoardDeviceAlias, _NewState, _LocalPartNumber) ->
-    {error, ""}.
+    {error, "device not supported"}.
 
 enable_disable_device({ok, Num_devicesStr}, {ok, Dependencies1}, {ok, Chrono2ekStr}, CfgFileName, Board, Device, BoardDeviceAlias, NewState, LocalPartNumber) ->
     Device_dependent = updater_hw_devices_utils:extract_device(Dependencies1),
@@ -245,10 +245,10 @@ enable_disable_device({ok, Num_devicesStr}, {ok, Dependencies1}, {ok, Chrono2ekS
     disable_device(CfgFileName, Board, Device, Device_dependent, 1, Num_devices, Chrono2ekStr, LocalPartNumber),
     enable_device(CfgFileName, Board, Device, Device_dependent, Alias, NewState, 1, Num_devices, Chrono2ekStr, LocalPartNumber);
 enable_disable_device({_Result1, _Num_devicesStr}, {_Result2, _Dependencies1}, {_Result3, _Chrono2ekStr}, _IniFile, _Board, _Device, _BoardDeviceAlias, _NewState, _LocalPartNumber) ->
-    {error, ""}.
+    {error, "fail to read cfg parameters"}.
 
 disable_device(_IniFile, _Board, _Device, _Device_dependent, Index, MaxDevices, _Chrono2ekStr, _LocalPartNumber) when (Index > MaxDevices) ->
-    {ok, ""};
+    {ok, "chenaged"};
 disable_device(CfgFileName, Board, Device, Device_dependent, Index, MaxDevices, Chrono2ekStr, LocalPartNumber) ->
     {Result1, Device1} = read_cfg_file(CfgFileName, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
     {Result2, VfVrIcs2ekStr} = read_cfg_file(CfgFileName, Board, unicode:characters_to_list(["vf_vr_ics_2ek", integer_to_list(Index)])),
@@ -257,13 +257,13 @@ disable_device(CfgFileName, Board, Device, Device_dependent, Index, MaxDevices, 
 
 disable_device({ok, Device1}, {ok, match}, CfgFileName, Board, Device, Device_dependent, Index, MaxDevices,  Chrono2ekStr, LocalPartNumber) when
     ((Device1 == Device) or (Device1 == Device_dependent)) ->
-        read_cfg_file(CfgFileName, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), "0", wr),
+        write_cfg_file(CfgFileName, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), "0"),
         disable_device(CfgFileName, Board, Device, Device_dependent, Index + 1, MaxDevices,  Chrono2ekStr, LocalPartNumber);
 disable_device({_Result, _Device1}, {_Result2, _Board2ekMatch}, CfgFileName, Board, Device, Device_dependent, Index, MaxDevices,  Chrono2ekStr, LocalPartNumber) ->
     disable_device(CfgFileName, Board, Device, Device_dependent, Index + 1, MaxDevices,  Chrono2ekStr, LocalPartNumber).
 
 enable_device(_IniFile, _Board, _Device, _Device_dependent, _Alias, _NewState, Index, MaxDevices, _Chrono2ekStr, _LocalPartNumber) when (Index > MaxDevices) ->
-    {ok, ""};
+    {ok, "changed"};
 enable_device(CfgFileName, Board, Device, Device_dependent, Alias, NewState, Index, MaxDevices, Chrono2ekStr, LocalPartNumber) ->
     {Result1, Device1} = read_cfg_file(CfgFileName, Board, unicode:characters_to_list(["device", integer_to_list(Index)])),
     {Result2, Alias1} = read_cfg_file(CfgFileName, Board, unicode:characters_to_list(["alias", integer_to_list(Index)])),
@@ -273,11 +273,10 @@ enable_device(CfgFileName, Board, Device, Device_dependent, Alias, NewState, Ind
 
 enable_device({ok, Device1}, {ok, Alias1}, {ok, match}, CfgFileName, Board, Device, Device_dependent, Alias, NewState, Index, MaxDevices, Chrono2ekStr, LocalPartNumber) when
     ((Device1 == Device) or (Device1 == Device_dependent)) and (Alias == Alias1) ->
-        read_cfg_file(CfgFileName, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), NewState, wr),
+        write_cfg_file(CfgFileName, Board, unicode:characters_to_list(["enabled", integer_to_list(Index)]), NewState),
         enable_device(CfgFileName, Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices, Chrono2ekStr, LocalPartNumber);
 enable_device({_Result1, _Device1}, {_Result2, _Alias1}, {_Result3, _Board2ekMatch}, CfgFileName, Board, Device, Device_dependent, Alias, NewState, Index, MaxDevices, Chrono2ekStr, LocalPartNumber) ->
     enable_device(CfgFileName, Board, Device, Device_dependent, Alias, NewState, Index + 1, MaxDevices, Chrono2ekStr, LocalPartNumber).
-
 
 %-----------------------------------------------------------------------------
 %
