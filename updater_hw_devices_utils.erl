@@ -119,11 +119,11 @@ extract_xml_field_value(XmlField) ->
 % Example:
 %
 %  Input:
-%         OldFieldWithValue = <enabled>1</enabled>
-%         NewValue          = 0
+%         OldFieldWithValue = <"field_name"">"value"</"field_name">
+%         NewValue          = new value to replace
 %
 %   Output:
-%         <enabled>0</enabled>
+%        <"field_name"">"new_value"</"field_name">
 %
 %-----------------------------------------------------------------------------
 replace_xml_field_value(OldFieldWithValue, NewValue) ->

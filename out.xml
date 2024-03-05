@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://ekinops.com/etsc/hardware/device/softpacks/v1">
+  <board>
+     <name>boards</name>
+     <num_boards>2</num_boards>
+     <device>
+         <id>1</id>
+         <board>lc1</board>
+     </device>
+     <device>
+         <id>2</id>
+         <board>fan</board>
+     </device>
+  </board>
+  <board>
+    <name>lc1</name>
+    <num_devices>8</num_devices>
+    <mnemonic>PM_LC1_MP1_C</mnemonic>
+    <chrono_2ek>2EK00379</chrono_2ek>
+    <device>
+      <id>1</id>
+      <device>fpgajic</device>
+      <alias>otu2-1g</alias>
+      <model>stratix</model>
+      <version>3GW00356AAAB1</version>
+      <file>./lc1/fpga/otu2_1g/3GW00356AAAB1_OTU2_1G_lc1_fpga_jic.rpd</file>
+      <md5>d1875f58fce18c35d2b9b5c8e842e98d</md5>
+      <devport>/dev/mx25u256</devport>
+      <adapter>0</adapter>
+      <activecard>0</activecard>
+      <enabled>0</enabled>
+      <checkversion>1</checkversion>
+      <dependencies>lc1_fpgacvp/otu2-1g</dependencies>
+      <restart_type>fpga-reload</restart_type>
+      <estimated_time>30</estimated_time>
+    </device>
+    <device>
+      <id>2</id>
+      <device>fpgacvp</device>
+      <model>stratix</model>
+      <alias>otu2-1g</alias>
+      <version>3GW00356AAAB1</version>
+      <file>./lc1/fpga/otu2_1g/3GW00356AAAB1_OTU2_1G_lc1_fpga.core.rbf</file>
+      <md5>d2fa172a05be26ee350a6983083bfb35</md5>
+      <devport>/dev/altera_cvp</devport>
+      <adapter>0</adapter>
+      <activecard>0</activecard>
+      <enabled>0</enabled>
+      <checkversion>0</checkversion>
+      <dependencies>lc1_fpgajic/otu2-1g</dependencies>
+      <restart_type>fpga-reload</restart_type>
+      <estimated_time>10</estimated_time>
+    </device>
+    <device>
+      <id>3</id>
+      <device>fpgajic</device>
+      <alias>otu4-10g</alias>
+      <model>stratix</model>
+      <version>3GW00369AAAB15</version>
+      <file>./lc1/fpga/otu4_10g/3GW00369AAAB15_OTU4_10G_lc1_fpga_jic.rpd</file>
+      <md5>062e23f656023a89adeb35d643cd2946</md5>
+      <devport>/dev/mx25u256</devport>
+      <adapter>0</adapter>
+      <activecard>0</activecard>
+      <enabled>1</enabled>
+      <checkversion>1</checkversion>
+      <dependencies>lc1_fpgacvp/otu4-10g</dependencies>
+      <restart_type>fpga-reload</restart_type>
+      <estimated_time>30</estimated_time>
+    </device>
+    <device>
+      <id>4</id>
+      <device>fpgacvp</device>
+      <model>stratix</model>
+      <alias>otu4-10g</alias>
+      <version>3GW00369AAAB15</version>
+      <file>./lc1/fpga/otu4_10g/3GW00369AAAB15_OTU4_10G_lc1_fpga.core.rbf</file>
+      <md5>8bca1d7e3b198145ddf95130610ad52b</md5>
+      <devport>/dev/altera_cvp</devport>
+      <adapter>0</adapter>
+      <activecard>0</activecard>
+      <enabled>1</enabled>
+      <checkversion>0</checkversion>
+      <dependencies>lc1_fpgajic/otu4-10g</dependencies>
+      <restart_type>fpga-reload</restart_type>
+      <estimated_time>10</estimated_time>
+    </device>
+    <device>
+      <id>5</id>
+      <device>fpgajic</device>
+      <alias>otu2-mp</alias>
+      <model>stratix</model>
+      <version>3GW00368AAAA66</version>
+      <file>./lc1/fpga/otu2_mp/3GW00368AAAA66_OTU2_MP_lc1_fpga_jic.rpd</file>
+      <md5>cc3b455b935506e724ae31532c93b43d</md5>
+      <devport>/dev/mx25u256</devport>
+      <adapter>0</adapter>
+      <activecard>0</activecard>
+      <enabled>0</enabled>
+      <checkversion>1</checkversion>
+      <dependencies>lc1_fpgacvp/otu2-mp</dependencies>
+      <restart_type>fpga-reload</restart_type>
+      <estimated_time>30</estimated_time>
+    </device>
+    <device>
+      <id>6</id>
+      <device>fpgacvp</device>
+      <model>stratix</model>
+      <alias>otu2-mp</alias>
+      <version>3GW00368AAAA66</version>
+      <file>./lc1/fpga/otu2_mp/3GW00368AAAA66_OTU2_MP_lc1_fpga.core.rbf</file>
+      <md5>daf3ec2f7c242cd97d2d9cfcf35c9e0e</md5>
+      <devport>/dev/altera_cvp</devport>
+      <adapter>0</adapter>
+      <activecard>0</activecard>
+      <enabled>0</enabled>
+      <checkversion>0</checkversion>
+      <dependencies>lc1_fpgajic/otu2-mp</dependencies>
+      <restart_type>fpga-reload</restart_type>
+      <estimated_time>10</estimated_time>
+    </device>
+    <device>
+      <id>7</id>
+      <device>lpc55</device>
+      <model>s66jev98</model>
+      <alias></alias>
+      <version>1.0.202308091135</version>
+      <file>./lc1/lpc55s6x/lpc55s66jev98_etsc1_lc.1.0.202308091135.hex</file>
+      <md5>859419778b24da13b5868932b99c6dea</md5>
+      <devport>/dev/i2c-5</devport>
+      <adapter>5</adapter>
+      <activecard>0</activecard>
+      <enabled>1</enabled>
+      <checkversion>1</checkversion>
+      <dependencies/>
+      <restart_type>system-reboot</restart_type>
+      <estimated_time>120</estimated_time>
+    </device>
+    <device>
+      <id>8</id>
+      <device>cy7c65211a</device>
+      <model>usb-spi</model>
+      <alias/>
+      <version>2</version>
+      <file>./lc1/cy7c65211a/lc1_spi_CY7C65211A-24LTXI_rev_2_decrypted.cyusbd</file>
+      <md5>f0ce15c2861af2cbbb3eb3df162e22f6</md5>
+      <devport>usb</devport>
+      <adapter>1</adapter>
+      <activecard>0</activecard>
+      <enabled>1</enabled>
+      <checkversion>1</checkversion>
+      <dependencies/>
+      <restart_type>system-reboot</restart_type>
+      <estimated_time>1</estimated_time>
+      <vf_vr_ics_2ek>AAAG01</vf_vr_ics_2ek><!-- New Front Panel, new PCB, new thermal pads for Kontron and FPGA -->
+      <vf_vr_ics_2ek>AAAG02</vf_vr_ics_2ek><!-- CO-23-0004 -->
+      <vf_vr_ics_2ek>AAAG03</vf_vr_ics_2ek><!-- CO-23-0005 -->
+      <vf_vr_ics_2ek>AAAG04</vf_vr_ics_2ek><!-- CO-23-0002 -->
+      <vf_vr_ics_2ek>AAAH01</vf_vr_ics_2ek><!-- CO-23-0003 -->
+      <vf_vr_ics_2ek>AAAH02</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAH03</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAH04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAI01</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAI02</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAI03</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAI04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAJ03</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAJ04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAK02</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAK04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAL03</vf_vr_ics_2ek><!-- New Front Panel, new thermal pads for Kontron and FPGA and capacitor protection -->
+      <vf_vr_ics_2ek>AAAL04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAM03</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAM04</vf_vr_ics_2ek><!-- -->
+      <vf_vr_ics_2ek>AAAN04</vf_vr_ics_2ek><!-- Rework of LPC55 power supply to avoid uPc turn0ff during power-cycle command -->
+    </device>
+  </board>
+  <board>
+    <name>fan</name>
+    <num_devices>2</num_devices>
+    <mnemonic>PM_FAN_ETSc1</mnemonic>
+    <chrono_2ek>2EK00378</chrono_2ek>
+    <device>
+      <id>1</id>
+      <device>cpld</device>
+      <model>machx02</model>
+      <alias/>
+      <version>4</version>
+      <file>./fan/cpld/CPLD_FAN_ETSc1_v04.jed</file>
+      <md5>ac4b38fc63716157bfdd6f14680df55d</md5>
+      <devport>/dev/i2c-34</devport>
+      <adapter>34</adapter>
+      <activecard>1</activecard>
+      <enabled>1</enabled>
+      <checkversion>1</checkversion>
+      <dependencies/>
+      <restart_type>system-reboot</restart_type>
+      <estimated_time>120</estimated_time>
+    </device>
+    <device>
+      <id>2</id>
+      <device>lpc55</device>
+      <model>s69</model>
+      <alias/>
+      <version>1.0.202212230928</version>
+      <file>./fan/lpc55s6x/lpc55s69_etsc1_fan_1_0_202212230928.hex</file>
+      <md5>826a048c7be7ecabcde9759d0f525982</md5>
+      <devport>/dev/i2c-34</devport>
+      <adapter>34</adapter>
+      <activecard>1</activecard>
+      <enabled>1</enabled>
+      <checkversion>1</checkversion>
+      <dependencies/>
+      <restart_type>system-reboot</restart_type>
+      <estimated_time>120</estimated_time>
+    </device>
+  </board>
+</config>

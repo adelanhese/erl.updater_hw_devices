@@ -3,10 +3,6 @@
 
 % Already tested and working
 -export([read_xml_xpath/2,
-
-         simplexml_to_file/2,
-         simplexml_from_file/1,
-
          xml_file/5]).
 
 %-----------------------------------------------------------------------------
@@ -132,7 +128,17 @@ read_xml_xpath(Filename, Xpath) ->
 
 %-----------------------------------------------------------------------------
 %
+% Input:
+%       <FieldName><Index>
+%       ex: "enabled8"
 %
+% Output:
+%       {FieldName, Index}
+%       ex: {"enabled", "8"} 
+%
+% ToDo:
+%       Currently the "index" is limited to max "9"
+%       It will be necessary to fix it
 %-----------------------------------------------------------------------------
 split_field(FieldName) ->
     IndexStr = string:substr(FieldName, length(FieldName), 1),
@@ -145,30 +151,3 @@ split_field(error, no_integer, FieldName) ->
     {FieldName, -1};
 split_field(_Val, _Result, FieldName) ->
     {FieldName, -1}.
-
-%-----------------------------------------------------------------------------
-%
-% A = [
-%   {a,[],[
-%       {b,[],[
-%           {c1,[],["C1-Value"]},
-%           {c2,[],["C2-Value"]},
-%           {d,[],[
-%               {d1,[],["Bla"]}
-%           ]}
-%       ]}
-%   ]}
-% ].
-%  
-%-----------------------------------------------------------------------------
-simplexml_to_file(OutPutFileName, Data) ->
-    Xml = lists:flatten(xmerl:export_simple(Data, xmerl_xml)),
-    DataToWrite = erlang:list_to_bitstring(Xml),
-    file:write_file(OutPutFileName, DataToWrite).
-
-simplexml_from_file(InputFileName) ->
-    {Element, _} = xmerl_scan:file(InputFileName, [{space, normalize}]),
-    [Clean] = xmerl_lib:remove_whitespace([Element]),
-    [xmerl_lib:simplify_element(Clean)].
-
-

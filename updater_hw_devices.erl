@@ -288,6 +288,7 @@ main(Args) when (length(Args) > 0) ->
                    command => "",
                    port => "",
                    part_number => "",
+                   cfgtype => ?CFG_TYPE_FILE,
                    undefined => ""},
 
     {ok, OptionsMap1} = updater_hw_devices_cmdlineparse:parse_params(Args, 1, OptionsMap),
@@ -296,13 +297,15 @@ main(Args) when (length(Args) > 0) ->
     {ok, Active} = updater_hw_devices_utils:get_active(maps:get(active, OptionsMap1)),
     Device_to_update = maps:get(device_to_update, OptionsMap1),
     Hw_image_partition = maps:get(hw_image_partition, OptionsMap1),
-    CfgFileName = unicode:characters_to_list([Hw_image_partition, ?IMAGES_PATH, Platform_type, "/", Platform_type, "_devices", ?CFG_TYPE_FILE]),
+    CfgType = maps:get(cfgtype, OptionsMap1),
+    CfgFileName = unicode:characters_to_list([Hw_image_partition, ?IMAGES_PATH, Platform_type, "/", Platform_type, "_devices", CfgType]),
     {_, LocalPartNumber} = updater_hw_devices_utils:get_part_number(maps:get(part_number, OptionsMap1)),
     Command = maps:get(command, OptionsMap1),
     %io:format("map:   ~p~n", [OptionsMap1]),
     io:format("Current platform:   ~p~n", [Platform_type]),
     io:format("Current base board: ~p~n", [Board_type]),
     io:format("Current partnumber: ~p~n", [LocalPartNumber]),
+    io:format("Current cfg file:   ~p~n", [CfgFileName]),
     {Result, Detail} = check_parameters(Command, CfgFileName, Platform_type, Board_type, Device_to_update, Active),
     main({Result, Detail}, Command, CfgFileName, Platform_type, Board_type, Active, Device_to_update, LocalPartNumber);
 main(_Args) ->
@@ -319,7 +322,7 @@ main({_, Detail}, _Command, _IniFile, _Platform_type, _Board_type, _Active, _Dev
 % 
 %-----------------------------------------------------------------------------
 -spec command_run(string, string, string, string, string, string, string) -> {result, string}.
-command_run(show_help, CfgFileName, _Platform_type, Board_type, Active, _Device_to_update, LocalPartNumber) ->
+command_run(showhelp, CfgFileName, _Platform_type, Board_type, Active, _Device_to_update, LocalPartNumber) ->
     updater_hw_devices_cmdlineparse:show_help(CfgFileName, Board_type, Active, LocalPartNumber),
     {ok, ""};
 command_run(check, CfgFileName, Platform_type, Board_type, Active, _Device_to_update, LocalPartNumber) ->

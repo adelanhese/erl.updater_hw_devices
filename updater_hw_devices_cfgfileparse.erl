@@ -449,7 +449,7 @@ update_cfg_file_next_device(Source, Target, BoardRead, Index, MaxDevices) ->
     update_cfg_file_next_device({Result1, Device}, {Result2, Enabled}, {Result3, Alias}, Source, Target, BoardRead, Index, MaxDevices).
 update_cfg_file_next_device({ok, Device}, {ok, Enabled}, {ok, Alias}, Source, Target, BoardRead, Index, MaxDevices) ->
     {_, IndexTarget} = get_device_index_from_cfg(Target, BoardRead, Device, "alias", Alias, ""),
-    read_cfg_file(Target, BoardRead, unicode:characters_to_list(["enabled", integer_to_list(IndexTarget)]), Enabled, wr),
+    write_cfg_file(Target, BoardRead, unicode:characters_to_list(["enabled", integer_to_list(IndexTarget)]), Enabled),
     update_cfg_file_next_device(Source, Target, BoardRead, Index + 1, MaxDevices);
 update_cfg_file_next_device({_Result1, _Device}, {_Result2, _Enabled}, {_Result3, _Alias}, _Source, _Target, _BoardRead, _Index, _MaxDevices) ->
     error.
